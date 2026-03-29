@@ -5,6 +5,7 @@ module.exports = async function handler(req, res) {
     ok: true,
     features: {
       cloudSync: Boolean(getEnv('SUPABASE_URL') && getEnv('SUPABASE_SERVICE_ROLE_KEY')),
+      contentStorage: Boolean(getEnv('SUPABASE_URL') && getEnv('SUPABASE_SERVICE_ROLE_KEY')),
       managedShopify: Boolean(getEnv('SHOPIFY_STORE') && getEnv('SHOPIFY_STOREFRONT_TOKEN')),
       vercelCron: true
     }

@@ -15,6 +15,17 @@ function readJson(req) {
   });
 }
 
+function readBuffer(req) {
+  if (Buffer.isBuffer(req.body)) return Promise.resolve(req.body);
+  if (typeof req.body === 'string') return Promise.resolve(Buffer.from(req.body));
+  return new Promise((resolve, reject) => {
+    const chunks = [];
+    req.on('data', chunk => { chunks.push(Buffer.from(chunk)); });
+    req.on('end', () => resolve(Buffer.concat(chunks)));
+    req.on('error', reject);
+  });
+}
+
 function sendJson(res, status, body) {
   res.statusCode = status;
   res.setHeader('Content-Type', 'application/json');
@@ -41,4 +52,4 @@ async function maybeLogSyncRun(payload) {
   });
 }
 
-module.exports = { readJson, sendJson, getEnv, maybeLogSyncRun };
+module.exports = { readJson, readBuffer, sendJson, getEnv, maybeLogSyncRun };

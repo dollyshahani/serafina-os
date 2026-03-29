@@ -247,6 +247,25 @@ html, body { min-height: 100vh; background: var(--cream); font-family: 'Segoe UI
 .task-card:hover .task-del { opacity: 1; }
 
 /* ─── CONTENT TABLE ALT ─── */
+.content-toolbar { display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin:16px 0 18px; }
+.content-search { flex:1; min-width:220px; background:var(--white); border:1.5px solid var(--border); border-radius:10px; padding:10px 12px; font-size:12px; outline:none; }
+.content-filter { background:var(--white); border:1.5px solid var(--border); border-radius:10px; padding:10px 12px; font-size:12px; outline:none; color:var(--text); min-width:145px; }
+.queue-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:14px; margin:0 0 18px; }
+.queue-card { background:var(--white); border:1.5px solid var(--border); border-radius:14px; padding:16px; }
+.queue-head { display:flex; justify-content:space-between; align-items:flex-start; gap:10px; margin-bottom:12px; }
+.queue-title { font-size:13px; font-weight:800; }
+.queue-count { font-size:22px; font-weight:900; }
+.queue-list { display:flex; flex-direction:column; gap:8px; }
+.queue-item { background:var(--cream); border-radius:10px; padding:10px 12px; font-size:12px; }
+.queue-item strong { display:block; color:var(--text); margin-bottom:2px; }
+.content-lane-pill { display:inline-flex; align-items:center; gap:4px; font-size:10px; font-weight:700; padding:3px 8px; border-radius:999px; margin-top:8px; }
+.content-link { display:inline-flex; align-items:center; gap:5px; font-size:11px; font-weight:700; color:var(--indigo); text-decoration:none; margin-top:8px; }
+.content-upload-row { display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-top:8px; }
+.content-upload-file { display:none; }
+.content-upload-status { font-size:12px; color:var(--text2); min-height:18px; }
+.content-upload-status.ok { color:var(--emerald); }
+.content-upload-status.warn { color:var(--gold); }
+.content-upload-status.err { color:var(--magenta); }
 .content-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 14px; }
 .content-card {
   background: var(--white); border-radius: var(--radius); border: 1.5px solid var(--border);
@@ -882,6 +901,30 @@ html, body { min-height: 100vh; background: var(--cream); font-family: 'Segoe UI
       <button class="btn btn-teal" onclick="openModal('modal-content')" style="background:var(--teal);color:white;">+ Add Asset</button>
     </div>
     <div class="stat-grid" id="content-stats"></div>
+    <div class="content-toolbar">
+      <input id="content-search" class="content-search" placeholder="Search clips, events, notes, sources..." oninput="setContentFilter('query', this.value)" />
+      <select id="content-owner-filter" class="content-filter" onchange="setContentFilter('owner', this.value)">
+        <option value="all">All owners</option>
+        <option value="Me">Me</option>
+        <option value="Social Media Manager">Social Media Manager</option>
+        <option value="Performance Marketing Manager">Performance Marketing Manager</option>
+      </select>
+      <select id="content-lane-filter" class="content-filter" onchange="setContentFilter('lane', this.value)">
+        <option value="all">All lanes</option>
+        <option value="serafina">Serafina HQ</option>
+        <option value="personal">Personal Brand OS</option>
+        <option value="both">Both</option>
+      </select>
+      <select id="content-queue-filter" class="content-filter" onchange="setContentFilter('queue', this.value)">
+        <option value="all">All queues</option>
+        <option value="intake">Raw inbox</option>
+        <option value="social">Needs social</option>
+        <option value="ads">Needs ads</option>
+        <option value="founder">Founder lane</option>
+        <option value="scheduled">Scheduled / posted</option>
+      </select>
+    </div>
+    <div class="queue-grid" id="content-queues"></div>
     <div class="content-grid" id="content-grid"></div>
   </div>
 
@@ -1264,6 +1307,18 @@ html, body { min-height: 100vh; background: var(--cream); font-family: 'Segoe UI
       </div>
       <div class="fgrp"><label>Asset source</label><input id="c-source" placeholder="Supabase / iPhone / Drive / Laptop" /></div>
     </div>
+    <div class="frow">
+      <div class="fgrp">
+        <label>Cloud upload</label>
+        <div class="content-upload-row">
+          <button class="btn btn-ghost" type="button" onclick="document.getElementById('c-asset-file').click()">Choose file</button>
+          <button class="btn" type="button" onclick="uploadContentAsset()" style="background:var(--indigo);color:white;">Upload to Cloud</button>
+          <input id="c-asset-file" class="content-upload-file" type="file" />
+        </div>
+        <div class="content-upload-status" id="c-upload-status">Upload once and this asset gets a cloud link your team can open directly.</div>
+      </div>
+    </div>
+    <div class="frow"><div class="fgrp"><label>Asset link (optional)</label><input id="c-link" placeholder="Cloud link for your manager to open directly" /></div></div>
     <div class="frow"><div class="fgrp"><label>Notes</label><textarea id="c-notes" placeholder="What's in this, where to use it…"></textarea></div></div>
     <div class="modal-btns">
       <button class="btn btn-ghost" onclick="closeModal('modal-content')">Cancel</button>
@@ -1587,7 +1642,7 @@ const fmt   = n => n ? '₹'+Number(n).toLocaleString('en-IN') : '₹0';
 const fmtD  = d => { if(!d) return '—'; const dt=new Date(d); return dt.toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'2-digit'}); };
 const CLOUD_SETTINGS_KEY = 'sf3_cloud_settings';
 const MANIFESTATION_URL = 'https://dollydash-knzskech.manus.space/';
-let runtimeConfig = { loaded:false, features:{ cloudSync:false, managedShopify:false, vercelCron:false } };
+let runtimeConfig = { loaded:false, features:{ cloudSync:false, contentStorage:false, managedShopify:false, vercelCron:false } };
 
 function loadBrief() {
   try {
@@ -1642,6 +1697,7 @@ function normalizeContentItem(item) {
     owner: item.owner || 'Me',
     adReady: item.adReady === true || item.adReady === 'yes',
     source: item.source || 'Mixed',
+    link: item.link || '',
   };
 }
 
@@ -2196,17 +2252,69 @@ function saveIdea() {
 // ═══════════════════════════════════════
 const TYPE_ICONS = {'a-roll':'🎥','b-roll':'🎞','reel':'📱','photo':'📸','script':'📝'};
 const STATUS_COLORS = {raw:['var(--coral-t)','var(--coral)'],'in-progress':['var(--indigo-t)','var(--indigo)'],edited:['var(--saffron-t)','var(--saffron)'],scheduled:['var(--purple-t)','var(--purple)'],posted:['var(--emerald-t)','var(--emerald)']};
+let contentFilters = { query:'', owner:'all', lane:'all', queue:'all' };
+
+function setContentFilter(key, value) {
+  contentFilters[key] = value;
+  renderContent();
+}
+
+function contentQueueMatches(item, queue) {
+  if (queue === 'all') return true;
+  if (queue === 'intake') return ['raw','in-progress'].includes(item.status);
+  if (queue === 'social') return item.owner === 'Social Media Manager' && item.status !== 'posted';
+  if (queue === 'ads') return item.adReady && ['edited','scheduled'].includes(item.status);
+  if (queue === 'founder') return ['personal','both'].includes(item.lane);
+  if (queue === 'scheduled') return ['scheduled','posted'].includes(item.status);
+  return true;
+}
 
 function renderContent() {
   const items=load(K.content).map(normalizeContentItem);
+  const q = contentFilters.query.trim().toLowerCase();
+  const filtered = items.filter(item => {
+    const haystack = [item.title,item.event,item.notes,item.source,item.owner,item.lane,item.link].join(' ').toLowerCase();
+    if (q && !haystack.includes(q)) return false;
+    if (contentFilters.owner !== 'all' && item.owner !== contentFilters.owner) return false;
+    if (contentFilters.lane !== 'all' && item.lane !== contentFilters.lane) return false;
+    if (!contentQueueMatches(item, contentFilters.queue)) return false;
+    return true;
+  });
+  const intake = items.filter(i=>['raw','in-progress'].includes(i.status));
+  const needsSocial = items.filter(i=>i.owner==='Social Media Manager' && i.status!=='posted');
+  const needsAds = items.filter(i=>i.adReady && ['edited','scheduled'].includes(i.status));
+  const founderLane = items.filter(i=>['personal','both'].includes(i.lane));
   document.getElementById('content-stats').innerHTML = `
     <div class="stat-card sc-coral"><div class="stat-label">Total Assets</div><div class="stat-val">${items.length}</div></div>
     <div class="stat-card sc-saffron"><div class="stat-label">Ready to Delegate</div><div class="stat-val">${items.filter(i=>['edited','scheduled'].includes(i.status)).length}</div></div>
-    <div class="stat-card sc-emerald"><div class="stat-label">Ad Eligible</div><div class="stat-val">${items.filter(i=>i.adReady).length}</div></div>
-    <div class="stat-card sc-teal"><div class="stat-label">Founder Lane</div><div class="stat-val">${items.filter(i=>i.lane==='personal'||i.lane==='both').length}</div></div>
+    <div class="stat-card sc-emerald"><div class="stat-label">Needs Ads</div><div class="stat-val">${needsAds.length}</div></div>
+    <div class="stat-card sc-teal"><div class="stat-label">Founder Lane</div><div class="stat-val">${founderLane.length}</div></div>
   `;
-  document.getElementById('content-grid').innerHTML = items.map(item=>{
+  document.getElementById('content-queues').innerHTML = `
+    <div class="queue-card">
+      <div class="queue-head"><div><div class="queue-title">Raw Intake Inbox</div><div class="content-sub">What still needs sorting or editing</div></div><div class="queue-count" style="color:var(--coral);">${intake.length}</div></div>
+      <div class="queue-list">${intake.slice(0,3).map(item=>`<div class="queue-item"><strong>${item.title}</strong>${item.source} · ${item.owner}</div>`).join('') || '<div class="content-sub">Inbox clear.</div>'}</div>
+    </div>
+    <div class="queue-card">
+      <div class="queue-head"><div><div class="queue-title">Needs Social</div><div class="content-sub">Queue for your social manager</div></div><div class="queue-count" style="color:var(--teal);">${needsSocial.length}</div></div>
+      <div class="queue-list">${needsSocial.slice(0,3).map(item=>`<div class="queue-item"><strong>${item.title}</strong>${item.status} · ${item.lane==='personal'?'founder':'serafina'}</div>`).join('') || '<div class="content-sub">Nothing pending.</div>'}</div>
+    </div>
+    <div class="queue-card">
+      <div class="queue-head"><div><div class="queue-title">Ad Pickup Queue</div><div class="content-sub">What pmax can grab right now</div></div><div class="queue-count" style="color:var(--emerald);">${needsAds.length}</div></div>
+      <div class="queue-list">${needsAds.slice(0,3).map(item=>`<div class="queue-item"><strong>${item.title}</strong>${item.status} · ${item.owner}</div>`).join('') || '<div class="content-sub">No ad-ready assets yet.</div>'}</div>
+    </div>
+    <div class="queue-card">
+      <div class="queue-head"><div><div class="queue-title">Founder Lane</div><div class="content-sub">Personal brand + digital products</div></div><div class="queue-count" style="color:var(--purple);">${founderLane.length}</div></div>
+      <div class="queue-list">${founderLane.slice(0,3).map(item=>`<div class="queue-item"><strong>${item.title}</strong>${item.status} · ${item.owner}</div>`).join('') || '<div class="content-sub">Add your first founder asset.</div>'}</div>
+    </div>
+  `;
+  document.getElementById('content-grid').innerHTML = filtered.map(item=>{
     const sc = STATUS_COLORS[item.status]||['var(--cream)','var(--text2)'];
+    const laneStyles = {
+      serafina:['var(--saffron-t)','var(--gold)','Serafina HQ'],
+      personal:['var(--purple-t)','var(--purple)','Personal Brand OS'],
+      both:['var(--teal-t)','var(--teal)','Both lanes'],
+    }[item.lane] || ['var(--cream)','var(--text2)','Serafina HQ'];
     return `<div class="content-card">
       <div class="content-thumb" style="background:linear-gradient(135deg,${sc[0]},var(--cream));">
         ${item.img?`<img src="${item.img}" alt="" />`:`<span>${TYPE_ICONS[item.type]||'🎬'}</span>`}
@@ -2215,22 +2323,83 @@ function renderContent() {
       </div>
       <div class="content-body">
         <div class="content-title">${item.title}</div>
-        <div class="content-sub">${item.lane==='personal'?'Personal Brand OS':item.lane==='both'?'Both lanes':'Serafina HQ'} · ${item.owner}</div>
+        <div class="content-sub">${laneStyles[2]} · ${item.owner}</div>
         ${item.event?`<div class="content-sub">📍 ${item.event}</div>`:''}
         <div class="content-sub" style="margin-top:4px;">${item.source}${item.adReady?' · ad-ready ✓':''}</div>
         ${item.notes?`<div class="content-sub" style="margin-top:4px;">${item.notes.length>60?item.notes.slice(0,60)+'…':item.notes}</div>`:''}
+        <span class="content-lane-pill" style="background:${laneStyles[0]};color:${laneStyles[1]};">${laneStyles[2]}</span>
+        ${item.link?`<a class="content-link" href="${item.link}" target="_blank">↗ Open asset</a>`:''}
       </div>
       <div class="content-foot">
         <button class="btn btn-ghost btn-sm" onclick="editContent('${item.id}')">Edit</button>
         <button class="btn btn-sm" onclick="deleteContent('${item.id}')" style="background:var(--coral-t);color:var(--coral);border:none;border-radius:7px;padding:4px 10px;cursor:pointer;font-size:11px;">Delete</button>
       </div>
     </div>`;
-  }).join('') || `<div class="empty-state" style="grid-column:1/-1"><div class="empty-icon">🎬</div><div class="empty-text">No content assets</div></div>`;
+  }).join('') || `<div class="empty-state" style="grid-column:1/-1"><div class="empty-icon">🎬</div><div class="empty-text">No content assets match this queue</div><div class="empty-sub">Try a different owner, lane, or queue filter</div></div>`;
 }
 
 function deleteContent(id) {
   save(K.content,load(K.content).filter(i=>i.id!==id)); renderContent();
 }
+function setContentUploadStatus(message, tone='') {
+  const el = document.getElementById('c-upload-status');
+  if (!el) return;
+  el.className = `content-upload-status${tone ? ` ${tone}` : ''}`;
+  el.textContent = message || '';
+}
+
+function resetContentModal() {
+  ['c-id','c-title','c-event','c-date','c-notes','c-img-data','c-source','c-link'].forEach(x=>{const el=document.getElementById(x);if(el)el.value='';});
+  document.getElementById('c-type').value='a-roll';
+  document.getElementById('c-status').value='raw';
+  document.getElementById('c-lane').value='serafina';
+  document.getElementById('c-owner').value='Me';
+  document.getElementById('c-ad-ready').value='no';
+  const fileInput = document.getElementById('c-asset-file');
+  if (fileInput) fileInput.value = '';
+  setContentUploadStatus('Upload once and this asset gets a cloud link your team can open directly.');
+  document.getElementById('c-img-area').innerHTML=`<span style="font-size:28px">🎬</span><span>Upload thumbnail</span><input type="file" id="c-img-file" accept="image/*" onchange="previewUpload(event,'c-img-area','c-img-data')" />`;
+}
+
+async function uploadContentAsset() {
+  const cfg = await loadRuntimeConfig();
+  if (!cfg.features?.contentStorage) {
+    setContentUploadStatus('Cloud storage is not configured for this deployment yet.', 'warn');
+    return;
+  }
+  const input = document.getElementById('c-asset-file');
+  const file = input?.files?.[0];
+  if (!file) {
+    setContentUploadStatus('Choose a file first, then upload it.', 'warn');
+    return;
+  }
+  const lane = document.getElementById('c-lane').value || 'serafina';
+  setContentUploadStatus('Uploading to cloud…', '');
+  try {
+    const params = new URLSearchParams({
+      filename: file.name,
+      contentType: file.type || 'application/octet-stream',
+      lane
+    });
+    const resp = await fetch(`/api/content/upload?${params.toString()}`, {
+      method: 'POST',
+      headers: { 'Content-Type': file.type || 'application/octet-stream' },
+      body: file
+    });
+    const data = await resp.json();
+    if (!resp.ok) throw new Error(data.error || 'Upload failed');
+    document.getElementById('c-link').value = data.publicUrl || '';
+    document.getElementById('c-source').value = 'Supabase Storage';
+    if ((file.type || '').startsWith('image/')) {
+      document.getElementById('c-img-data').value = data.publicUrl || '';
+      document.getElementById('c-img-area').innerHTML=`<img src="${data.publicUrl}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;" /><input type="file" id="c-img-file" accept="image/*" onchange="previewUpload(event,'c-img-area','c-img-data')" /><span style="position:absolute;bottom:8px;background:rgba(0,0,0,.5);color:white;font-size:11px;padding:2px 10px;border-radius:4px;z-index:2;">Change</span>`;
+    }
+    setContentUploadStatus('Uploaded. This asset now has a cloud link ready to share.', 'ok');
+  } catch (e) {
+    setContentUploadStatus('Upload failed: ' + e.message, 'err');
+  }
+}
+
 function editContent(id) {
   const item = normalizeContentItem(load(K.content).find(x=>x.id===id) || {}); if(!item.id) return;
   document.getElementById('c-id').value=item.id;
@@ -2244,6 +2413,10 @@ function editContent(id) {
   document.getElementById('c-owner').value=item.owner||'Me';
   document.getElementById('c-ad-ready').value=item.adReady?'yes':'no';
   document.getElementById('c-source').value=item.source||'';
+  document.getElementById('c-link').value=item.link||'';
+  const fileInput = document.getElementById('c-asset-file');
+  if (fileInput) fileInput.value = '';
+  setContentUploadStatus(item.link ? 'This asset already has a saved cloud link.' : 'Upload once and this asset gets a cloud link your team can open directly.', item.link ? 'ok' : '');
   document.getElementById('c-img-data').value=item.img||'';
   if (item.img) {
     document.getElementById('c-img-area').innerHTML=`<img src="${item.img}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;" /><input type="file" id="c-img-file" accept="image/*" onchange="previewUpload(event,'c-img-area','c-img-data')" /><span style="position:absolute;bottom:8px;background:rgba(0,0,0,.5);color:white;font-size:11px;padding:2px 10px;border-radius:4px;z-index:2;">Change</span>`;
@@ -2265,6 +2438,7 @@ function saveContent() {
     owner:document.getElementById('c-owner').value,
     adReady:document.getElementById('c-ad-ready').value==='yes',
     source:document.getElementById('c-source').value.trim()||'Mixed',
+    link:document.getElementById('c-link').value.trim(),
     img:document.getElementById('c-img-data').value||null,
   };
   const items=load(K.content);
@@ -2273,14 +2447,7 @@ function saveContent() {
     if (idx >= 0) items[idx] = item;
     else items.push(item);
   } else items.push(item);
-  save(K.content,items); closeModal('modal-content');
-  ['c-id','c-title','c-event','c-date','c-notes','c-img-data','c-source'].forEach(x=>{const el=document.getElementById(x);if(el)el.value='';});
-  document.getElementById('c-type').value='a-roll';
-  document.getElementById('c-status').value='raw';
-  document.getElementById('c-lane').value='serafina';
-  document.getElementById('c-owner').value='Me';
-  document.getElementById('c-ad-ready').value='no';
-  document.getElementById('c-img-area').innerHTML=`<span style="font-size:28px">🎬</span><span>Upload thumbnail</span><input type="file" id="c-img-file" accept="image/*" onchange="previewUpload(event,'c-img-area','c-img-data')" />`;
+  save(K.content,items); closeModal('modal-content'); resetContentModal();
   renderContent();
 }
 
@@ -2336,11 +2503,15 @@ function savePartner() {
 // ═══════════════════════════════════════
 function openModal(id) {
   if (id==='modal-brief') hydrateBriefModal();
+  if (id==='modal-content' && !document.getElementById('c-id').value) resetContentModal();
   document.getElementById(id).classList.add('open');
 }
-function closeModal(id) { document.getElementById(id).classList.remove('open'); }
-document.querySelectorAll('.overlay').forEach(m=>m.addEventListener('click',e=>{ if(e.target===m) m.classList.remove('open'); }));
-document.addEventListener('keydown',e=>{ if(e.key==='Escape') document.querySelectorAll('.overlay.open').forEach(m=>m.classList.remove('open')); });
+function closeModal(id) {
+  document.getElementById(id).classList.remove('open');
+  if (id==='modal-content') resetContentModal();
+}
+document.querySelectorAll('.overlay').forEach(m=>m.addEventListener('click',e=>{ if(e.target===m) closeModal(m.id); }));
+document.addEventListener('keydown',e=>{ if(e.key==='Escape') document.querySelectorAll('.overlay.open').forEach(m=>closeModal(m.id)); });
 
 function previewUpload(e, areaId, dataId) {
   const file=e.target.files[0]; if(!file) return;
@@ -2370,7 +2541,7 @@ async function loadRuntimeConfig(force=false) {
     const data = await resp.json();
     runtimeConfig = { loaded:true, ...(data||{}) };
   } catch (e) {
-    runtimeConfig = { loaded:true, features:{ cloudSync:false, managedShopify:false, vercelCron:false } };
+    runtimeConfig = { loaded:true, features:{ cloudSync:false, contentStorage:false, managedShopify:false, vercelCron:false } };
   }
   return runtimeConfig;
 }

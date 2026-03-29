@@ -1,5 +1,9 @@
 create extension if not exists pgcrypto;
 
+insert into storage.buckets (id, name, public)
+values ('serafina-assets', 'serafina-assets', true)
+on conflict (id) do nothing;
+
 create table if not exists public.app_snapshots (
   workspace text primary key,
   payload jsonb not null default '{}'::jsonb,
