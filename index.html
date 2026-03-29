@@ -1114,8 +1114,8 @@ body.portal-mode .kriti-portal-shell { display:block; }
 
   <div id="page-reels" class="page">
     <div class="page-top">
-      <div><div class="greeting">✦ reference locker</div><div class="page-title">Reel Lab</div><div class="page-sub">Paste a reel you love, break down exactly why it works, and turn it into a Dolly version.</div></div>
-      <button class="btn btn-saffron" onclick="openModal('modal-reel')">+ Analyze Reel</button>
+      <div><div class="greeting">✦ inspiration to execution</div><div class="page-title">Reel Lab</div><div class="page-sub">Save a reel link or creator account you love. Then get a simple breakdown and a Dolly version you can actually make.</div></div>
+      <button class="btn btn-saffron" onclick="openModal('modal-reel')">+ Save Inspiration</button>
     </div>
     <div class="stat-grid" id="reel-lab-stats"></div>
     <div class="reel-lab-grid" id="reel-lab-grid"></div>
@@ -1767,14 +1767,22 @@ body.portal-mode .kriti-portal-shell { display:block; }
 
 <div class="overlay" id="modal-reel">
   <div class="modal">
-    <div class="modal-head"><div class="modal-title">Analyze Reel Reference</div><button class="modal-x" onclick="closeModal('modal-reel')">×</button></div>
+    <div class="modal-head"><div class="modal-title">Save Inspiration</div><button class="modal-x" onclick="closeModal('modal-reel')">×</button></div>
     <input type="hidden" id="reel-id">
     <div class="frow c2">
-      <div class="fgrp"><label>Reel link</label><input id="reel-link" placeholder="Paste Instagram reel link" /></div>
+      <div class="fgrp"><label>What are you saving?</label>
+        <select id="reel-source-type">
+          <option value="reel">A reel link</option>
+          <option value="account">An Instagram account</option>
+        </select>
+      </div>
       <div class="fgrp"><label>Creator / source</label><input id="reel-creator" placeholder="e.g. soleilssofia" /></div>
     </div>
     <div class="frow c2">
-      <div class="fgrp"><label>Why did you save it?</label><input id="reel-why" placeholder="opening / emotion / text / edit..." /></div>
+      <div class="fgrp"><label>Paste the link</label><input id="reel-link" placeholder="Paste reel link or Instagram account link" /></div>
+      <div class="fgrp"><label>Why do you like it?</label><input id="reel-why" placeholder="opening / emotion / text / edit..." /></div>
+    </div>
+    <div class="frow c2">
       <div class="fgrp"><label>Dolly pillar</label>
         <select id="reel-pillar">
           <option value="The Body">The Body</option>
@@ -1784,11 +1792,12 @@ body.portal-mode .kriti-portal-shell { display:block; }
           <option value="Founder x Serafina">Founder x Serafina</option>
         </select>
       </div>
+      <div class="fgrp"><label>What do you want from it?</label><input id="reel-goal" placeholder="e.g. make my own version for founder reel" /></div>
     </div>
-    <div class="frow"><div class="fgrp"><label>Any notes from you</label><textarea id="reel-notes" placeholder="What exactly felt good here?"></textarea></div></div>
+    <div class="frow"><div class="fgrp"><label>Anything else you noticed?</label><textarea id="reel-notes" placeholder="What exactly felt good here? What do you want to steal and remake?"></textarea></div></div>
     <div class="modal-btns">
       <button class="btn btn-ghost" onclick="closeModal('modal-reel')">Cancel</button>
-      <button class="btn btn-saffron" onclick="saveReelRef()">Save + Break Down</button>
+      <button class="btn btn-saffron" onclick="saveReelRef()">Analyze + Make My Version</button>
     </div>
   </div>
 </div>
@@ -1944,19 +1953,32 @@ function normalizeReelRef(item) {
   return {
     id: item.id || uid(),
     link: item.link || '',
+    sourceType: item.sourceType || 'reel',
     creator: item.creator || 'Reference',
     why: item.why || '',
     pillar: item.pillar || 'The Build',
+    goal: item.goal || '',
     notes: item.notes || '',
     opening: item.opening || '',
     pacing: item.pacing || '',
     editStyle: item.editStyle || '',
+    sceneMap: item.sceneMap || '',
+    shotGrammar: item.shotGrammar || '',
+    cameraLanguage: item.cameraLanguage || '',
+    colorMood: item.colorMood || '',
+    audioMood: item.audioMood || '',
+    editMoves: item.editMoves || '',
+    retentionTriggers: item.retentionTriggers || '',
     textStyle: item.textStyle || '',
+    textOverlaySystem: item.textOverlaySystem || '',
     ctaStyle: item.ctaStyle || '',
+    ctaMechanic: item.ctaMechanic || '',
     hookPattern: item.hookPattern || '',
     anglePattern: item.anglePattern || '',
     emotionalArc: item.emotionalArc || '',
+    saveWhy: item.saveWhy || '',
     dollyVersion: item.dollyVersion || '',
+    remakePlan: item.remakePlan || '',
     motionText: item.motionText || '',
     createdAt: item.createdAt || today()
   };
@@ -5205,8 +5227,10 @@ function deleteObs(id) { save(K_OBS, load(K_OBS).filter(x=>x.id!==id)); renderOb
 
 function buildReelBreakdownDraft(input) {
   const creator = String(input.creator || 'Reference').trim();
+  const sourceType = input.sourceType || 'reel';
   const why = String(input.why || '').toLowerCase();
   const notes = String(input.notes || '').toLowerCase();
+  const goal = String(input.goal || '').trim();
   const pillar = input.pillar || 'The Build';
   const cinematic = /lana|cinematic|story|emotional|soft|aesthetic|mood/.test(`${creator} ${why} ${notes}`);
   const opening = cinematic
@@ -5218,10 +5242,37 @@ function buildReelBreakdownDraft(input) {
   const editStyle = cinematic
     ? 'Cinematic, diaristic, soft-luxury, memory-like edits with clean fades and intimate footage.'
     : 'Simple but sharp storytelling edit that prioritizes narrative over trend effects.';
+  const sceneMap = cinematic
+    ? 'Scene 1: arresting intimate opener. Scene 2: world-building b-roll. Scene 3: emotional truth. Scene 4: payoff image. Scene 5: quiet CTA.'
+    : 'Scene 1: direct hook. Scene 2: proof/detail. Scene 3: supporting scene. Scene 4: lesson. Scene 5: CTA.';
+  const shotGrammar = cinematic
+    ? 'Close-ups, slow environmental details, one face shot, one texture shot, one lived-in movement shot.'
+    : 'One hook shot, one proof shot, one movement shot, one lifestyle shot, one ending shot.';
+  const cameraLanguage = cinematic
+    ? 'Feels handheld but intentional, intimate framing, soft push-ins, quiet pauses.'
+    : 'Clean tripod or simple handheld. Framing stays readable and hook-forward.';
+  const colorMood = cinematic
+    ? 'Warm, creamy, nostalgic, soft contrast, expensive skin tones.'
+    : 'Clean, bright, premium, easy to read on mobile.';
+  const audioMood = cinematic
+    ? 'Dreamy, melancholic, romantic, slow-burn audio with emotional lift.'
+    : 'Minimal, rhythm-led audio that supports the message without overpowering it.';
+  const editMoves = cinematic
+    ? 'Hold longer than expected, use 1-2 soft fades, cut on emotional beats, avoid busy transitions.'
+    : 'Trim hard, cut on meaning, keep transitions invisible, no gimmick effects.';
+  const retentionTriggers = cinematic
+    ? 'Strong first frame, unanswered emotional tension, text that lands one truth at a time, visual beauty that buys attention.'
+    : 'Clear first-line tension, quick proof, visual variety, no dead seconds.';
   const textStyle = cinematic
     ? 'Minimal motion text. One strong line at a time. Feels like a private thought, not marketing copy.'
     : 'Bold first-line hook, then clean supporting text only when needed.';
+  const textOverlaySystem = cinematic
+    ? 'Use 2-4 text moments max: opening confession, one clarifying truth, one payoff line, one soft CTA.'
+    : 'Use a bold first line, one support line in the middle, one CTA at the end.';
   const ctaStyle = 'Soft CTA at the end: follow, save, or come back tomorrow. Never emoji bait.';
+  const ctaMechanic = pillar === 'Founder x Serafina'
+    ? 'Invite them back into your world: follow for the next build chapter or save for the aesthetic/lesson.'
+    : 'Use follow or save CTAs that feel like continuation, not selling.';
   const hookPattern = cinematic
     ? 'Confession or emotionally loaded observation in the first line.'
     : 'Direct tension, curiosity, or identity-based statement in the first line.';
@@ -5235,6 +5286,11 @@ function buildReelBreakdownDraft(input) {
           ? 'Behind the scenes + leverage + proof'
           : 'Founder honesty + aspiration + reality';
   const emotionalArc = 'Hook -> mood/visual world -> truth or proof -> emotional payoff -> soft CTA';
+  const saveWhy = pillar === 'The Mind'
+    ? 'People save this because it sounds like a thought they needed to hear at the right time.'
+    : pillar === 'The Body'
+      ? 'People save this because it captures the feeling of becoming someone better.'
+      : 'People save this because it makes the life feel desirable and achievable.';
   const dollyVersion = pillar === 'The Body'
     ? 'Use your own body/discipline footage, keep the language intimate, and make the reel feel like a life shift instead of fitness content.'
     : pillar === 'The Mind'
@@ -5245,17 +5301,54 @@ function buildReelBreakdownDraft(input) {
   const motionText = cinematic
     ? 'Line 1: confession. Line 2: emotional truth. Line 3: quiet payoff.'
     : 'Line 1: hook. Line 2: proof. Line 3: CTA.';
+  const remakePlan = [
+    'Film one face-to-camera hook first.',
+    'Pick 4-6 beautiful supporting shots from your real life.',
+    'Use one emotional line as the spine of the reel.',
+    'Keep text minimal and elegant.',
+    'End with a soft follow/save CTA.',
+    sourceType === 'account'
+      ? 'Choose one specific reel from this creator each time and remake the structure, not the copy.'
+      : 'Remake the feeling, pacing, and story structure. Do not imitate line by line.'
+  ].join(' ');
+  const ownVersion = [
+    sourceType === 'account'
+      ? 'Pick one reel from this creator that matches your mood today.'
+      : 'Keep only the emotional structure, not the exact copy.',
+    `Opening: ${opening}`,
+    `Hook: ${hookPattern}`,
+    `Pacing: ${pacing}`,
+    `Edit style: ${editStyle}`,
+    `Text: ${motionText}`,
+    `CTA: ${ctaStyle}`,
+    goal ? `Goal: ${goal}` : 'Goal: make one founder-led reel that still feels like you.',
+    `Dolly version: ${dollyVersion}`,
+    `Remake plan: ${remakePlan}`
+  ].join(' ');
   return normalizeReelRef({
     ...input,
+    sourceType,
+    goal,
     opening,
     pacing,
     editStyle,
+    sceneMap,
+    shotGrammar,
+    cameraLanguage,
+    colorMood,
+    audioMood,
+    editMoves,
+    retentionTriggers,
     textStyle,
+    textOverlaySystem,
     ctaStyle,
+    ctaMechanic,
     hookPattern,
     anglePattern,
     emotionalArc,
-    dollyVersion,
+    saveWhy,
+    dollyVersion: ownVersion,
+    remakePlan,
     motionText,
     createdAt: today()
   });
@@ -5264,23 +5357,29 @@ function buildReelBreakdownDraft(input) {
 function renderReelLab() {
   const refs = load(K_REELS).map(normalizeReelRef).sort((a,b)=>String(b.createdAt).localeCompare(String(a.createdAt)));
   document.getElementById('reel-lab-stats').innerHTML = `
-    <div class="stat-card sc-saffron"><div class="stat-label">References Saved</div><div class="stat-val">${refs.length}</div><div class="stat-sub">your inspiration locker</div></div>
+    <div class="stat-card sc-saffron"><div class="stat-label">Saved</div><div class="stat-val">${refs.length}</div><div class="stat-sub">reels + creator accounts</div></div>
     <div class="stat-card sc-coral"><div class="stat-label">Story-led</div><div class="stat-val">${refs.filter(r=>/story|emotional|confession/i.test([r.why,r.editStyle,r.hookPattern].join(' '))).length}</div><div class="stat-sub">strong narrative references</div></div>
-    <div class="stat-card sc-teal"><div class="stat-label">Dolly-ready</div><div class="stat-val">${refs.filter(r=>r.dollyVersion).length}</div><div class="stat-sub">adaptations written</div></div>
-    <div class="stat-card sc-magenta"><div class="stat-label">War Room Ready</div><div class="stat-val">${refs.length}</div><div class="stat-sub">push any card into storyboard</div></div>
+    <div class="stat-card sc-teal"><div class="stat-label">Make My Version</div><div class="stat-val">${refs.filter(r=>r.dollyVersion).length}</div><div class="stat-sub">usable remake plans</div></div>
+    <div class="stat-card sc-magenta"><div class="stat-label">Storyboard Ready</div><div class="stat-val">${refs.length}</div><div class="stat-sub">send any idea to War Room</div></div>
   `;
   document.getElementById('reel-lab-grid').innerHTML = refs.map(ref => `
     <div class="reel-ref-card">
       <div class="reel-ref-title">${ref.creator}</div>
-      <div class="reel-ref-sub">${ref.pillar} · saved ${fmtD(ref.createdAt)}${ref.link ? ` · <a href="${ref.link}" target="_blank" style="color:var(--indigo);font-weight:700;">open reel ↗</a>` : ''}</div>
-      <div class="reel-ref-section"><div class="reel-ref-label">Why it works</div><div class="reel-ref-text">${escapeHtml(ref.why || ref.notes || 'Saved for storytelling reference.')}</div></div>
+      <div class="reel-ref-sub">${ref.sourceType === 'account' ? 'creator account' : 'reel reference'} · ${ref.pillar} · saved ${fmtD(ref.createdAt)}${ref.link ? ` · <a href="${ref.link}" target="_blank" style="color:var(--indigo);font-weight:700;">open ↗</a>` : ''}` : ''}</div>
+      <div class="reel-ref-section"><div class="reel-ref-label">Why you saved it</div><div class="reel-ref-text">${escapeHtml(ref.why || ref.notes || 'Saved for storytelling reference.')}</div></div>
       <div class="reel-ref-section"><div class="reel-ref-label">Opening</div><div class="reel-ref-text">${escapeHtml(ref.opening)}</div></div>
-      <div class="reel-ref-section"><div class="reel-ref-label">Pacing + Edit Style</div><div class="reel-ref-text">${escapeHtml(ref.pacing)} ${escapeHtml(ref.editStyle)}</div></div>
-      <div class="reel-ref-section"><div class="reel-ref-label">Hook + Text</div><div class="reel-ref-text">${escapeHtml(ref.hookPattern)} ${escapeHtml(ref.textStyle)}</div></div>
-      <div class="reel-ref-section"><div class="reel-ref-label">CTA + Angle</div><div class="reel-ref-text">${escapeHtml(ref.ctaStyle)} ${escapeHtml(ref.anglePattern)}</div></div>
-      <div class="reel-ref-section"><div class="reel-ref-label">Dolly version</div><div class="reel-ref-text">${escapeHtml(ref.dollyVersion)}</div></div>
+      <div class="reel-ref-section"><div class="reel-ref-label">Scene map</div><div class="reel-ref-text">${escapeHtml(ref.sceneMap)}</div></div>
+      <div class="reel-ref-section"><div class="reel-ref-label">Shot grammar</div><div class="reel-ref-text">${escapeHtml(ref.shotGrammar)} ${escapeHtml(ref.cameraLanguage)}</div></div>
+      <div class="reel-ref-section"><div class="reel-ref-label">Pacing + edit style</div><div class="reel-ref-text">${escapeHtml(ref.pacing)} ${escapeHtml(ref.editStyle)} ${escapeHtml(ref.editMoves)}</div></div>
+      <div class="reel-ref-section"><div class="reel-ref-label">Retention triggers</div><div class="reel-ref-text">${escapeHtml(ref.retentionTriggers)}</div></div>
+      <div class="reel-ref-section"><div class="reel-ref-label">Text system</div><div class="reel-ref-text">${escapeHtml(ref.textStyle)} ${escapeHtml(ref.textOverlaySystem)}</div></div>
+      <div class="reel-ref-section"><div class="reel-ref-label">Audio + color mood</div><div class="reel-ref-text">${escapeHtml(ref.audioMood)} ${escapeHtml(ref.colorMood)}</div></div>
+      <div class="reel-ref-section"><div class="reel-ref-label">Hook + angle</div><div class="reel-ref-text">${escapeHtml(ref.hookPattern)} ${escapeHtml(ref.anglePattern)}</div></div>
+      <div class="reel-ref-section"><div class="reel-ref-label">CTA + why people save it</div><div class="reel-ref-text">${escapeHtml(ref.ctaStyle)} ${escapeHtml(ref.ctaMechanic)} ${escapeHtml(ref.saveWhy)}</div></div>
+      <div class="reel-ref-section"><div class="reel-ref-label">Make my version</div><div class="reel-ref-text">${escapeHtml(ref.dollyVersion)}</div></div>
+      <div class="reel-ref-section"><div class="reel-ref-label">Remake plan</div><div class="reel-ref-text">${escapeHtml(ref.remakePlan)}</div></div>
       <div class="reel-ref-actions">
-        <button class="btn btn-ghost btn-sm" onclick="copyReelBreakdown('${ref.id}')">Copy breakdown</button>
+        <button class="btn btn-ghost btn-sm" onclick="copyReelBreakdown('${ref.id}')">Copy analysis</button>
         <button class="btn btn-ghost btn-sm" onclick="sendReelToWarRoom('${ref.id}')">Send to War Room</button>
         <button class="btn btn-ghost btn-sm" onclick="deleteReelRef('${ref.id}')">Delete</button>
       </div>
@@ -5291,10 +5390,12 @@ function renderReelLab() {
 function saveReelRef() {
   const ref = buildReelBreakdownDraft({
     id: document.getElementById('reel-id').value || uid(),
+    sourceType: document.getElementById('reel-source-type').value,
     link: document.getElementById('reel-link').value.trim(),
     creator: document.getElementById('reel-creator').value.trim() || 'Reference',
     why: document.getElementById('reel-why').value.trim(),
     pillar: document.getElementById('reel-pillar').value,
+    goal: document.getElementById('reel-goal').value.trim(),
     notes: document.getElementById('reel-notes').value.trim()
   });
   const refs = load(K_REELS).map(normalizeReelRef);
@@ -5302,7 +5403,8 @@ function saveReelRef() {
   if (idx >= 0) refs[idx] = ref; else refs.unshift(ref);
   save(K_REELS, refs);
   closeModal('modal-reel');
-  ['reel-id','reel-link','reel-creator','reel-why','reel-notes'].forEach(id => { const el = document.getElementById(id); if (el) el.value=''; });
+  ['reel-id','reel-link','reel-creator','reel-why','reel-goal','reel-notes'].forEach(id => { const el = document.getElementById(id); if (el) el.value=''; });
+  document.getElementById('reel-source-type').value = 'reel';
   document.getElementById('reel-pillar').value = 'The Build';
   if (currentPage === 'reels') renderReelLab();
 }
@@ -5314,17 +5416,30 @@ async function copyReelBreakdown(id) {
     `Reference: ${ref.creator}`,
     ref.link ? `Link: ${ref.link}` : '',
     `Pillar: ${ref.pillar}`,
+    `Type: ${ref.sourceType === 'account' ? 'creator account' : 'reel reference'}`,
     `Why it works: ${ref.why || ref.notes}`,
     `Opening: ${ref.opening}`,
+    `Scene map: ${ref.sceneMap}`,
+    `Shot grammar: ${ref.shotGrammar}`,
+    `Camera language: ${ref.cameraLanguage}`,
     `Pacing: ${ref.pacing}`,
     `Edit style: ${ref.editStyle}`,
+    `Edit moves: ${ref.editMoves}`,
+    `Retention triggers: ${ref.retentionTriggers}`,
     `Text style: ${ref.textStyle}`,
+    `Text system: ${ref.textOverlaySystem}`,
+    `Audio mood: ${ref.audioMood}`,
+    `Color mood: ${ref.colorMood}`,
     `Hook pattern: ${ref.hookPattern}`,
     `CTA style: ${ref.ctaStyle}`,
+    `CTA mechanic: ${ref.ctaMechanic}`,
     `Angle pattern: ${ref.anglePattern}`,
     `Emotional arc: ${ref.emotionalArc}`,
+    `Why people save it: ${ref.saveWhy}`,
     `Motion text: ${ref.motionText}`,
-    `Dolly version: ${ref.dollyVersion}`
+    ref.goal ? `Goal: ${ref.goal}` : '',
+    `Make my version: ${ref.dollyVersion}`,
+    `Remake plan: ${ref.remakePlan}`
   ].filter(Boolean).join('\n');
   await copyTextValue(text, 'Reel breakdown copied');
 }
