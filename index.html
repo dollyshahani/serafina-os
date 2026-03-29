@@ -1892,6 +1892,8 @@ const fmtD  = d => { if(!d) return '—'; const dt=new Date(d); return dt.toLoca
 const CLOUD_SETTINGS_KEY = 'sf3_cloud_settings';
 const MANIFESTATION_URL = 'https://dollydash-knzskech.manus.space/';
 let runtimeConfig = { loaded:false, features:{ cloudSync:false, contentStorage:false, localIntake:false, managedShopify:false, vercelCron:false } };
+let liveCommerceSummary = null;
+let liveCommerceLoading = false;
 
 function loadBrief() {
   try {
@@ -2334,8 +2336,11 @@ function renderDash() {
     brief.note ? `<div class="alert-chip">🧠 ${brief.note}</div>` : ''
   ].filter(Boolean).join('') || `<div class="alert-chip">✦ Clean slate. Build profit, not noise.</div>`;
 
+  const salesYesterday = liveCommerceSummary?.salesYesterday ?? brief.salesYesterday;
+  const ordersYesterday = liveCommerceSummary?.ordersYesterday ?? 0;
+  const repeatYesterday = liveCommerceSummary?.repeatYesterday;
   document.getElementById('dash-stats').innerHTML = `
-    <div class="stat-card sc-saffron"><div class="stat-label">Sales Yesterday</div><div class="stat-val">${fmt(brief.salesYesterday)}</div><div class="stat-sub">manual founder snapshot</div></div>
+    <div class="stat-card sc-saffron"><div class="stat-label">Sales Yesterday</div><div class="stat-val">${fmt(salesYesterday)}</div><div class="stat-sub">${liveCommerceSummary ? 'live Shopify admin data' : 'manual founder snapshot'}</div></div>
     <div class="stat-card sc-coral"><div class="stat-label">Cash Out This Week</div><div class="stat-val">${fmt(brief.cashOutWeek)}</div><div class="stat-sub">production, rent, shows, salaries</div></div>
     <div class="stat-card sc-teal"><div class="stat-label">Ads Snapshot</div><div class="stat-val">${roas.toFixed(1)}x</div><div class="stat-sub">${fmt(brief.adSpend)} spend · ${fmt(brief.adRevenue)} revenue</div></div>
     <div class="stat-card sc-magenta"><div class="stat-label">Kriti + Review</div><div class="stat-val">${kritiQueue.length}</div><div class="stat-sub">${readyForDolly.length} ready for Dolly</div></div>
@@ -2377,12 +2382,14 @@ function renderDash() {
 
   document.getElementById('dash-brief-controls').innerHTML = `
     <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;">
-      <div style="background:var(--cream);border:1px solid var(--border);border-radius:12px;padding:12px;"><div style="font-size:11px;color:var(--text2);">Sales Yesterday</div><div style="font-size:20px;font-weight:900;color:var(--saffron);">${fmt(brief.salesYesterday)}</div></div>
+      <div style="background:var(--cream);border:1px solid var(--border);border-radius:12px;padding:12px;"><div style="font-size:11px;color:var(--text2);">Sales Yesterday</div><div style="font-size:20px;font-weight:900;color:var(--saffron);">${fmt(salesYesterday)}</div></div>
+      <div style="background:var(--cream);border:1px solid var(--border);border-radius:12px;padding:12px;"><div style="font-size:11px;color:var(--text2);">Orders Yesterday</div><div style="font-size:20px;font-weight:900;color:var(--indigo);">${ordersYesterday}</div></div>
       <div style="background:var(--cream);border:1px solid var(--border);border-radius:12px;padding:12px;"><div style="font-size:11px;color:var(--text2);">Cash Out This Week</div><div style="font-size:20px;font-weight:900;color:var(--coral);">${fmt(brief.cashOutWeek)}</div></div>
       <div style="background:var(--cream);border:1px solid var(--border);border-radius:12px;padding:12px;"><div style="font-size:11px;color:var(--text2);">Meta Spend</div><div style="font-size:20px;font-weight:900;color:var(--teal);">${fmt(brief.adSpend)}</div></div>
       <div style="background:var(--cream);border:1px solid var(--border);border-radius:12px;padding:12px;"><div style="font-size:11px;color:var(--text2);">Conversion Rate</div><div style="font-size:20px;font-weight:900;color:var(--magenta);">${brief.cvr ? brief.cvr.toFixed(1) : '0.0'}%</div></div>
+      <div style="background:var(--cream);border:1px solid var(--border);border-radius:12px;padding:12px;"><div style="font-size:11px;color:var(--text2);">Repeat Yesterday</div><div style="font-size:20px;font-weight:900;color:var(--emerald);">${repeatYesterday == null ? '—' : repeatYesterday ? 'Yes' : 'No'}</div></div>
     </div>
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:14px;font-size:12px;color:var(--text2);"><span>${brief.note || 'Use this like your real founder dashboard.'}</span><button class="btn btn-ghost btn-sm" onclick="openModal('modal-brief')">Update →</button></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:14px;font-size:12px;color:var(--text2);"><span>${liveCommerceSummary ? 'Shopify sales/orders are live. Ads + cash are still founder-entered.' : (brief.note || 'Use this like your real founder dashboard.')}</span><button class="btn btn-ghost btn-sm" onclick="openModal('modal-brief')">Update →</button></div>
   `;
 
   document.getElementById('dash-task-count').textContent = `${urgentDashboardTasks.filter(t=>t.priority==='urgent').length} urgent · ${urgentDashboardTasks.length} in focus`;
@@ -2408,6 +2415,29 @@ function renderDash() {
     </div>
     <div style="font-size:12px;line-height:1.8;color:var(--text2);"><div><strong style="color:var(--text);">Primary pillars:</strong> weight loss, discipline, manifestation, founder x Serafina</div><div><strong style="color:var(--text);">Digital product:</strong> <a href="${MANIFESTATION_URL}" target="_blank" style="color:var(--indigo);font-weight:700;">Manifestation dashboard ↗</a></div></div>
   `;
+  hydrateDashLiveCommerce();
+}
+
+async function hydrateDashLiveCommerce() {
+  if (liveCommerceLoading) return;
+  const cfg = await loadRuntimeConfig(true);
+  if (!cfg.features?.shopifyAdmin) return;
+  try {
+    liveCommerceLoading = true;
+    const creds = JSON.parse(localStorage.getItem(SHOPIFY_KEY) || '{}');
+    const resp = await fetch('/api/shopify/summary', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ store: creds.store || undefined })
+    });
+    const data = await resp.json();
+    if (!resp.ok) throw new Error(data?.error || 'Shopify summary failed');
+    liveCommerceSummary = data.summary || null;
+    if (currentPage === 'dashboard') renderDash();
+  } catch (_) {
+  } finally {
+    liveCommerceLoading = false;
+  }
 }
 
 // ═══════════════════════════════════════
