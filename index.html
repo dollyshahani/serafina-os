@@ -923,12 +923,12 @@ html, body { min-height: 100vh; background: var(--cream); font-family: 'Segoe UI
       <div>
         <div class="greeting">✦ content engine</div>
         <div class="page-title">Content Engine</div>
-        <div class="page-sub">Raw to posted, with delegation and ad-pickup built in</div>
+        <div class="page-sub">Content drops to posted, with delegation and ad-pickup built in</div>
       </div>
       <div class="page-actions">
         <button class="btn btn-ghost" onclick="pullCloudIntoContent()">↺ Pull Cloud</button>
         <button class="btn btn-ghost" onclick="syncSerafinaRawIntoContent()">📥 Sync Intake Folder</button>
-        <button class="btn btn-teal" onclick="openModal('modal-content')" style="background:var(--teal);color:white;">+ Add Asset</button>
+        <button class="btn btn-teal" onclick="openModal('modal-content')" style="background:var(--teal);color:white;">+ New Drop</button>
       </div>
     </div>
     <div class="content-sync-status" id="content-sync-status"></div>
@@ -1303,7 +1303,7 @@ html, body { min-height: 100vh; background: var(--cream); font-family: 'Segoe UI
 <div class="overlay" id="modal-content">
   <div class="modal">
     <div class="modal-head">
-      <div class="modal-title">Add Content Asset</div>
+      <div class="modal-title">Add Content Drop</div>
       <button class="modal-x" onclick="closeModal('modal-content')">×</button>
     </div>
     <input type="hidden" id="c-id" />
@@ -1322,7 +1322,7 @@ html, body { min-height: 100vh; background: var(--cream); font-family: 'Segoe UI
         <select id="c-status"><option value="raw">Raw</option><option value="selected">Selected</option><option value="editing">Editing</option><option value="ready-review">Ready for Dolly</option><option value="approved">Approved</option><option value="scheduled">Scheduled</option><option value="posted">Posted ✓</option></select>
       </div>
     </div>
-    <div class="frow"><div class="fgrp"><label>Title</label><input id="c-title" placeholder="What's this clip?" /></div></div>
+    <div class="frow"><div class="fgrp"><label>Title</label><input id="c-title" placeholder="What's this drop or clip?" /></div></div>
     <div class="frow c2">
       <div class="fgrp"><label>Belongs To</label>
         <select id="c-lane"><option value="serafina">Serafina HQ</option><option value="personal">Personal Brand OS</option><option value="both">Both</option></select>
@@ -2460,6 +2460,19 @@ function buildRolePlaybookText(role) {
   ].join('\n');
 }
 
+function buildKritiBatchPing(batchName, items) {
+  const deadline = items.map(item => item.deadline).filter(Boolean).sort()[0] || defaultDeadlineISO();
+  const driveLink = items.find(item => item.driveLink)?.driveLink || '';
+  return [
+    `Hi Kriti, I added new footage in ${batchName}.`,
+    `Please create reels and carousel posts by ${fmtD(deadline)}.`,
+    'Use the best hooks and keep the editing premium, sharp, feminine, and aligned with Serafina fonts and aesthetics.',
+    'Please work from the dashboard, upload finals back there one by one, and move them to Ready for Dolly.',
+    driveLink ? `Drive folder: ${driveLink}` : '',
+    `Dashboard: ${location.origin}`
+  ].filter(Boolean).join('\n');
+}
+
 function generateContentBrief() {
   const item = {
     title: document.getElementById('c-title').value.trim() || 'this asset',
@@ -2531,7 +2544,7 @@ function renderContent() {
     <div class="stat-card sc-coral"><div class="stat-label">Total Assets</div><div class="stat-val">${items.length}</div></div>
     <div class="stat-card sc-saffron"><div class="stat-label">Ready for Dolly</div><div class="stat-val">${readyForDolly.length}</div></div>
     <div class="stat-card sc-emerald"><div class="stat-label">Winning Ads</div><div class="stat-val">${needsAds.length}</div></div>
-    <div class="stat-card sc-teal"><div class="stat-label">Batches</div><div class="stat-val">${batches.length}</div></div>
+    <div class="stat-card sc-teal"><div class="stat-label">Content Drops</div><div class="stat-val">${batches.length}</div></div>
   `;
   document.getElementById('content-batches').innerHTML = batches.slice(0,8).map(batch=>`
     <div class="batch-card">
@@ -2546,14 +2559,14 @@ function renderContent() {
       </div>
       <div class="batch-actions">
         <button class="btn btn-ghost btn-sm" onclick="setContentFilter('query', '${String(batch.name).replace(/'/g, "\\'")}'); document.getElementById('content-search').value='${String(batch.name).replace(/'/g, "\\'")}';">Open batch</button>
-        <button class="btn btn-ghost btn-sm" onclick="sendBatchHandoffWhatsApp('${String(batch.name).replace(/'/g, "\\'")}')">WhatsApp Kriti</button>
+        <button class="btn btn-ghost btn-sm" onclick="sendBatchHandoffWhatsApp('${String(batch.name).replace(/'/g, "\\'")}')">Ping Kriti</button>
         ${batch.driveLink?`<a class="btn btn-ghost btn-sm" href="${batch.driveLink}" target="_blank" rel="noopener noreferrer">Open Drive</a>`:''}
       </div>
     </div>
   `).join('') || '';
   document.getElementById('content-queues').innerHTML = `
     <div class="queue-card">
-      <div class="queue-head"><div><div class="queue-title">Raw Intake Inbox</div><div class="content-sub">What still needs sorting or editing</div></div><div class="queue-actions"><button class="btn btn-ghost btn-sm" onclick="copyContentQueue('intake')">Copy queue</button><div class="queue-count" style="color:var(--coral);">${intake.length}</div></div></div>
+      <div class="queue-head"><div><div class="queue-title">New Drops</div><div class="content-sub">What still needs sorting or editing</div></div><div class="queue-actions"><button class="btn btn-ghost btn-sm" onclick="copyContentQueue('intake')">Copy queue</button><div class="queue-count" style="color:var(--coral);">${intake.length}</div></div></div>
       <div class="queue-list">${intake.slice(0,3).map(item=>`<div class="queue-item"><strong>${item.title}</strong>${item.source} · ${item.owner}</div>`).join('') || '<div class="content-sub">Inbox clear.</div>'}</div>
     </div>
     <div class="queue-card">
@@ -2598,7 +2611,7 @@ function renderContent() {
       <div class="content-foot">
         <button class="btn btn-ghost btn-sm" onclick="copyContentHandoff('${item.id}')">Copy brief</button>
         <button class="btn btn-ghost btn-sm" onclick="sendContentHandoffWhatsApp('${item.id}')">WhatsApp</button>
-        ${item.status==='ready-review'?`<button class="btn btn-ghost btn-sm" onclick="approveContent('${item.id}')">Approve</button>`:''}
+        ${item.status==='ready-review'?`<button class="btn btn-ghost btn-sm" onclick="approveContent('${item.id}')">Approve</button><button class="btn btn-ghost btn-sm" onclick="rejectContent('${item.id}')">Reject</button>`:''}
         <button class="btn btn-ghost btn-sm" onclick="editContent('${item.id}')">Edit</button>
         <button class="btn btn-sm" onclick="deleteContent('${item.id}')" style="background:var(--coral-t);color:var(--coral);border:none;border-radius:7px;padding:4px 10px;cursor:pointer;font-size:11px;">Delete</button>
       </div>
@@ -2690,7 +2703,7 @@ function sendContentHandoffWhatsApp(id) {
 async function copyContentQueue(queue) {
   const items = load(K.content).map(normalizeContentItem).filter(item => contentQueueMatches(item, queue));
   const queueNames = {
-    intake: 'Raw Intake Inbox',
+    intake: 'New Drops',
     social: 'Kriti Queue',
     ads: 'Badri Library',
     founder: 'Founder Lane'
@@ -2713,13 +2726,13 @@ function sendRolePlaybookWhatsApp(role) {
 async function copyBatchHandoff(batchName) {
   const items = load(K.content).map(normalizeContentItem).filter(item => batchNameForItem(item) === batchName);
   if (!items.length) return;
-  await copyTextValue(buildBatchHandoff(batchName, items), `${batchName} brief copied`);
+  await copyTextValue(buildKritiBatchPing(batchName, items), `${batchName} ping copied`);
 }
 
 function sendBatchHandoffWhatsApp(batchName) {
   const items = load(K.content).map(normalizeContentItem).filter(item => batchNameForItem(item) === batchName);
   if (!items.length) return;
-  window.open(`https://wa.me/?text=${encodeURIComponent(buildBatchHandoff(batchName, items))}`, '_blank');
+  window.open(`https://wa.me/?text=${encodeURIComponent(buildKritiBatchPing(batchName, items))}`, '_blank');
 }
 
 function approveContent(id) {
@@ -2729,6 +2742,31 @@ function approveContent(id) {
   items[idx].status = 'approved';
   save(K.content, items);
   renderContent();
+}
+
+function rejectContent(id) {
+  const items = load(K.content).map(normalizeContentItem);
+  const idx = items.findIndex(x=>x.id===id);
+  if (idx < 0) return;
+  const note = prompt('What feedback should be sent back to Kriti?');
+  if (note === null) return;
+  const item = items[idx];
+  items[idx] = {
+    ...item,
+    status: 'editing',
+    notes: [item.notes, `Rejection note: ${note.trim()}`].filter(Boolean).join('\n')
+  };
+  save(K.content, items);
+  renderContent();
+  const text = [
+    `Hi Kriti, please rework ${item.title}.`,
+    `Feedback: ${note.trim() || 'Needs another pass.'}`,
+    'Please update the edit and upload the final back into the dashboard, then move it to Ready for Dolly again.',
+    item.driveLink ? `Drive folder: ${item.driveLink}` : '',
+    item.link ? `Asset link: ${item.link}` : '',
+    `Dashboard: ${location.origin}`
+  ].filter(Boolean).join('\n');
+  window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
 }
 
 function setContentUploadStatus(message, tone='') {
