@@ -525,6 +525,19 @@ body.portal-mode .kriti-portal-shell { display:block; }
   backdrop-filter: blur(8px); pointer-events: none; gap: 14px; z-index: 400;
 }
 .bs-hint.bs-active { display: flex; }
+.bs-sidepanel {
+  position: fixed; left: calc(var(--sidebar) + 20px); top: 82px; z-index: 405;
+  width: 320px; max-height: calc(100vh - 120px); overflow:auto;
+  background: rgba(255,255,255,.96); border: 1.5px solid var(--border); border-radius: 18px;
+  padding: 16px; box-shadow: 0 18px 48px rgba(28,16,40,.14); display:none;
+}
+.bs-sidepanel.bs-active { display:block; }
+.bs-side-title { font-size:18px; font-weight:900; color:var(--text); }
+.bs-side-sub { font-size:12px; color:var(--text2); line-height:1.6; margin-top:6px; }
+.bs-side-group + .bs-side-group { margin-top:14px; }
+.bs-side-label { font-size:10px; letter-spacing:1px; text-transform:uppercase; color:var(--text2); margin-bottom:8px; font-weight:800; }
+.bs-side-list { display:flex; flex-direction:column; gap:8px; }
+.bs-side-tip { font-size:12px; color:var(--text2); line-height:1.65; background:var(--cream); border-radius:12px; padding:10px 12px; }
 
 /* ─── FINANCE PAGE ─── */
 .fin-pl-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 24px; }
@@ -793,7 +806,7 @@ body.portal-mode .kriti-portal-shell { display:block; }
     </button>
     <div class="nav-section">Studio</div>
     <button class="nav-item" data-page="brainstorm">
-      <span class="nav-dot" style="background:var(--magenta)"></span> Brainstorm ✦
+      <span class="nav-dot" style="background:var(--magenta)"></span> Story War Room ✦
     </button>
     <button class="nav-item" data-page="obsession">
       <span class="nav-dot" style="background:var(--coral)"></span> Dolly Daily
@@ -1183,6 +1196,32 @@ body.portal-mode .kriti-portal-shell { display:block; }
 </div>
 <div class="bs-hint" id="bs-hint">
   <span>Space+drag to pan · Scroll to zoom · Del to delete · Dbl-click to edit</span>
+</div>
+<div class="bs-sidepanel" id="bs-sidepanel">
+  <div class="bs-side-title">Storytelling War Room</div>
+  <div class="bs-side-sub">Map the reel visually: hook, scenes, AI footage, motion text, edit flow, and CTA in one place.</div>
+  <div class="bs-side-group">
+    <div class="bs-side-label">Templates</div>
+    <div class="bs-side-list">
+      <button class="btn btn-ghost btn-sm" onclick="bsLoadStoryTemplate('daily')">Load Dolly Daily board</button>
+      <button class="btn btn-ghost btn-sm" onclick="bsLoadStoryTemplate('founder')">Load founder story board</button>
+      <button class="btn btn-ghost btn-sm" onclick="bsLoadStoryTemplate('serafina')">Load Serafina reel board</button>
+      <button class="btn btn-ghost btn-sm" onclick="bsClearBoard()">Clear board</button>
+    </div>
+  </div>
+  <div class="bs-side-group">
+    <div class="bs-side-label">Copy Kits</div>
+    <div class="bs-side-list">
+      <button class="btn btn-ghost btn-sm" onclick="bsCopyStoryKit('prompt')">Copy Claude story prompt</button>
+      <button class="btn btn-ghost btn-sm" onclick="bsCopyStoryKit('higgsfield')">Copy Higgsfield prompt</button>
+      <button class="btn btn-ghost btn-sm" onclick="bsCopyStoryKit('videoleap')">Copy Videoleap checklist</button>
+      <button class="btn btn-ghost btn-sm" onclick="bsCopyStoryKit('motion')">Copy motion text lines</button>
+    </div>
+  </div>
+  <div class="bs-side-group">
+    <div class="bs-side-label">Use This For</div>
+    <div class="bs-side-tip">Drop your real footage as image cards, write the hook on top, connect scenes left to right, and keep AI shots and text overlays separate so editing becomes obvious.</div>
+  </div>
 </div>
 <input type="file" id="bs-img-upload" accept="image/*" style="display:none" onchange="bsHandleImgUpload(event)">
 
@@ -1943,6 +1982,7 @@ function navigate(page) {
   document.getElementById('bs-wrap').classList.toggle('bs-active', isBs);
   document.getElementById('bs-toolbar').classList.toggle('bs-active', isBs);
   document.getElementById('bs-hint').classList.toggle('bs-active', isBs);
+  document.getElementById('bs-sidepanel').classList.toggle('bs-active', isBs);
   document.getElementById('main').style.display = isBs ? 'none' : '';
   document.querySelectorAll('.page').forEach(p => p.classList.toggle('active', p.id === 'page-'+page));
   renderPage(page);
@@ -4215,6 +4255,103 @@ let bsSelectedId = null;
 let bsImgNodeTarget = null;
 let bsEventsBound = false;
 
+function bsTemplateNode(type, x, y, title, body, color='#fff9c4', extra={}) {
+  return {
+    id:'bs'+uid(),
+    type,
+    x,
+    y,
+    w: extra.w || 230,
+    h: extra.h || (type === 'text' ? 100 : 170),
+    title: title || '',
+    body: body || '',
+    color,
+    img: extra.img || null,
+    text: extra.text || ''
+  };
+}
+
+function bsBuildTemplate(kind='daily') {
+  const brief = buildDailyReelBrief(load(K.content).map(normalizeContentItem), load(K_OBS).map(normalizeBrandEntry));
+  const titleMap = {
+    daily: 'Dolly Daily Story Board',
+    founder: 'Founder Story Board',
+    serafina: 'Serafina Reel Board'
+  };
+  const mood = kind === 'serafina' ? 'quiet luxury + product payoff' : brief.mood;
+  const source = kind === 'serafina' ? 'Use Serafina product footage + texture shots' : brief.sourceDrop;
+  const nodes = [
+    bsTemplateNode('text', 60, 40, '', '', '#fff', { w: 520, h: 110, text: `${titleMap[kind]}\n${brief.hook}` }),
+    bsTemplateNode('sticky', 80, 180, 'Hook', brief.hook, '#fff9c4'),
+    bsTemplateNode('sticky', 360, 180, 'Insight', brief.angle, '#fce4ec'),
+    bsTemplateNode('sticky', 640, 180, 'CTA', 'Follow for tomorrow’s update.\nOptional save CTA for value content.', '#e8f5e9'),
+    bsTemplateNode('sticky', 80, 410, 'Real footage', `Source: ${source}\nPick 3-5 strongest clips only.`, '#e3f2fd'),
+    bsTemplateNode('sticky', 360, 410, 'AI footage', `Higgsfield mood:\n${mood}`, '#f3e5f5'),
+    bsTemplateNode('sticky', 640, 410, 'Motion text', 'Line 1: bold opener\nLine 2: emotional payoff\nLine 3: CTA or save prompt', '#fff3e0'),
+    bsTemplateNode('sticky', 920, 180, 'Edit flow', 'Videoleap:\n0-3s hook\n3-15s B-roll\n15-25s insight\n25-30s CTA', '#fff9c4'),
+    bsTemplateNode('sticky', 920, 410, 'Repurpose', `Turn this into:\n• Reel\n• 3 story frames\n• Carousel or text post\n• Serafina bridge`, '#e8f5e9')
+  ];
+  const connections = [
+    { id:'bc'+uid(), from:nodes[0].id, to:nodes[1].id },
+    { id:'bc'+uid(), from:nodes[1].id, to:nodes[4].id },
+    { id:'bc'+uid(), from:nodes[4].id, to:nodes[3].id },
+    { id:'bc'+uid(), from:nodes[1].id, to:nodes[2].id },
+    { id:'bc'+uid(), from:nodes[2].id, to:nodes[5].id },
+    { id:'bc'+uid(), from:nodes[5].id, to:nodes[6].id },
+    { id:'bc'+uid(), from:nodes[6].id, to:nodes[7].id },
+    { id:'bc'+uid(), from:nodes[7].id, to:nodes[8].id }
+  ];
+  return { nodes, connections };
+}
+
+function bsLoadStoryTemplate(kind='daily') {
+  const template = bsBuildTemplate(kind);
+  bsState.nodes = template.nodes;
+  bsState.connections = template.connections;
+  bsState.bx = 140;
+  bsState.by = 90;
+  bsState.scale = 0.9;
+  bsSelectedId = null;
+  bsApplyTransform();
+  bsSave();
+  bsRender();
+}
+
+function bsClearBoard() {
+  if (!confirm('Clear this story board?')) return;
+  bsState.nodes = [];
+  bsState.connections = [];
+  bsSelectedId = null;
+  bsSave();
+  bsRender();
+}
+
+async function bsCopyStoryKit(kind='prompt') {
+  const brief = buildDailyReelBrief(load(K.content).map(normalizeContentItem), load(K_OBS).map(normalizeBrandEntry));
+  const kits = {
+    prompt: buildDollyDailyPrompt(brief),
+    higgsfield: buildHiggsfieldPrompt(brief),
+    videoleap: [
+      'Videoleap checklist',
+      '1. Open saved Dolly Daily preset.',
+      '2. Hook on face in first 2 seconds.',
+      '3. Cuts every 2.5-3 seconds.',
+      '4. Warmth +15, Saturation -8, Contrast +10, Highlights -5.',
+      '5. Montserrat Bold captions, highlight one keyword in gold.',
+      '6. 0.2s fade only.',
+      '7. End with follow CTA, not emoji CTA.'
+    ].join('\n'),
+    motion: [
+      'Motion text ideas',
+      brief.hook,
+      'Nobody tells you this part.',
+      'This is what the shift really looks like.',
+      'Follow for tomorrow’s update.'
+    ].join('\n')
+  };
+  await copyTextValue(kits[kind] || kits.prompt, 'Story kit copied');
+}
+
 function bsLoad() {
   try {
     const raw = localStorage.getItem(K_BS);
@@ -4238,6 +4375,7 @@ function bsSave() {
 
 function bsInit() {
   bsLoad();
+  document.getElementById('bs-sidepanel').classList.add('bs-active');
   bsApplyTransform();
   bsRender();
   bsSetupEvents();
