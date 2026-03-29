@@ -8,8 +8,8 @@ const DEFAULT_WORKSPACE = 'serafina-main';
 const DEFAULT_BUCKET = process.env.SUPABASE_STORAGE_BUCKET || 'serafina-assets';
 
 const folderRules = {
-  'serafina-raw': { lane: 'serafina', owner: 'Social Media Manager', sourceLabel: 'Local Intake / Serafina' },
-  'founder-raw': { lane: 'personal', owner: 'Social Media Manager', sourceLabel: 'Local Intake / Founder' },
+  'serafina-raw': { lane: 'serafina', owner: 'Kriti', sourceLabel: 'Local Intake / Serafina' },
+  'founder-raw': { lane: 'personal', owner: 'Kriti', sourceLabel: 'Local Intake / Founder' },
   'needs-review': { lane: 'both', owner: 'Me', sourceLabel: 'Local Intake / Review' }
 };
 
@@ -48,6 +48,10 @@ function inferType(fileName = '') {
   if (/\.(jpg|jpeg|png|webp|gif|heic|heif)$/i.test(name)) return 'photo';
   if (/\.(mov|mp4|m4v|avi|mkv)$/i.test(name)) return 'b-roll';
   return 'a-roll';
+}
+
+function isImportable(fileName = '') {
+  return /\.(jpg|jpeg|png|webp|gif|heic|heif|mov|mp4|m4v|avi|mkv)$/i.test(fileName);
 }
 
 function titleFromFilename(name = '') {
@@ -217,6 +221,10 @@ async function main() {
     for (const relativeFilePath of files) {
       const filePath = path.join(folderPath, relativeFilePath);
       const fileName = path.basename(relativeFilePath);
+      if (!isImportable(fileName)) {
+        if (!jsonOutput) console.log(`Skipped ${folderName}/${relativeFilePath}`);
+        continue;
+      }
       const folderLabel = primaryFolderName(relativeFilePath);
       const uploaded = await uploadFile(supabaseUrl, serviceKey, bucket, rule.lane, filePath, fileName);
       const item = {
