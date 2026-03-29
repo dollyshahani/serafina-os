@@ -5365,7 +5365,7 @@ function renderReelLab() {
   document.getElementById('reel-lab-grid').innerHTML = refs.map(ref => `
     <div class="reel-ref-card">
       <div class="reel-ref-title">${ref.creator}</div>
-      <div class="reel-ref-sub">${ref.sourceType === 'account' ? 'creator account' : 'reel reference'} · ${ref.pillar} · saved ${fmtD(ref.createdAt)}${ref.link ? ` · <a href="${ref.link}" target="_blank" style="color:var(--indigo);font-weight:700;">open ↗</a>` : ''}` : ''}</div>
+      <div class="reel-ref-sub">${ref.sourceType === 'account' ? 'creator account' : 'reel reference'} · ${ref.pillar} · saved ${fmtD(ref.createdAt)}${ref.link ? ` · <a href="${ref.link}" target="_blank" style="color:var(--indigo);font-weight:700;">open ↗</a>` : ''}</div>
       <div class="reel-ref-section"><div class="reel-ref-label">Why you saved it</div><div class="reel-ref-text">${escapeHtml(ref.why || ref.notes || 'Saved for storytelling reference.')}</div></div>
       <div class="reel-ref-section"><div class="reel-ref-label">Opening</div><div class="reel-ref-text">${escapeHtml(ref.opening)}</div></div>
       <div class="reel-ref-section"><div class="reel-ref-label">Scene map</div><div class="reel-ref-text">${escapeHtml(ref.sceneMap)}</div></div>
