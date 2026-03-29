@@ -45,3 +45,19 @@ You can also protect manual cron calls with:
 - Shopify product sync through serverless routes
 - Daily Vercel cron endpoint
 - GitHub validation workflow for inline app JS syntax
+
+## Local Intake Importer
+
+If you want to dump backlog footage from your laptop into Serafina OS:
+
+1. Put files into:
+   - `/Users/dollyshahani/Documents/Playground/serafina-intake/serafina-raw`
+   - `/Users/dollyshahani/Documents/Playground/serafina-intake/founder-raw`
+   - `/Users/dollyshahani/Documents/Playground/serafina-intake/needs-review`
+2. Run:
+   - `npm run import:intake`
+3. Then in the app:
+   - open `☁ Sync`
+   - `Pull Cloud`
+
+The importer uploads those files into Supabase Storage, adds them to `sf3_content` in the cloud snapshot, and moves processed source files into the local `imported/` folder.

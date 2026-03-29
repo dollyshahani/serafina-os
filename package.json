@@ -4,6 +4,7 @@
   "version": "1.0.0",
   "description": "Serafina OS static app with Vercel serverless integrations",
   "scripts": {
-    "check": "node scripts/check-html.js"
+    "check": "node scripts/check-html.js",
+    "import:intake": "node scripts/import-intake.js"
   }
 }
