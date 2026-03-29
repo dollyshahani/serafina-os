@@ -1314,9 +1314,10 @@ html, body { min-height: 100vh; background: var(--cream); font-family: 'Segoe UI
         <div class="content-upload-row">
           <button class="btn btn-ghost" type="button" onclick="document.getElementById('c-asset-file').click()">Choose file</button>
           <button class="btn" type="button" onclick="uploadContentAsset()" style="background:var(--indigo);color:white;">Upload to Cloud</button>
-          <input id="c-asset-file" class="content-upload-file" type="file" />
+          <button class="btn" type="button" onclick="bulkUploadContentAssets()" style="background:var(--teal);color:white;">Bulk upload intake</button>
+          <input id="c-asset-file" class="content-upload-file" type="file" multiple />
         </div>
-        <div class="content-upload-status" id="c-upload-status">Upload once and this asset gets a cloud link your team can open directly.</div>
+        <div class="content-upload-status" id="c-upload-status">Choose one or many files. Single upload fills this asset; bulk upload creates a whole intake batch automatically.</div>
       </div>
     </div>
     <div class="frow"><div class="fgrp"><label>Asset link (optional)</label><input id="c-link" placeholder="Cloud link for your manager to open directly" /></div></div>
@@ -2426,8 +2427,36 @@ function resetContentModal() {
   document.getElementById('c-ad-ready').value='no';
   const fileInput = document.getElementById('c-asset-file');
   if (fileInput) fileInput.value = '';
-  setContentUploadStatus('Upload once and this asset gets a cloud link your team can open directly.');
+  setContentUploadStatus('Choose one or many files. Single upload fills this asset; bulk upload creates a whole intake batch automatically.');
   document.getElementById('c-img-area').innerHTML=`<span style="font-size:28px">🎬</span><span>Upload thumbnail</span><input type="file" id="c-img-file" accept="image/*" onchange="previewUpload(event,'c-img-area','c-img-data')" />`;
+}
+
+function inferContentType(file) {
+  const name = (file?.name || '').toLowerCase();
+  const mime = (file?.type || '').toLowerCase();
+  if (mime.startsWith('image/')) return 'photo';
+  if (name.endsWith('.mov') || name.endsWith('.mp4') || name.endsWith('.m4v') || name.endsWith('.avi')) return 'b-roll';
+  return 'a-roll';
+}
+
+function titleFromFilename(name='') {
+  return name.replace(/\.[^.]+$/, '').replace(/[_-]+/g, ' ').replace(/\s+/g, ' ').trim();
+}
+
+async function uploadFileToCloud(file, lane) {
+  const params = new URLSearchParams({
+    filename: file.name,
+    contentType: file.type || 'application/octet-stream',
+    lane
+  });
+  const resp = await fetch(`/api/content/upload?${params.toString()}`, {
+    method: 'POST',
+    headers: { 'Content-Type': file.type || 'application/octet-stream' },
+    body: file
+  });
+  const data = await resp.json();
+  if (!resp.ok) throw new Error(data.error || 'Upload failed');
+  return data;
 }
 
 async function uploadContentAsset() {
@@ -2445,20 +2474,10 @@ async function uploadContentAsset() {
   const lane = document.getElementById('c-lane').value || 'serafina';
   setContentUploadStatus('Uploading to cloud…', '');
   try {
-    const params = new URLSearchParams({
-      filename: file.name,
-      contentType: file.type || 'application/octet-stream',
-      lane
-    });
-    const resp = await fetch(`/api/content/upload?${params.toString()}`, {
-      method: 'POST',
-      headers: { 'Content-Type': file.type || 'application/octet-stream' },
-      body: file
-    });
-    const data = await resp.json();
-    if (!resp.ok) throw new Error(data.error || 'Upload failed');
+    const data = await uploadFileToCloud(file, lane);
     document.getElementById('c-link').value = data.publicUrl || '';
     document.getElementById('c-source').value = 'Supabase Storage';
+    if (!document.getElementById('c-title').value.trim()) document.getElementById('c-title').value = titleFromFilename(file.name);
     if ((file.type || '').startsWith('image/')) {
       document.getElementById('c-img-data').value = data.publicUrl || '';
       document.getElementById('c-img-area').innerHTML=`<img src="${data.publicUrl}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;" /><input type="file" id="c-img-file" accept="image/*" onchange="previewUpload(event,'c-img-area','c-img-data')" /><span style="position:absolute;bottom:8px;background:rgba(0,0,0,.5);color:white;font-size:11px;padding:2px 10px;border-radius:4px;z-index:2;">Change</span>`;
@@ -2467,6 +2486,63 @@ async function uploadContentAsset() {
   } catch (e) {
     setContentUploadStatus('Upload failed: ' + e.message, 'err');
   }
+}
+
+async function bulkUploadContentAssets() {
+  const cfg = await loadRuntimeConfig();
+  if (!cfg.features?.contentStorage) {
+    setContentUploadStatus('Cloud storage is not configured for this deployment yet.', 'warn');
+    return;
+  }
+  const input = document.getElementById('c-asset-file');
+  const files = Array.from(input?.files || []);
+  if (!files.length) {
+    setContentUploadStatus('Choose one or more files first.', 'warn');
+    return;
+  }
+  const lane = document.getElementById('c-lane').value || 'serafina';
+  const owner = document.getElementById('c-owner').value;
+  const event = document.getElementById('c-event').value;
+  const date = document.getElementById('c-date').value || today();
+  const notes = document.getElementById('c-notes').value;
+  const status = document.getElementById('c-status').value || 'raw';
+  const typeValue = document.getElementById('c-type').value;
+  const adReady = document.getElementById('c-ad-ready').value==='yes';
+  const items = load(K.content);
+  let done = 0;
+  setContentUploadStatus(`Uploading ${files.length} files into intake…`, '');
+  for (const file of files) {
+    try {
+      const data = await uploadFileToCloud(file, lane);
+      items.push({
+        id: uid(),
+        type: typeValue || inferContentType(file),
+        title: titleFromFilename(file.name) || 'Untitled asset',
+        event,
+        date,
+        notes,
+        status,
+        lane,
+        owner,
+        adReady,
+        source: 'Supabase Storage',
+        link: data.publicUrl || '',
+        img: (file.type || '').startsWith('image/') ? (data.publicUrl || '') : null,
+      });
+      done++;
+      setContentUploadStatus(`Uploaded ${done} of ${files.length} files…`, '');
+    } catch (e) {
+      setContentUploadStatus(`Stopped after ${done} uploads. ${e.message}`, 'err');
+      save(K.content, items);
+      renderContent();
+      return;
+    }
+  }
+  save(K.content, items);
+  renderContent();
+  resetContentModal();
+  closeModal('modal-content');
+  alert(`✅ Bulk intake complete. Added ${done} new content assets.`);
 }
 
 function editContent(id) {
