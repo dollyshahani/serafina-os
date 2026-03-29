@@ -1996,20 +1996,46 @@ const MANIFESTATION_URL = 'https://dollydash-knzskech.manus.space/';
 let runtimeConfig = { loaded:false, features:{ cloudSync:false, contentStorage:false, localIntake:false, managedShopify:false, vercelCron:false } };
 let liveCommerceSummary = null;
 let liveCommerceLoading = false;
+const SEEDED_BRIEF_SIGNATURE = { salesYesterday:28600, cashOutWeek:42000, adSpend:8500, adRevenue:36200, cvr:2.4 };
+
+function parseMaybeNumber(value) {
+  if (value == null || value === '') return null;
+  const n = Number(value);
+  return Number.isFinite(n) ? n : null;
+}
+
+function fmtMaybeCurrency(value) {
+  return value == null ? '—' : fmt(value);
+}
+
+function fmtMaybeNumber(value) {
+  return value == null ? '—' : String(value);
+}
 
 function loadBrief() {
   try {
     const raw = JSON.parse(localStorage.getItem(K_BRIEF) || '{}');
+    const looksSeeded = raw
+      && Number(raw.salesYesterday) === SEEDED_BRIEF_SIGNATURE.salesYesterday
+      && Number(raw.cashOutWeek) === SEEDED_BRIEF_SIGNATURE.cashOutWeek
+      && Number(raw.adSpend) === SEEDED_BRIEF_SIGNATURE.adSpend
+      && Number(raw.adRevenue) === SEEDED_BRIEF_SIGNATURE.adRevenue
+      && Number(raw.cvr) === SEEDED_BRIEF_SIGNATURE.cvr
+      && String(raw.note || '').includes('Protect profitability. Delegate content.');
+    if (looksSeeded) {
+      localStorage.removeItem(K_BRIEF);
+      return { salesYesterday:null, cashOutWeek:null, adSpend:null, adRevenue:null, cvr:null, note:'' };
+    }
     return {
-      salesYesterday: Number(raw.salesYesterday || 0),
-      cashOutWeek: Number(raw.cashOutWeek || 0),
-      adSpend: Number(raw.adSpend || 0),
-      adRevenue: Number(raw.adRevenue || 0),
-      cvr: Number(raw.cvr || 0),
+      salesYesterday: parseMaybeNumber(raw.salesYesterday),
+      cashOutWeek: parseMaybeNumber(raw.cashOutWeek),
+      adSpend: parseMaybeNumber(raw.adSpend),
+      adRevenue: parseMaybeNumber(raw.adRevenue),
+      cvr: parseMaybeNumber(raw.cvr),
       note: raw.note || '',
     };
   } catch(_) {
-    return { salesYesterday:0, cashOutWeek:0, adSpend:0, adRevenue:0, cvr:0, note:'' };
+    return { salesYesterday:null, cashOutWeek:null, adSpend:null, adRevenue:null, cvr:null, note:'' };
   }
 }
 
@@ -2052,11 +2078,11 @@ function hydrateBriefModal() {
 
 function saveBrief() {
   localStorage.setItem(K_BRIEF, JSON.stringify({
-    salesYesterday: Number(document.getElementById('mb-sales').value || 0),
-    cashOutWeek: Number(document.getElementById('mb-cash').value || 0),
-    adSpend: Number(document.getElementById('mb-spend').value || 0),
-    adRevenue: Number(document.getElementById('mb-revenue').value || 0),
-    cvr: Number(document.getElementById('mb-cvr').value || 0),
+    salesYesterday: parseMaybeNumber(document.getElementById('mb-sales').value),
+    cashOutWeek: parseMaybeNumber(document.getElementById('mb-cash').value),
+    adSpend: parseMaybeNumber(document.getElementById('mb-spend').value),
+    adRevenue: parseMaybeNumber(document.getElementById('mb-revenue').value),
+    cvr: parseMaybeNumber(document.getElementById('mb-cvr').value),
     note: document.getElementById('mb-note').value.trim(),
   }));
   closeModal('modal-brief');
@@ -2223,9 +2249,6 @@ function seed() {
     {id:'pb3',type:'offer',tag:'digital-product',text:'Manifestation dashboard = one place to hold goals, identity, routines, and proof.',link:MANIFESTATION_URL,img:''},
     {id:'pb4',type:'proof',tag:'serafina',text:'Personal brand should make Serafina more trusted, not separate from it.',link:'founder x brand bridge',img:''},
   ]);
-  if (!localStorage.getItem(K_BRIEF)) {
-    localStorage.setItem(K_BRIEF, JSON.stringify({salesYesterday:28600,cashOutWeek:42000,adSpend:8500,adRevenue:36200,cvr:2.4,note:'Protect profitability. Delegate content. Keep founder energy for launch + personal brand.'}));
-  }
 }
 
 // ═══════════════════════════════════════
@@ -2453,7 +2476,7 @@ function renderDash() {
   const launch = load(K_DROPS)[0];
   const lowStock = prods.filter(p=>Number(p.qty)<=Number(p.reorder)&&p.status!=='discontinued');
   const openTasks = tasks.filter(t=>t.status!=='done');
-  const roas = brief.adSpend ? (brief.adRevenue / brief.adSpend) : 0;
+  const roas = brief.adSpend && brief.adRevenue ? (brief.adRevenue / brief.adSpend) : null;
   const readyForDolly = content.filter(i=>i.status==='ready-review');
   const kritiQueue = content.filter(i=>i.owner==='Kriti' && ['raw','selected','editing'].includes(i.status));
   const overdueKriti = kritiQueue.filter(i => i.deadline && i.deadline < today());
@@ -2483,10 +2506,13 @@ function renderDash() {
     : commerceSummary?.source === 'shopify-csv'
       ? `Shopify CSV snapshot${commerceSummary.importedAt ? ' · ' + new Date(commerceSummary.importedAt).toLocaleDateString('en-IN',{day:'numeric',month:'short'}) : ''}`
       : 'manual founder snapshot';
+  const adSub = (brief.adSpend != null && brief.adRevenue != null)
+    ? `${fmt(brief.adSpend)} spend · ${fmt(brief.adRevenue)} revenue`
+    : 'update Meta spend + revenue';
   document.getElementById('dash-stats').innerHTML = `
-    <div class="stat-card sc-saffron"><div class="stat-label">Sales Yesterday</div><div class="stat-val">${fmt(salesYesterday)}</div><div class="stat-sub">${commerceSourceLabel}</div></div>
-    <div class="stat-card sc-coral"><div class="stat-label">Cash Out This Week</div><div class="stat-val">${fmt(brief.cashOutWeek)}</div><div class="stat-sub">production, rent, shows, salaries</div></div>
-    <div class="stat-card sc-teal"><div class="stat-label">Ads Snapshot</div><div class="stat-val">${roas.toFixed(1)}x</div><div class="stat-sub">${fmt(brief.adSpend)} spend · ${fmt(brief.adRevenue)} revenue</div></div>
+    <div class="stat-card sc-saffron"><div class="stat-label">Sales Yesterday</div><div class="stat-val">${fmtMaybeCurrency(salesYesterday)}</div><div class="stat-sub">${commerceSummary ? commerceSourceLabel : 'connect Shopify snapshot'}</div></div>
+    <div class="stat-card sc-coral"><div class="stat-label">Cash Out This Week</div><div class="stat-val">${fmtMaybeCurrency(brief.cashOutWeek)}</div><div class="stat-sub">${brief.cashOutWeek == null ? 'update founder cash out' : 'production, rent, shows, salaries'}</div></div>
+    <div class="stat-card sc-teal"><div class="stat-label">Ads Snapshot</div><div class="stat-val">${roas == null ? '—' : `${roas.toFixed(1)}x`}</div><div class="stat-sub">${adSub}</div></div>
     <div class="stat-card sc-magenta"><div class="stat-label">Kriti + Review</div><div class="stat-val">${kritiQueue.length}</div><div class="stat-sub">${readyForDolly.length} ready for Dolly</div></div>
   `;
 
@@ -2526,14 +2552,14 @@ function renderDash() {
 
   document.getElementById('dash-brief-controls').innerHTML = `
     <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;">
-      <div style="background:var(--cream);border:1px solid var(--border);border-radius:12px;padding:12px;"><div style="font-size:11px;color:var(--text2);">Sales Yesterday</div><div style="font-size:20px;font-weight:900;color:var(--saffron);">${fmt(salesYesterday)}</div></div>
+      <div style="background:var(--cream);border:1px solid var(--border);border-radius:12px;padding:12px;"><div style="font-size:11px;color:var(--text2);">Sales Yesterday</div><div style="font-size:20px;font-weight:900;color:var(--saffron);">${fmtMaybeCurrency(salesYesterday)}</div></div>
       <div style="background:var(--cream);border:1px solid var(--border);border-radius:12px;padding:12px;"><div style="font-size:11px;color:var(--text2);">Orders Yesterday</div><div style="font-size:20px;font-weight:900;color:var(--indigo);">${ordersYesterday}</div></div>
-      <div style="background:var(--cream);border:1px solid var(--border);border-radius:12px;padding:12px;"><div style="font-size:11px;color:var(--text2);">Cash Out This Week</div><div style="font-size:20px;font-weight:900;color:var(--coral);">${fmt(brief.cashOutWeek)}</div></div>
-      <div style="background:var(--cream);border:1px solid var(--border);border-radius:12px;padding:12px;"><div style="font-size:11px;color:var(--text2);">Meta Spend</div><div style="font-size:20px;font-weight:900;color:var(--teal);">${fmt(brief.adSpend)}</div></div>
-      <div style="background:var(--cream);border:1px solid var(--border);border-radius:12px;padding:12px;"><div style="font-size:11px;color:var(--text2);">Conversion Rate</div><div style="font-size:20px;font-weight:900;color:var(--magenta);">${brief.cvr ? brief.cvr.toFixed(1) : '0.0'}%</div></div>
+      <div style="background:var(--cream);border:1px solid var(--border);border-radius:12px;padding:12px;"><div style="font-size:11px;color:var(--text2);">Cash Out This Week</div><div style="font-size:20px;font-weight:900;color:var(--coral);">${fmtMaybeCurrency(brief.cashOutWeek)}</div></div>
+      <div style="background:var(--cream);border:1px solid var(--border);border-radius:12px;padding:12px;"><div style="font-size:11px;color:var(--text2);">Meta Spend</div><div style="font-size:20px;font-weight:900;color:var(--teal);">${fmtMaybeCurrency(brief.adSpend)}</div></div>
+      <div style="background:var(--cream);border:1px solid var(--border);border-radius:12px;padding:12px;"><div style="font-size:11px;color:var(--text2);">Conversion Rate</div><div style="font-size:20px;font-weight:900;color:var(--magenta);">${brief.cvr == null ? '—' : `${brief.cvr.toFixed(1)}%`}</div></div>
       <div style="background:var(--cream);border:1px solid var(--border);border-radius:12px;padding:12px;"><div style="font-size:11px;color:var(--text2);">Repeat Yesterday</div><div style="font-size:20px;font-weight:900;color:var(--emerald);">${repeatYesterday == null ? '—' : repeatYesterday ? 'Yes' : 'No'}</div></div>
     </div>
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:14px;font-size:12px;color:var(--text2);"><span>${commerceSummary ? `${commerceSourceLabel}. Ads + cash are still founder-entered.` : (brief.note || 'Use this like your real founder dashboard.')}</span><button class="btn btn-ghost btn-sm" onclick="openModal('modal-brief')">Update →</button></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:14px;font-size:12px;color:var(--text2);"><span>${commerceSummary ? `${commerceSourceLabel}. Ads + cash are still founder-entered.` : 'Sales are not connected yet. Upload Shopify CSV or run Pull Shopify (Mac).'} </span><button class="btn btn-ghost btn-sm" onclick="openModal('modal-brief')">Update →</button></div>
   `;
 
   document.getElementById('dash-task-count').textContent = `${urgentDashboardTasks.filter(t=>t.priority==='urgent').length} urgent · ${urgentDashboardTasks.length} in focus`;
