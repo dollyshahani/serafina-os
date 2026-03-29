@@ -322,6 +322,16 @@ body.portal-mode .kriti-portal-shell { display:block; }
 .review-tags { display:flex; gap:8px; flex-wrap:wrap; margin-top:12px; }
 .review-actions { display:flex; gap:8px; flex-wrap:wrap; margin-top:14px; }
 .review-note { margin-top:10px; background:var(--cream); border-radius:10px; padding:10px 12px; font-size:12px; color:var(--text2); line-height:1.55; }
+.ai-suggestion-box { background:var(--white); border:1.5px solid var(--border); border-radius:14px; padding:14px; margin-bottom:14px; display:none; }
+.ai-suggestion-box.open { display:block; }
+.ai-suggestion-head { display:flex; justify-content:space-between; gap:10px; align-items:center; margin-bottom:10px; flex-wrap:wrap; }
+.ai-suggestion-title { font-size:13px; font-weight:800; color:var(--text); }
+.ai-suggestion-sub { font-size:11px; color:var(--text2); }
+.ai-suggestion-group + .ai-suggestion-group { margin-top:12px; }
+.ai-suggestion-label { font-size:11px; font-weight:800; color:var(--text2); margin-bottom:8px; }
+.ai-suggestion-list { display:flex; flex-direction:column; gap:8px; }
+.ai-suggestion-item { background:var(--cream); border-radius:12px; padding:10px 12px; font-size:12px; color:var(--text); display:flex; justify-content:space-between; gap:10px; align-items:flex-start; }
+.ai-suggestion-item span { line-height:1.5; }
 .content-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 14px; }
 .content-card {
   background: var(--white); border-radius: var(--radius); border: 1.5px solid var(--border);
@@ -1395,6 +1405,7 @@ body.portal-mode .kriti-portal-shell { display:block; }
     </div>
     <div class="frow"><div class="fgrp"><label>Kriti instructions</label><textarea id="c-instructions" placeholder="Editing style, story arc, hook direction, deadline..."></textarea></div></div>
     <div class="frow"><div class="fgrp"><button class="btn btn-ghost" type="button" onclick="generateContentBrief()">Generate hook + angle + instructions</button></div></div>
+    <div id="content-ai-panel" class="ai-suggestion-box"></div>
     <div class="frow">
       <div class="fgrp">
         <label>Intake mode</label>
@@ -2455,18 +2466,182 @@ function isDriveLink(link='') {
   return /drive\.google\.com/i.test(String(link || ''));
 }
 
+function escapeHtml(value='') {
+  return String(value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function uniqueList(items) {
+  return Array.from(new Set(items.filter(Boolean).map(x => String(x).trim()))).filter(Boolean);
+}
+
+function contentContext(item) {
+  const title = String(item.title || item.folderName || item.event || 'this content').trim();
+  const lane = item.lane || 'serafina';
+  const type = item.type || 'a-roll';
+  const notes = String(item.notes || '').toLowerCase();
+  const source = String(item.source || '').toLowerCase();
+  const batch = String(item.folderName || item.event || '').trim();
+  const lower = `${title} ${batch} ${notes} ${source}`.toLowerCase();
+  const isFounder = lane === 'personal';
+  const isBoth = lane === 'both';
+  const isPhoto = type === 'photo';
+  const isBroll = type === 'b-roll';
+  const isDrive = /drive/.test(source) || isDriveLink(item.driveLink || '');
+  const isProduct = /product|catalogue|flatlay|tee|shirt|hoodie|pant|modal|collection/.test(lower);
+  const isExhibition = /stall|show|jaipur|bangalore|exhibition|market/.test(lower);
+  const isTransformation = /founder|discipline|weight|manifest|transformation/.test(lower);
+  return { title, lane, type, notes, batch, isFounder, isBoth, isPhoto, isBroll, isDrive, isProduct, isExhibition, isTransformation };
+}
+
+function generateHookOptions(item) {
+  const ctx = contentContext(item);
+  const hooks = [];
+  if (ctx.isFounder || ctx.isTransformation) {
+    hooks.push(
+      'POV: you finally become the version of yourself you kept promising.',
+      'This is what discipline starts looking like when it finally works.',
+      'Nobody talks about how different your life feels once you stop quitting on yourself.',
+      `If you are rebuilding yourself right now, start here.`
+    );
+  }
+  if (ctx.isProduct || ctx.isPhoto) {
+    hooks.push(
+      `If soft luxury was a feeling, it would look like ${ctx.title}.`,
+      `The detail on ${ctx.title} deserves a stop-scroll opener.`,
+      'Wait till you see how soft, sharp, and expensive this looks on camera.',
+      'This is the kind of piece that makes the whole outfit feel elevated.'
+    );
+  }
+  if (ctx.isExhibition) {
+    hooks.push(
+      'What customers kept reaching for first at this show.',
+      'The real in-person reaction told us everything.',
+      'This is what actually pulled people in at the stall.',
+      'You can tell which piece is winning the second people touch it.'
+    );
+  }
+  if (ctx.isBroll || ctx.isDrive) {
+    hooks.push(
+      `You need to see what came out of ${ctx.batch || ctx.title}.`,
+      'These clips were too good to stay in the camera roll.',
+      'This is the kind of footage that should never sit unedited.',
+      'The first three seconds here can do all the heavy lifting.'
+    );
+  }
+  hooks.push(
+    'Stop scrolling, this is the one shot that matters.',
+    'This is exactly how you make soft look powerful.'
+  );
+  return uniqueList(hooks).slice(0, 4);
+}
+
+function generateAdAngleOptions(item) {
+  const ctx = contentContext(item);
+  const angles = [];
+  if (ctx.isFounder || ctx.isTransformation) {
+    angles.push(
+      'Founder-led trust and transformation angle',
+      'Identity shift: become the version of yourself you respect',
+      'Routine + discipline proof angle',
+      'Emotional authority and relatability angle'
+    );
+  }
+  if (ctx.isProduct || ctx.isPhoto) {
+    angles.push(
+      'Premium texture and touch-first product angle',
+      'Soft luxury for everyday wear angle',
+      'Fit, comfort, and expensive-feel angle',
+      'Quiet luxury with Indian confidence angle'
+    );
+  }
+  if (ctx.isExhibition) {
+    angles.push(
+      'Real customer reaction and social proof angle',
+      'Best-seller momentum angle',
+      'In-person validation angle',
+      'Scarcity and show-floor demand angle'
+    );
+  }
+  if (ctx.isBroll) {
+    angles.push(
+      'Hook -> texture/detail -> payoff -> CTA ad structure',
+      'Lifestyle aspiration with product payoff angle',
+      'Problem-solution with visual softness angle'
+    );
+  }
+  angles.push('Scroll-stopping aesthetic with clear payoff angle');
+  return uniqueList(angles).slice(0, 4);
+}
+
 function suggestHook(item) {
-  if (item.type === 'photo') return `The soft detail in ${item.title} deserves a stop-scroll opener.`;
-  if (item.lane === 'personal') return `POV: you finally become the version of yourself you kept talking about.`;
-  if (item.folderName) return `You need to see what came out of ${item.folderName}.`;
-  return `Wait till you see how this looks on camera.`;
+  return generateHookOptions(item)[0] || 'Wait till you see how this looks on camera.';
 }
 
 function suggestAdAngle(item) {
   if (!item.adReady) return '';
-  if (item.lane === 'personal') return 'Founder-led trust and transformation angle';
-  if (item.type === 'photo') return 'Premium product detail and texture angle';
-  return 'Soft luxury + problem-solution + aspirational lifestyle angle';
+  return generateAdAngleOptions(item)[0] || 'Soft luxury + problem-solution + aspirational lifestyle angle';
+}
+
+function renderContentAISuggestions(item) {
+  const panel = document.getElementById('content-ai-panel');
+  if (!panel) return;
+  const hooks = generateHookOptions(item);
+  const angles = item.adReady ? generateAdAngleOptions(item) : generateAdAngleOptions({ ...item, adReady: true });
+  panel.classList.add('open');
+  panel.innerHTML = `
+    <div class="ai-suggestion-head">
+      <div>
+        <div class="ai-suggestion-title">High-engagement ideas</div>
+        <div class="ai-suggestion-sub">Built for hooks, ad angles, and clean direction for Kriti and Badri.</div>
+      </div>
+      <button class="btn btn-ghost btn-sm" type="button" onclick="this.closest('#content-ai-panel').classList.remove('open')">Hide</button>
+    </div>
+    <div class="ai-suggestion-group">
+      <div class="ai-suggestion-label">Hook options</div>
+      <div class="ai-suggestion-list">
+        ${hooks.map(hook => `
+          <div class="ai-suggestion-item">
+            <span>${escapeHtml(hook)}</span>
+            <button class="btn btn-ghost btn-sm" type="button" onclick="applyAISuggestion('hook', ${JSON.stringify(hook)})">Use</button>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+    <div class="ai-suggestion-group">
+      <div class="ai-suggestion-label">Ad angle options</div>
+      <div class="ai-suggestion-list">
+        ${angles.map(angle => `
+          <div class="ai-suggestion-item">
+            <span>${escapeHtml(angle)}</span>
+            <button class="btn btn-ghost btn-sm" type="button" onclick="applyAISuggestion('angle', ${JSON.stringify(angle)})">Use</button>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `;
+}
+
+function applyAISuggestion(kind, value) {
+  if (kind === 'hook') document.getElementById('c-hook').value = value;
+  if (kind === 'angle') {
+    document.getElementById('c-ad-ready').value = 'yes';
+    document.getElementById('c-ad-angle').value = value;
+  }
+  const lane = document.getElementById('c-lane').value;
+  const adReady = document.getElementById('c-ad-ready').value === 'yes';
+  const deadline = document.getElementById('c-deadline').value || defaultDeadlineISO();
+  document.getElementById('c-instructions').value = buildDefaultInstructions({
+    lane,
+    adReady,
+    deadline,
+    hook: document.getElementById('c-hook').value.trim(),
+    adAngle: document.getElementById('c-ad-angle').value.trim()
+  });
 }
 
 function buildRolePlaybook(role) {
@@ -2538,6 +2713,11 @@ function generateContentBrief() {
   if (!document.getElementById('c-hook').value.trim()) document.getElementById('c-hook').value = suggestHook(item);
   if (!document.getElementById('c-ad-angle').value.trim()) document.getElementById('c-ad-angle').value = suggestAdAngle(item);
   document.getElementById('c-instructions').value = buildDefaultInstructions({
+    ...item,
+    hook: document.getElementById('c-hook').value.trim(),
+    adAngle: document.getElementById('c-ad-angle').value.trim()
+  });
+  renderContentAISuggestions({
     ...item,
     hook: document.getElementById('c-hook').value.trim(),
     adAngle: document.getElementById('c-ad-angle').value.trim()
@@ -2694,6 +2874,7 @@ function renderContent() {
       <div class="content-foot">
         <button class="btn btn-ghost btn-sm" onclick="copyContentHandoff('${item.id}')">Copy brief</button>
         <button class="btn btn-ghost btn-sm" onclick="sendContentHandoffWhatsApp('${item.id}')">WhatsApp</button>
+        <button class="btn btn-ghost btn-sm" onclick="openAIForContent('${item.id}')">AI ideas</button>
         ${item.status==='ready-review'?`<button class="btn btn-ghost btn-sm" onclick="approveContent('${item.id}')">Approve</button><button class="btn btn-ghost btn-sm" onclick="rejectContent('${item.id}')">Reject</button>`:''}
         <button class="btn btn-ghost btn-sm" onclick="editContent('${item.id}')">Edit</button>
         <button class="btn btn-sm" onclick="deleteContent('${item.id}')" style="background:var(--coral-t);color:var(--coral);border:none;border-radius:7px;padding:4px 10px;cursor:pointer;font-size:11px;">Delete</button>
@@ -2704,6 +2885,10 @@ function renderContent() {
 
 function deleteContent(id) {
   save(K.content,load(K.content).filter(i=>i.id!==id)); renderContent();
+}
+function openAIForContent(id) {
+  editContent(id);
+  generateContentBrief();
 }
 async function copyTextValue(text, successMessage='Copied') {
   try {
@@ -2890,6 +3075,11 @@ function resetContentModal() {
   setContentIntakeMode('cloud');
   const fileInput = document.getElementById('c-asset-file');
   if (fileInput) fileInput.value = '';
+  const aiPanel = document.getElementById('content-ai-panel');
+  if (aiPanel) {
+    aiPanel.classList.remove('open');
+    aiPanel.innerHTML = '';
+  }
   setContentUploadStatus('Choose one or many files. Single upload fills this asset; bulk upload creates a whole intake batch automatically.');
   document.getElementById('c-img-area').innerHTML=`<span style="font-size:28px">🎬</span><span>Upload thumbnail</span><input type="file" id="c-img-file" accept="image/*" onchange="previewUpload(event,'c-img-area','c-img-data')" />`;
 }
