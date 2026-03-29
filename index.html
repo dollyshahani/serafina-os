@@ -5501,7 +5501,8 @@ function renderReelLab() {
         <button class="btn btn-ghost btn-sm" onclick="copyVideoleapChecklist('${ref.id}')">Copy Videoleap</button>
         <button class="btn btn-ghost btn-sm" onclick="copyReelShotList('${ref.id}')">Copy shot list</button>
         <button class="btn btn-ghost btn-sm" onclick="analyzeReelRefWithAI('${ref.id}')">AI analyze frames</button>
-        <button class="btn btn-ghost btn-sm" onclick="sendReelToWarRoom('${ref.id}')">Send to War Room</button>
+        <button class="btn btn-ghost btn-sm" onclick="createDollyStoryboard('${ref.id}')">Turn into storyboard</button>
+        <button class="btn btn-ghost btn-sm" onclick="sendReelToWarRoom('${ref.id}')">Send analysis to War Room</button>
         <button class="btn btn-ghost btn-sm" onclick="deleteReelRef('${ref.id}')">Delete</button>
       </div>
     </div>
@@ -5627,6 +5628,43 @@ async function copyReelShotList(id) {
     ref.creatorShotList
   ].filter(Boolean).join('\n\n');
   await copyTextValue(text, 'Shot list copied');
+}
+
+function createDollyStoryboard(id) {
+  const ref = normalizeReelRef(load(K_REELS).find(x=>x.id===id) || {});
+  if (!ref.id) return;
+  const nodes = [
+    bsTemplateNode('text', 60, 30, '', '', '#fff', { w: 600, h: 120, text: `Dolly Storyboard\n${ref.creator}\n${ref.goal || ref.why || 'Remake this reference in your own voice.'}` }),
+    bsTemplateNode('sticky', 70, 190, 'Hook', ref.hookPattern, '#fff9c4'),
+    bsTemplateNode('sticky', 320, 190, 'Opening', ref.opening, '#fce4ec'),
+    bsTemplateNode('sticky', 570, 190, 'Scene map', ref.sceneMap, '#e8f5e9'),
+    bsTemplateNode('sticky', 820, 190, 'Shot list', ref.creatorShotList, '#e3f2fd'),
+    bsTemplateNode('sticky', 70, 470, 'Text overlays', `${ref.textOverlaySystem}\n${ref.motionText}`, '#f3e5f5'),
+    bsTemplateNode('sticky', 320, 470, 'Edit recipe', ref.dollyEditRecipe, '#fff3e0'),
+    bsTemplateNode('sticky', 570, 470, 'Videoleap', ref.videoleapChecklist, '#fff9c4'),
+    bsTemplateNode('sticky', 820, 470, 'CTA', `${ref.ctaStyle}\n${ref.ctaMechanic}`, '#e8f5e9'),
+    bsTemplateNode('sticky', 320, 760, 'Emotion', `${ref.emotionalArc}\n${ref.emotionSequence}`, '#fce4ec'),
+    bsTemplateNode('sticky', 570, 760, 'Audio + palette', `${ref.audioMood}\n${ref.audioUse}\n${ref.paletteNotes}`, '#e3f2fd'),
+    bsTemplateNode('sticky', 820, 760, 'Make my version', `${ref.dollyVersion}\n\n${ref.remakePlan}`, '#fff3e0')
+  ];
+  bsState.nodes = nodes;
+  bsState.connections = [
+    { id:'bc'+uid(), from:nodes[0].id, to:nodes[1].id },
+    { id:'bc'+uid(), from:nodes[1].id, to:nodes[2].id },
+    { id:'bc'+uid(), from:nodes[2].id, to:nodes[3].id },
+    { id:'bc'+uid(), from:nodes[3].id, to:nodes[4].id },
+    { id:'bc'+uid(), from:nodes[4].id, to:nodes[6].id },
+    { id:'bc'+uid(), from:nodes[5].id, to:nodes[6].id },
+    { id:'bc'+uid(), from:nodes[6].id, to:nodes[7].id },
+    { id:'bc'+uid(), from:nodes[6].id, to:nodes[8].id },
+    { id:'bc'+uid(), from:nodes[6].id, to:nodes[9].id },
+    { id:'bc'+uid(), from:nodes[10].id, to:nodes[11].id }
+  ];
+  bsState.bx = 80;
+  bsState.by = 60;
+  bsState.scale = 0.82;
+  bsSave();
+  navigate('brainstorm');
 }
 
 async function analyzeReelRefWithAI(id) {
