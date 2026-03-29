@@ -5550,21 +5550,45 @@ async function saveReelRef() {
     textShotImg,
     ctaShotImg
   });
-  const refs = load(K_REELS).map(normalizeReelRef);
-  const idx = refs.findIndex(r => r.id === ref.id);
-  if (idx >= 0) refs[idx] = ref; else refs.unshift(ref);
-  save(K_REELS, refs);
   const shouldAnalyze = Boolean(openingShotImg || middleShotImg || textShotImg || ctaShotImg);
+  let refToStore = ref;
+  if (shouldAnalyze) {
+    try {
+      const result = await runReelAnalysis(ref);
+      refToStore = normalizeReelRef({
+        ...ref,
+        ...(result.analysis || {}),
+        // Don't persist large base64 screenshots in localStorage.
+        openingShotImg: '',
+        middleShotImg: '',
+        textShotImg: '',
+        ctaShotImg: ''
+      });
+    } catch (err) {
+      alert(`AI analysis failed: ${err.message}`);
+      refToStore = normalizeReelRef({
+        ...ref,
+        openingShotImg: '',
+        middleShotImg: '',
+        textShotImg: '',
+        ctaShotImg: ''
+      });
+    }
+  }
+  const refs = load(K_REELS).map(normalizeReelRef);
+  const idx = refs.findIndex(r => r.id === refToStore.id);
+  if (idx >= 0) refs[idx] = refToStore; else refs.unshift(refToStore);
+  save(K_REELS, refs);
   closeModal('modal-reel');
   ['reel-id','reel-link','reel-creator','reel-why','reel-goal','reel-notes'].forEach(id => { const el = document.getElementById(id); if (el) el.value=''; });
   ['reel-shot-opening','reel-shot-middle','reel-shot-text','reel-shot-cta'].forEach(id => { const el = document.getElementById(id); if (el) el.value=''; });
   document.getElementById('reel-source-type').value = 'reel';
   document.getElementById('reel-pillar').value = 'The Build';
   if (currentPage === 'reels') renderReelLab();
-  if (shouldAnalyze) {
-    await analyzeReelRefWithAI(ref.id, { silentIfMissingConfig:true, fromSave:true });
-  } else {
+  if (!shouldAnalyze) {
     alert('Saved. Add screenshots next time if you want AI frame analysis.');
+  } else {
+    alert('Saved and analyzed.');
   }
 }
 
@@ -5681,28 +5705,31 @@ function createDollyStoryboard(id) {
   navigate('brainstorm');
 }
 
-async function analyzeReelRefWithAI(id, opts = {}) {
+async function runReelAnalysis(ref) {
   const cfg = await ensureRuntimeConfig(true);
   if (!cfg.features?.reelVision) {
-    if (!opts.silentIfMissingConfig) alert('Add OPENAI_API_KEY in Vercel first to enable real frame analysis.');
-    return;
+    throw new Error('Add OPENAI_API_KEY in Vercel first to enable real frame analysis.');
   }
+  if (!ref.openingShotImg && !ref.middleShotImg && !ref.textShotImg && !ref.ctaShotImg) {
+    throw new Error('Add at least one screenshot first. Opening, middle, text, and CTA frames are best.');
+  }
+  const resp = await fetch('/api/reels/analyze', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ reference: ref })
+  });
+  const data = await resp.json();
+  if (!resp.ok) throw new Error(data?.error || 'AI analysis failed');
+  return data;
+}
+
+async function analyzeReelRefWithAI(id, opts = {}) {
   const refs = load(K_REELS).map(normalizeReelRef);
   const idx = refs.findIndex(x => x.id === id);
   if (idx < 0) return;
   const ref = refs[idx];
-  if (!ref.openingShotImg && !ref.middleShotImg && !ref.textShotImg && !ref.ctaShotImg) {
-    if (!opts.silentIfMissingConfig) alert('Add at least one screenshot first. Opening, middle, text, and CTA frames are best.');
-    return;
-  }
   try {
-    const resp = await fetch('/api/reels/analyze', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ reference: ref })
-    });
-    const data = await resp.json();
-    if (!resp.ok) throw new Error(data?.error || 'AI analysis failed');
+    const data = await runReelAnalysis(ref);
     refs[idx] = normalizeReelRef({ ...ref, ...(data.analysis || {}) });
     save(K_REELS, refs);
     if (currentPage === 'reels') renderReelLab();
@@ -5710,7 +5737,7 @@ async function analyzeReelRefWithAI(id, opts = {}) {
       ? `Saved and analyzed${data.model ? ` using ${data.model}` : ''}.`
       : `AI analysis complete${data.model ? ` using ${data.model}` : ''}.`);
   } catch (err) {
-    alert(`AI analysis failed: ${err.message}`);
+    if (!opts.silentIfMissingConfig) alert(`AI analysis failed: ${err.message}`);
   }
 }
 
