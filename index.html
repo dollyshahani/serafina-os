@@ -253,6 +253,7 @@ html, body { min-height: 100vh; background: var(--cream); font-family: 'Segoe UI
 .queue-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:14px; margin:0 0 18px; }
 .queue-card { background:var(--white); border:1.5px solid var(--border); border-radius:14px; padding:16px; }
 .queue-head { display:flex; justify-content:space-between; align-items:flex-start; gap:10px; margin-bottom:12px; }
+.queue-actions { display:flex; gap:6px; flex-wrap:wrap; justify-content:flex-end; }
 .queue-title { font-size:13px; font-weight:800; }
 .queue-count { font-size:22px; font-weight:900; }
 .queue-list { display:flex; flex-direction:column; gap:8px; }
@@ -282,7 +283,7 @@ html, body { min-height: 100vh; background: var(--cream); font-family: 'Segoe UI
 .content-body { padding: 12px; }
 .content-title { font-size: 12px; font-weight: 700; }
 .content-sub   { font-size: 11px; color: var(--text2); margin-top: 2px; }
-.content-foot  { padding: 8px 12px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; }
+.content-foot  { padding: 8px 12px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 6px; flex-wrap: wrap; }
 
 /* ─── PARTNER CARDS ─── */
 .partner-card {
@@ -2292,19 +2293,19 @@ function renderContent() {
   `;
   document.getElementById('content-queues').innerHTML = `
     <div class="queue-card">
-      <div class="queue-head"><div><div class="queue-title">Raw Intake Inbox</div><div class="content-sub">What still needs sorting or editing</div></div><div class="queue-count" style="color:var(--coral);">${intake.length}</div></div>
+      <div class="queue-head"><div><div class="queue-title">Raw Intake Inbox</div><div class="content-sub">What still needs sorting or editing</div></div><div class="queue-actions"><button class="btn btn-ghost btn-sm" onclick="copyContentQueue('intake')">Copy queue</button><div class="queue-count" style="color:var(--coral);">${intake.length}</div></div></div>
       <div class="queue-list">${intake.slice(0,3).map(item=>`<div class="queue-item"><strong>${item.title}</strong>${item.source} · ${item.owner}</div>`).join('') || '<div class="content-sub">Inbox clear.</div>'}</div>
     </div>
     <div class="queue-card">
-      <div class="queue-head"><div><div class="queue-title">Needs Social</div><div class="content-sub">Queue for your social manager</div></div><div class="queue-count" style="color:var(--teal);">${needsSocial.length}</div></div>
+      <div class="queue-head"><div><div class="queue-title">Needs Social</div><div class="content-sub">Queue for your social manager</div></div><div class="queue-actions"><button class="btn btn-ghost btn-sm" onclick="copyContentQueue('social')">Copy queue</button><div class="queue-count" style="color:var(--teal);">${needsSocial.length}</div></div></div>
       <div class="queue-list">${needsSocial.slice(0,3).map(item=>`<div class="queue-item"><strong>${item.title}</strong>${item.status} · ${item.lane==='personal'?'founder':'serafina'}</div>`).join('') || '<div class="content-sub">Nothing pending.</div>'}</div>
     </div>
     <div class="queue-card">
-      <div class="queue-head"><div><div class="queue-title">Ad Pickup Queue</div><div class="content-sub">What pmax can grab right now</div></div><div class="queue-count" style="color:var(--emerald);">${needsAds.length}</div></div>
+      <div class="queue-head"><div><div class="queue-title">Ad Pickup Queue</div><div class="content-sub">What pmax can grab right now</div></div><div class="queue-actions"><button class="btn btn-ghost btn-sm" onclick="copyContentQueue('ads')">Copy queue</button><div class="queue-count" style="color:var(--emerald);">${needsAds.length}</div></div></div>
       <div class="queue-list">${needsAds.slice(0,3).map(item=>`<div class="queue-item"><strong>${item.title}</strong>${item.status} · ${item.owner}</div>`).join('') || '<div class="content-sub">No ad-ready assets yet.</div>'}</div>
     </div>
     <div class="queue-card">
-      <div class="queue-head"><div><div class="queue-title">Founder Lane</div><div class="content-sub">Personal brand + digital products</div></div><div class="queue-count" style="color:var(--purple);">${founderLane.length}</div></div>
+      <div class="queue-head"><div><div class="queue-title">Founder Lane</div><div class="content-sub">Personal brand + digital products</div></div><div class="queue-actions"><button class="btn btn-ghost btn-sm" onclick="copyContentQueue('founder')">Copy queue</button><div class="queue-count" style="color:var(--purple);">${founderLane.length}</div></div></div>
       <div class="queue-list">${founderLane.slice(0,3).map(item=>`<div class="queue-item"><strong>${item.title}</strong>${item.status} · ${item.owner}</div>`).join('') || '<div class="content-sub">Add your first founder asset.</div>'}</div>
     </div>
   `;
@@ -2331,6 +2332,8 @@ function renderContent() {
         ${item.link?`<a class="content-link" href="${item.link}" target="_blank">↗ Open asset</a>`:''}
       </div>
       <div class="content-foot">
+        <button class="btn btn-ghost btn-sm" onclick="copyContentHandoff('${item.id}')">Copy brief</button>
+        <button class="btn btn-ghost btn-sm" onclick="sendContentHandoffWhatsApp('${item.id}')">WhatsApp</button>
         <button class="btn btn-ghost btn-sm" onclick="editContent('${item.id}')">Edit</button>
         <button class="btn btn-sm" onclick="deleteContent('${item.id}')" style="background:var(--coral-t);color:var(--coral);border:none;border-radius:7px;padding:4px 10px;cursor:pointer;font-size:11px;">Delete</button>
       </div>
@@ -2341,6 +2344,72 @@ function renderContent() {
 function deleteContent(id) {
   save(K.content,load(K.content).filter(i=>i.id!==id)); renderContent();
 }
+async function copyTextValue(text, successMessage='Copied') {
+  try {
+    if (navigator.clipboard?.writeText) {
+      await navigator.clipboard.writeText(text);
+    } else {
+      const area = document.createElement('textarea');
+      area.value = text;
+      document.body.appendChild(area);
+      area.select();
+      document.execCommand('copy');
+      document.body.removeChild(area);
+    }
+    alert(`✅ ${successMessage}`);
+  } catch (e) {
+    alert('❌ Could not copy automatically. Try again in Chrome.');
+  }
+}
+
+function contentLaneLabel(lane) {
+  if (lane === 'personal') return 'Personal Brand OS';
+  if (lane === 'both') return 'Both lanes';
+  return 'Serafina HQ';
+}
+
+function buildContentHandoff(item) {
+  const parts = [
+    `Asset: ${item.title || 'Untitled asset'}`,
+    `Lane: ${contentLaneLabel(item.lane)}`,
+    `Owner: ${item.owner || 'Me'}`,
+    `Status: ${item.status || 'raw'}`,
+    item.type ? `Type: ${item.type}` : '',
+    item.event ? `Event: ${item.event}` : '',
+    item.source ? `Source: ${item.source}` : '',
+    item.adReady ? 'Ad-ready: Yes' : 'Ad-ready: No',
+    item.link ? `Asset link: ${item.link}` : 'Asset link: add cloud link before delegating',
+    item.notes ? `Notes: ${item.notes}` : ''
+  ].filter(Boolean);
+  return parts.join('\n');
+}
+
+async function copyContentHandoff(id) {
+  const item = normalizeContentItem(load(K.content).find(x=>x.id===id) || {});
+  if (!item.id) return;
+  await copyTextValue(buildContentHandoff(item), 'Handoff brief copied');
+}
+
+function sendContentHandoffWhatsApp(id) {
+  const item = normalizeContentItem(load(K.content).find(x=>x.id===id) || {});
+  if (!item.id) return;
+  const text = buildContentHandoff(item);
+  window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
+}
+
+async function copyContentQueue(queue) {
+  const items = load(K.content).map(normalizeContentItem).filter(item => contentQueueMatches(item, queue));
+  const queueNames = {
+    intake: 'Raw Intake Inbox',
+    social: 'Needs Social',
+    ads: 'Ad Pickup Queue',
+    founder: 'Founder Lane'
+  };
+  const header = queueNames[queue] || 'Content Queue';
+  const body = items.length ? items.map((item, idx) => `${idx + 1}. ${item.title} | ${item.status} | ${item.owner}${item.link ? ` | ${item.link}` : ''}`).join('\n') : 'Queue is empty.';
+  await copyTextValue(`${header}\n\n${body}`, `${header} copied`);
+}
+
 function setContentUploadStatus(message, tone='') {
   const el = document.getElementById('c-upload-status');
   if (!el) return;
