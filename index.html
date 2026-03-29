@@ -292,14 +292,15 @@ body.portal-mode { background:linear-gradient(180deg, var(--cream), #fffaf4); }
 .playbook-list li + li { margin-top:5px; }
 .playbook-foot { display:flex; gap:8px; flex-wrap:wrap; margin-top:14px; }
 .playbook-badge { font-size:10px; font-weight:700; padding:4px 8px; border-radius:999px; background:var(--cream); color:var(--text2); }
-.kriti-portal-shell { display:none; min-height:100vh; padding:34px 22px 60px; max-width:1100px; margin:0 auto; }
+.kriti-portal-shell { display:none; min-height:100vh; padding:34px 22px 60px; max-width:820px; margin:0 auto; }
 body.portal-mode .kriti-portal-shell { display:block; }
-.kriti-portal-top { display:flex; justify-content:space-between; align-items:flex-end; gap:16px; margin-bottom:22px; flex-wrap:wrap; }
-.kriti-portal-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:16px; }
+.kriti-portal-top { display:flex; justify-content:space-between; align-items:flex-end; gap:16px; margin-bottom:18px; flex-wrap:wrap; }
+.kriti-portal-grid { display:grid; grid-template-columns:1fr; gap:16px; }
 .kriti-card { background:var(--white); border:1.5px solid var(--border); border-radius:16px; padding:18px; }
 .kriti-card-title { font-size:15px; font-weight:800; color:var(--text); }
 .kriti-card-sub { font-size:11px; color:var(--text2); margin-top:4px; line-height:1.5; }
 .kriti-card-actions { display:flex; gap:8px; flex-wrap:wrap; margin-top:12px; }
+.kriti-portal-note { margin:0 0 18px; background:var(--white); border:1.5px solid var(--border); border-radius:14px; padding:14px 16px; font-size:12px; color:var(--text2); line-height:1.6; }
 .kriti-field { margin-top:12px; }
 .kriti-field label { display:block; font-size:11px; color:var(--text2); font-weight:700; margin-bottom:6px; }
 .kriti-field input, .kriti-field textarea, .kriti-field select { width:100%; background:var(--cream); border:1.5px solid var(--border); border-radius:10px; padding:10px 12px; font-size:12px; font-family:inherit; color:var(--text); outline:none; }
@@ -1111,17 +1112,11 @@ body.portal-mode .kriti-portal-shell { display:block; }
     <div>
       <div class="greeting">✦ kriti upload portal</div>
       <div class="page-title">Upload Final Edits</div>
-      <div class="page-sub">Only assigned content. Upload finals one by one and send them to Ready for Dolly.</div>
+      <div class="page-sub">Just upload your finished edits here. Dolly will review them after submission.</div>
     </div>
-    <div style="display:flex;gap:8px;flex-wrap:wrap;">
-      <input id="kriti-portal-search" class="content-search" placeholder="Search by drop, title, notes..." oninput="renderKritiPortal()" style="min-width:260px;" />
-      <button class="btn btn-ghost" onclick="window.location.href='/'">Exit Portal</button>
-    </div>
+    <button class="btn btn-ghost" onclick="window.location.href='/'">Exit Portal</button>
   </div>
-  <div class="playbook-card" style="margin-bottom:18px;">
-    <div class="playbook-title">What Kriti should do</div>
-    <div class="playbook-sub" style="margin-top:6px;">Open the source, create the edit, upload the final here, add a note if needed, mark if it can be used for ads, and submit. Every submission goes straight to Ready for Dolly.</div>
-  </div>
+  <div class="kriti-portal-note">Upload final edits one by one. Add a short note only if Dolly needs context. If the edit can work for ads too, mark it before submitting.</div>
   <div id="kriti-portal-grid" class="kriti-portal-grid"></div>
 </div>
 
@@ -2513,9 +2508,9 @@ function buildKritiBatchPing(batchName, items) {
     `Hi Kriti, I added new footage in ${batchName}.`,
     `Please create reels and carousel posts by ${fmtD(deadline)}.`,
     'Use the best hooks and keep the editing premium, sharp, feminine, and aligned with Serafina fonts and aesthetics.',
-    'Please work from the dashboard, upload finals back there one by one, and move them to Ready for Dolly.',
+    'Please upload the final edits one by one in the Kriti upload link below so Dolly can review them.',
     driveLink ? `Drive folder: ${driveLink}` : '',
-    `Dashboard: ${location.origin}`
+    `Upload link: ${getKritiPortalLink()}`
   ].filter(Boolean).join('\n');
 }
 
@@ -3059,33 +3054,29 @@ function saveDriveBatch() {
 }
 
 function renderKritiPortal() {
-  const q = (document.getElementById('kriti-portal-search')?.value || '').trim().toLowerCase();
   const items = load(K.content)
     .map(normalizeContentItem)
-    .filter(item => item.owner === 'Kriti' && !['approved','scheduled','posted'].includes(item.status))
-    .filter(item => {
-      const hay = [item.title, item.folderName, item.event, item.notes, item.instructions, item.hook, item.adAngle].join(' ').toLowerCase();
-      return !q || hay.includes(q);
-    });
+    .filter(item => item.owner === 'Kriti' && ['raw','selected','editing'].includes(item.status))
+    .sort((a,b) => String(a.deadline || '').localeCompare(String(b.deadline || '')) || String(b.date || '').localeCompare(String(a.date || '')));
   const root = document.getElementById('kriti-portal-grid');
   if (!root) return;
   root.innerHTML = items.map(item => `
     <div class="kriti-card">
       <div class="kriti-card-title">${item.title}</div>
-      <div class="kriti-card-sub">${item.folderName || item.event || 'Content drop'} · due ${item.deadline ? fmtD(item.deadline) : 'ASAP'} · ${contentLaneLabel(item.lane)}</div>
-      <div class="kriti-card-sub" style="margin-top:8px;">${item.instructions || buildDefaultInstructions(item)}</div>
-      ${item.hook ? `<div class="kriti-card-sub" style="margin-top:8px;">Hook: ${item.hook}</div>` : ''}
-      ${item.driveLink ? `<div class="kriti-card-actions"><a class="btn btn-ghost btn-sm" href="${item.driveLink}" target="_blank" rel="noopener noreferrer">Open Drive</a></div>` : item.link ? `<div class="kriti-card-actions"><a class="btn btn-ghost btn-sm" href="${item.link}" target="_blank" rel="noopener noreferrer">Open Source</a></div>` : ''}
+      <div class="kriti-card-sub">${item.folderName || item.event || 'Content drop'} · due ${item.deadline ? fmtD(item.deadline) : 'within 24 hours'} · ${contentLaneLabel(item.lane)}</div>
+      <div class="kriti-card-actions">
+        ${item.driveLink ? `<a class="btn btn-ghost btn-sm" href="${item.driveLink}" target="_blank" rel="noopener noreferrer">Open source</a>` : item.link ? `<a class="btn btn-ghost btn-sm" href="${item.link}" target="_blank" rel="noopener noreferrer">Open source</a>` : `<span class="batch-chip">No source link added</span>`}
+      </div>
       <div class="kriti-field">
         <label>Upload final edit</label>
         <input id="kriti-file-${item.id}" type="file" />
       </div>
       <div class="kriti-field">
         <label>Note for Dolly</label>
-        <textarea id="kriti-note-${item.id}" placeholder="Caption idea, what you changed, or anything important..."></textarea>
+        <textarea id="kriti-note-${item.id}" placeholder="Optional note"></textarea>
       </div>
       <div class="kriti-field">
-        <label>Can this be used for ads too?</label>
+        <label>Can Badri test this as an ad too?</label>
         <select id="kriti-ad-${item.id}">
           <option value="${item.adReady ? 'yes' : 'no'}">${item.adReady ? 'Yes' : 'No'}</option>
           <option value="yes">Yes</option>
@@ -3093,10 +3084,10 @@ function renderKritiPortal() {
         </select>
       </div>
       <div class="kriti-card-actions">
-        <button class="btn" style="background:var(--teal);color:white;" onclick="submitKritiItem('${item.id}')">Submit to Ready for Dolly</button>
+        <button class="btn" style="background:var(--teal);color:white;" onclick="submitKritiItem('${item.id}')">Upload and send to Dolly</button>
       </div>
     </div>
-  `).join('') || `<div class="playbook-card"><div class="playbook-title">Nothing assigned right now</div><div class="playbook-sub" style="margin-top:8px;">New uploads from Dolly will appear here automatically.</div></div>`;
+  `).join('') || `<div class="playbook-card"><div class="playbook-title">Nothing to upload right now</div><div class="playbook-sub" style="margin-top:8px;">New work from Dolly will appear here automatically after she pings you.</div></div>`;
 }
 
 async function submitKritiItem(id) {
