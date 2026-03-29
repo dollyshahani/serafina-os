@@ -1986,16 +1986,22 @@ function normalizeReelRef(item) {
     shotGrammar: item.shotGrammar || '',
     cameraLanguage: item.cameraLanguage || '',
     colorMood: item.colorMood || '',
+    paletteNotes: item.paletteNotes || '',
+    fontDirection: item.fontDirection || '',
+    secondsPerScene: item.secondsPerScene || '',
     audioMood: item.audioMood || '',
+    audioUse: item.audioUse || '',
     editMoves: item.editMoves || '',
     retentionTriggers: item.retentionTriggers || '',
     textStyle: item.textStyle || '',
     textOverlaySystem: item.textOverlaySystem || '',
+    textTiming: item.textTiming || '',
     ctaStyle: item.ctaStyle || '',
     ctaMechanic: item.ctaMechanic || '',
     hookPattern: item.hookPattern || '',
     anglePattern: item.anglePattern || '',
     emotionalArc: item.emotionalArc || '',
+    emotionSequence: item.emotionSequence || '',
     saveWhy: item.saveWhy || '',
     dollyVersion: item.dollyVersion || '',
     remakePlan: item.remakePlan || '',
@@ -5274,9 +5280,21 @@ function buildReelBreakdownDraft(input) {
   const colorMood = cinematic
     ? 'Warm, creamy, nostalgic, soft contrast, expensive skin tones.'
     : 'Clean, bright, premium, easy to read on mobile.';
+  const paletteNotes = cinematic
+    ? 'Creams, warm whites, faded gold, muted browns, romantic skin tones, low-saturation luxury.'
+    : 'Clean neutrals with one strong accent so the text and subject stay easy to read.';
+  const fontDirection = cinematic
+    ? 'Elegant serif or refined all-caps with lots of breathing room. Never childish or too bold.'
+    : 'Clean sans with one strong hook line. Readable first, stylish second.';
+  const secondsPerScene = cinematic
+    ? 'Opening: 1.5-2.5s. Mood shots: 2-3s each. Truth/payoff: 2s. CTA: 1-1.5s.'
+    : 'Hook: 1s. Proof: 1-1.5s. Support shots: 1-2s. CTA: under 1.5s.';
   const audioMood = cinematic
     ? 'Dreamy, melancholic, romantic, slow-burn audio with emotional lift.'
     : 'Minimal, rhythm-led audio that supports the message without overpowering it.';
+  const audioUse = cinematic
+    ? 'Let the song carry emotion under the story. Dialogue/text should feel like it belongs to the music, not fights it.'
+    : 'Use audio as energy support, not the main event. Message stays primary.';
   const editMoves = cinematic
     ? 'Hold longer than expected, use 1-2 soft fades, cut on emotional beats, avoid busy transitions.'
     : 'Trim hard, cut on meaning, keep transitions invisible, no gimmick effects.';
@@ -5289,6 +5307,9 @@ function buildReelBreakdownDraft(input) {
   const textOverlaySystem = cinematic
     ? 'Use 2-4 text moments max: opening confession, one clarifying truth, one payoff line, one soft CTA.'
     : 'Use a bold first line, one support line in the middle, one CTA at the end.';
+  const textTiming = cinematic
+    ? 'Text enters slowly, lands on emotional beats, and never changes too fast to feel. Leave silence between lines.'
+    : 'Text appears quickly and clearly. Each line should be readable in under 1 second.';
   const ctaStyle = 'Soft CTA at the end: follow, save, or come back tomorrow. Never emoji bait.';
   const ctaMechanic = pillar === 'Founder x Serafina'
     ? 'Invite them back into your world: follow for the next build chapter or save for the aesthetic/lesson.'
@@ -5306,6 +5327,9 @@ function buildReelBreakdownDraft(input) {
           ? 'Behind the scenes + leverage + proof'
           : 'Founder honesty + aspiration + reality';
   const emotionalArc = 'Hook -> mood/visual world -> truth or proof -> emotional payoff -> soft CTA';
+  const emotionSequence = cinematic
+    ? 'curiosity -> longing -> recognition -> softness -> desire to follow/save'
+    : 'curiosity -> clarity -> proof -> momentum -> action';
   const saveWhy = pillar === 'The Mind'
     ? 'People save this because it sounds like a thought they needed to hear at the right time.'
     : pillar === 'The Body'
@@ -5356,16 +5380,22 @@ function buildReelBreakdownDraft(input) {
     shotGrammar,
     cameraLanguage,
     colorMood,
+    paletteNotes,
+    fontDirection,
+    secondsPerScene,
     audioMood,
+    audioUse,
     editMoves,
     retentionTriggers,
     textStyle,
     textOverlaySystem,
+    textTiming,
     ctaStyle,
     ctaMechanic,
     hookPattern,
     anglePattern,
     emotionalArc,
+    emotionSequence,
     saveWhy,
     dollyVersion: ownVersion,
     remakePlan,
@@ -5397,11 +5427,15 @@ function renderReelLab() {
       <div class="reel-ref-section"><div class="reel-ref-label">Opening</div><div class="reel-ref-text">${escapeHtml(ref.opening)}</div></div>
       <div class="reel-ref-section"><div class="reel-ref-label">Scene map</div><div class="reel-ref-text">${escapeHtml(ref.sceneMap)}</div></div>
       <div class="reel-ref-section"><div class="reel-ref-label">Shot grammar</div><div class="reel-ref-text">${escapeHtml(ref.shotGrammar)} ${escapeHtml(ref.cameraLanguage)}</div></div>
+      <div class="reel-ref-section"><div class="reel-ref-label">Fonts + text feel</div><div class="reel-ref-text">${escapeHtml(ref.fontDirection)} ${escapeHtml(ref.textTiming)}</div></div>
       <div class="reel-ref-section"><div class="reel-ref-label">Pacing + edit style</div><div class="reel-ref-text">${escapeHtml(ref.pacing)} ${escapeHtml(ref.editStyle)} ${escapeHtml(ref.editMoves)}</div></div>
+      <div class="reel-ref-section"><div class="reel-ref-label">Seconds per scene</div><div class="reel-ref-text">${escapeHtml(ref.secondsPerScene)}</div></div>
       <div class="reel-ref-section"><div class="reel-ref-label">Retention triggers</div><div class="reel-ref-text">${escapeHtml(ref.retentionTriggers)}</div></div>
       <div class="reel-ref-section"><div class="reel-ref-label">Text system</div><div class="reel-ref-text">${escapeHtml(ref.textStyle)} ${escapeHtml(ref.textOverlaySystem)}</div></div>
-      <div class="reel-ref-section"><div class="reel-ref-label">Audio + color mood</div><div class="reel-ref-text">${escapeHtml(ref.audioMood)} ${escapeHtml(ref.colorMood)}</div></div>
+      <div class="reel-ref-section"><div class="reel-ref-label">Audio</div><div class="reel-ref-text">${escapeHtml(ref.audioMood)} ${escapeHtml(ref.audioUse)}</div></div>
+      <div class="reel-ref-section"><div class="reel-ref-label">Colors + palette</div><div class="reel-ref-text">${escapeHtml(ref.colorMood)} ${escapeHtml(ref.paletteNotes)}</div></div>
       <div class="reel-ref-section"><div class="reel-ref-label">Hook + angle</div><div class="reel-ref-text">${escapeHtml(ref.hookPattern)} ${escapeHtml(ref.anglePattern)}</div></div>
+      <div class="reel-ref-section"><div class="reel-ref-label">Emotion</div><div class="reel-ref-text">${escapeHtml(ref.emotionalArc)} ${escapeHtml(ref.emotionSequence)}</div></div>
       <div class="reel-ref-section"><div class="reel-ref-label">CTA + why people save it</div><div class="reel-ref-text">${escapeHtml(ref.ctaStyle)} ${escapeHtml(ref.ctaMechanic)} ${escapeHtml(ref.saveWhy)}</div></div>
       <div class="reel-ref-section"><div class="reel-ref-label">Make my version</div><div class="reel-ref-text">${escapeHtml(ref.dollyVersion)}</div></div>
       <div class="reel-ref-section"><div class="reel-ref-label">Remake plan</div><div class="reel-ref-text">${escapeHtml(ref.remakePlan)}</div></div>
@@ -5476,19 +5510,25 @@ async function copyReelBreakdown(id) {
     `Scene map: ${ref.sceneMap}`,
     `Shot grammar: ${ref.shotGrammar}`,
     `Camera language: ${ref.cameraLanguage}`,
+    `Font direction: ${ref.fontDirection}`,
+    `Seconds per scene: ${ref.secondsPerScene}`,
     `Pacing: ${ref.pacing}`,
     `Edit style: ${ref.editStyle}`,
     `Edit moves: ${ref.editMoves}`,
     `Retention triggers: ${ref.retentionTriggers}`,
     `Text style: ${ref.textStyle}`,
     `Text system: ${ref.textOverlaySystem}`,
+    `Text timing: ${ref.textTiming}`,
     `Audio mood: ${ref.audioMood}`,
+    `Audio use: ${ref.audioUse}`,
     `Color mood: ${ref.colorMood}`,
+    `Palette notes: ${ref.paletteNotes}`,
     `Hook pattern: ${ref.hookPattern}`,
     `CTA style: ${ref.ctaStyle}`,
     `CTA mechanic: ${ref.ctaMechanic}`,
     `Angle pattern: ${ref.anglePattern}`,
     `Emotional arc: ${ref.emotionalArc}`,
+    `Emotion sequence: ${ref.emotionSequence}`,
     `Why people save it: ${ref.saveWhy}`,
     `Motion text: ${ref.motionText}`,
     ref.goal ? `Goal: ${ref.goal}` : '',
