@@ -3889,7 +3889,7 @@ async function loadRuntimeConfig(force=false) {
     const data = await resp.json();
     runtimeConfig = { loaded:true, ...(data||{}) };
   } catch (e) {
-    runtimeConfig = { loaded:true, features:{ cloudSync:false, contentStorage:false, localIntake:false, managedShopify:false, vercelCron:false } };
+    runtimeConfig = { loaded:true, features:{ cloudSync:false, contentStorage:false, localIntake:false, managedShopify:false, vercelCron:false, reelVision:false } };
   }
   return runtimeConfig;
 }
@@ -5706,7 +5706,7 @@ function createDollyStoryboard(id) {
 }
 
 async function runReelAnalysis(ref) {
-  const cfg = await ensureRuntimeConfig(true);
+  const cfg = await loadRuntimeConfig(true);
   if (!cfg.features?.reelVision) {
     throw new Error('Add OPENAI_API_KEY in Vercel first to enable real frame analysis.');
   }
