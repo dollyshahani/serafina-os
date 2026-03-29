@@ -2200,6 +2200,24 @@ const SERAFINA_PRODUCTS = [
     {id:'p17',sku:'SC-017', name:'Compression Full Sleeves Top Black', cat:'Activewear Top', qty:12, cost:400, price:1199, reorder:5, status:'active', notes:'6 size variants.', img:null},
     {id:'p18',sku:'SC-018', name:'Elevated Everyday Classic Tee', cat:'T-Shirt', qty:180, cost:0, price:799, reorder:20, status:'active', notes:'18 variants (colors + sizes).', img:null},
 ];
+const SEEDED_EXHIBITION_SIGNATURE = [
+  'Delhi Trunk Show',
+  'Bangalore Design Bazaar',
+  'Mumbai Pop-up — Bandra',
+  'Jaipur Heritage Market',
+  'Hyderabad Style Summit'
+];
+
+function maybeClearSeededExhibitions() {
+  const exhs = load(K.exh);
+  if (!exhs.length) return;
+  const names = exhs.map(e => e.name).sort();
+  const looksSeeded = exhs.length === SEEDED_EXHIBITION_SIGNATURE.length
+    && SEEDED_EXHIBITION_SIGNATURE.slice().sort().every((name, idx) => names[idx] === name);
+  if (looksSeeded) {
+    localStorage.removeItem(K.exh);
+  }
+}
 
 function seed() {
   const seedIfEmpty = (key, value) => { if (!load(key).length) save(key, value); };
@@ -2209,13 +2227,7 @@ function seed() {
   if (existing.length === 0 || hasDemo) {
     save(K.products, SERAFINA_PRODUCTS);
   }
-  seedIfEmpty(K.exh, [
-    {id:'e1',name:'Delhi Trunk Show',city:'Delhi',start:'2025-11-15',end:'2025-11-17',rev:38000,units:11,exp:8000,stall:5000,status:'completed',notes:'Wrap dress was top seller. Need better display.',img:null},
-    {id:'e2',name:'Bangalore Design Bazaar',city:'Bangalore',start:'2025-12-05',end:'2025-12-07',rev:52000,units:16,exp:11000,stall:7500,status:'completed',notes:'Highest revenue. Co-ords flew off. Very style-forward crowd.',img:null},
-    {id:'e3',name:'Mumbai Pop-up — Bandra',city:'Mumbai',start:'2026-01-18',end:'2026-01-19',rev:29000,units:8,exp:9000,stall:6000,status:'completed',notes:'Smaller crowd. Great stylist contacts made.',img:null},
-    {id:'e4',name:'Jaipur Heritage Market',city:'Jaipur',start:'2026-02-14',end:'2026-02-16',rev:44000,units:13,exp:7500,stall:4500,status:'completed',notes:'Artisanal angle worked. Customers wanted fusion pieces.',img:null},
-    {id:'e5',name:'Hyderabad Style Summit',city:'Hyderabad',start:'2026-04-10',end:'2026-04-12',rev:0,units:0,exp:0,stall:8000,status:'upcoming',notes:'Booked stall. Prepare 3 new SKUs.',img:null},
-  ]);
+  maybeClearSeededExhibitions();
   seedIfEmpty(K.tasks, [
     {id:'t1',title:'Restock Linen Co-ord Set — order 5 more',owner:'Me',due:'2026-04-02',priority:'urgent',cat:'Production',status:'todo',notes:''},
     {id:'t2',title:'Create April Instagram content plan',owner:'Me',due:'2026-04-01',priority:'urgent',cat:'Content',status:'todo',notes:''},
@@ -2746,11 +2758,12 @@ function renderExh() {
   const totalRev = done.reduce((s,e)=>s+Number(e.rev||0),0);
   const totalNet = done.reduce((s,e)=>s+Number(e.rev||0)-Number(e.exp||0)-Number(e.stall||0),0);
   const avg = done.length ? Math.round(totalRev/done.length) : 0;
+  const statCurrency = value => exhs.length ? fmt(value) : '—';
 
   document.getElementById('exh-stats').innerHTML = `
-    <div class="stat-card sc-magenta"><div class="stat-label">Total Revenue</div><div class="stat-val">${fmt(totalRev)}</div><div class="stat-sub">${done.length} shows done</div></div>
-    <div class="stat-card sc-emerald"><div class="stat-label">Net Profit</div><div class="stat-val">${fmt(totalNet)}</div><div class="stat-sub">after expenses</div></div>
-    <div class="stat-card sc-saffron"><div class="stat-label">Avg per Show</div><div class="stat-val">${fmt(avg)}</div></div>
+    <div class="stat-card sc-magenta"><div class="stat-label">Total Revenue</div><div class="stat-val">${statCurrency(totalRev)}</div><div class="stat-sub">${done.length} shows done</div></div>
+    <div class="stat-card sc-emerald"><div class="stat-label">Net Profit</div><div class="stat-val">${statCurrency(totalNet)}</div><div class="stat-sub">after expenses</div></div>
+    <div class="stat-card sc-saffron"><div class="stat-label">Avg per Show</div><div class="stat-val">${exhs.length ? fmt(avg) : '—'}</div></div>
     <div class="stat-card sc-teal"><div class="stat-label">Total Shows</div><div class="stat-val">${exhs.length}</div><div class="stat-sub">${exhs.filter(e=>e.status==='upcoming').length} upcoming</div></div>
   `;
 
