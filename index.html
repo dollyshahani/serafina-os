@@ -1372,7 +1372,7 @@ html, body { min-height: 100vh; background: var(--cream); font-family: 'Segoe UI
             <div class="fgrp"><label>Approx file count</label><input id="c-drive-count" type="number" min="1" placeholder="How many clips/videos?" /></div>
           </div>
           <div class="content-upload-row" style="margin-top:4px;">
-            <button class="btn" type="button" onclick="saveDriveBatch()" style="background:var(--gold);color:white;">Save Drive batch</button>
+            <button class="btn" type="button" onclick="saveDriveBatch()" style="background:var(--gold);color:white;">Save + Ping Kriti</button>
           </div>
         </div>
         <div class="content-upload-status" id="c-upload-status">Choose one or many files. Single upload fills this asset; bulk upload creates a whole intake batch automatically.</div>
@@ -1758,8 +1758,10 @@ function normalizeContentItem(item) {
     adReady: item.adReady === true || item.adReady === 'yes',
     source: item.source || 'Mixed',
     link: item.link || '',
+    driveLink: item.driveLink || '',
     folderName: item.folderName || '',
     importPath: item.importPath || '',
+    assetCount: Number(item.assetCount || 0) || 0,
     deadline: item.deadline || '',
     audience: item.audience || '',
     hook: item.hook || '',
@@ -2966,8 +2968,9 @@ function saveDriveBatch() {
   const adAngle = document.getElementById('c-ad-angle').value.trim();
   const instructions = document.getElementById('c-instructions').value.trim() || buildDefaultInstructions({ lane, adReady: document.getElementById('c-ad-ready').value==='yes', deadline });
   const items = load(K.content);
+  const createdIds = [];
   for (let i = 0; i < assetCount; i++) {
-    items.push({
+    const created = {
       id: uid(),
       type: 'b-roll',
       title: assetCount === 1 ? title : `${title} ${i + 1}`,
@@ -2989,13 +2992,20 @@ function saveDriveBatch() {
       folderName: title,
       importPath: `drive/${title}`,
       assetCount
-    });
+    };
+    items.push(created);
+    createdIds.push(created.id);
   }
   save(K.content, items);
   renderContent();
+  setContentFilter('query', title);
+  document.getElementById('content-search').value = title;
+  renderContent();
   closeModal('modal-content');
+  const createdItems = load(K.content).map(normalizeContentItem).filter(item => createdIds.includes(item.id));
+  setContentSyncStatus(`Drive drop saved: ${title}. Open batch, Drive link, and Ping Kriti are now ready.`, 'ok');
+  sendBatchHandoffWhatsApp(title);
   resetContentModal();
-  alert(`✅ Drive batch saved. Kriti can now work this from the dashboard with the Drive folder linked.`);
 }
 function saveContent() {
   const id = document.getElementById('c-id').value;
