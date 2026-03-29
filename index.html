@@ -1814,7 +1814,7 @@ body.portal-mode .kriti-portal-shell { display:block; }
     </div>
     <div class="modal-btns">
       <button class="btn btn-ghost" onclick="closeModal('modal-reel')">Cancel</button>
-      <button class="btn btn-saffron" onclick="saveReelRef()">Analyze + Make My Version</button>
+      <button class="btn btn-saffron" onclick="saveReelRef()">Save + Analyze</button>
     </div>
   </div>
 </div>
@@ -5546,12 +5546,18 @@ async function saveReelRef() {
   const idx = refs.findIndex(r => r.id === ref.id);
   if (idx >= 0) refs[idx] = ref; else refs.unshift(ref);
   save(K_REELS, refs);
+  const shouldAnalyze = Boolean(openingShotImg || middleShotImg || textShotImg || ctaShotImg);
   closeModal('modal-reel');
   ['reel-id','reel-link','reel-creator','reel-why','reel-goal','reel-notes'].forEach(id => { const el = document.getElementById(id); if (el) el.value=''; });
   ['reel-shot-opening','reel-shot-middle','reel-shot-text','reel-shot-cta'].forEach(id => { const el = document.getElementById(id); if (el) el.value=''; });
   document.getElementById('reel-source-type').value = 'reel';
   document.getElementById('reel-pillar').value = 'The Build';
   if (currentPage === 'reels') renderReelLab();
+  if (shouldAnalyze) {
+    await analyzeReelRefWithAI(ref.id, { silentIfMissingConfig:true, fromSave:true });
+  } else {
+    alert('Saved. Add screenshots next time if you want AI frame analysis.');
+  }
 }
 
 async function copyReelBreakdown(id) {
@@ -5667,10 +5673,10 @@ function createDollyStoryboard(id) {
   navigate('brainstorm');
 }
 
-async function analyzeReelRefWithAI(id) {
+async function analyzeReelRefWithAI(id, opts = {}) {
   const cfg = await ensureRuntimeConfig(true);
   if (!cfg.features?.reelVision) {
-    alert('Add OPENAI_API_KEY in Vercel first to enable real frame analysis.');
+    if (!opts.silentIfMissingConfig) alert('Add OPENAI_API_KEY in Vercel first to enable real frame analysis.');
     return;
   }
   const refs = load(K_REELS).map(normalizeReelRef);
@@ -5678,7 +5684,7 @@ async function analyzeReelRefWithAI(id) {
   if (idx < 0) return;
   const ref = refs[idx];
   if (!ref.openingShotImg && !ref.middleShotImg && !ref.textShotImg && !ref.ctaShotImg) {
-    alert('Add at least one screenshot first. Opening, middle, text, and CTA frames are best.');
+    if (!opts.silentIfMissingConfig) alert('Add at least one screenshot first. Opening, middle, text, and CTA frames are best.');
     return;
   }
   try {
@@ -5692,7 +5698,9 @@ async function analyzeReelRefWithAI(id) {
     refs[idx] = normalizeReelRef({ ...ref, ...(data.analysis || {}) });
     save(K_REELS, refs);
     if (currentPage === 'reels') renderReelLab();
-    alert(`AI analysis complete${data.model ? ` using ${data.model}` : ''}.`);
+    alert(opts.fromSave
+      ? `Saved and analyzed${data.model ? ` using ${data.model}` : ''}.`
+      : `AI analysis complete${data.model ? ` using ${data.model}` : ''}.`);
   } catch (err) {
     alert(`AI analysis failed: ${err.message}`);
   }
