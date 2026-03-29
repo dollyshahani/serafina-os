@@ -1700,6 +1700,8 @@ function normalizeContentItem(item) {
     adReady: item.adReady === true || item.adReady === 'yes',
     source: item.source || 'Mixed',
     link: item.link || '',
+    folderName: item.folderName || '',
+    importPath: item.importPath || '',
   };
 }
 
@@ -1767,13 +1769,6 @@ function seed() {
     {id:'i3',title:'Display quality = conversion rate',type:'learning',body:'High footfall ≠ high sales. The way garments are hung determines buyer intent. Better display = more sales. Invest in good hangers, racks.',tags:['exhibition','conversion'],src:'Mumbai Pop-up',date:'2026-01-19'},
     {id:'i4',title:'Brand storytelling raises perceived value',type:'learning',body:'When I explained fabric sourcing + design process, customers paid full price without negotiating. Story = value.',tags:['branding','pricing'],src:'Jaipur show',date:'2026-02-15'},
     {id:'i5',title:'Equity deal with infra partner to reduce capital needs',type:'idea',body:'Offer stall cost split to fabric/infra partner in exchange for % of show revenue. Reduces upfront capital. Test with Kavya Textiles.',tags:['equity','finance'],src:'Own thinking',date:'2026-03-20'},
-  ]);
-  seedIfEmpty(K.content, [
-    {id:'c1',type:'b-roll',title:'Stall setup — Bangalore',event:'Bangalore Design Bazaar',status:'raw',notes:'Time-lapse setup. Good garment display shots.',lane:'serafina',owner:'Social Media Manager',adReady:false,source:'iPhone',img:null,date:'2025-12-05'},
-    {id:'c2',type:'a-roll',title:'Brand intro — who is Serafina?',event:'',status:'in-progress',notes:'Talking-head. Needs editing. Strong footage.',lane:'serafina',owner:'Social Media Manager',adReady:true,source:'Laptop',img:null,date:'2026-01-10'},
-    {id:'c3',type:'reel',title:'Customer try-ons — Jaipur',event:'Jaipur Heritage Market',status:'edited',notes:'Natural customer reactions. Great energy.',lane:'serafina',owner:'Performance Marketing Manager',adReady:true,source:'Drive',img:null,date:'2026-02-15'},
-    {id:'c4',type:'a-roll',title:'Fabric sourcing vlog',event:'',status:'raw',notes:'Fabric market visit. Raw footage.',lane:'serafina',owner:'Me',adReady:false,source:'iPhone',img:null,date:'2026-03-05'},
-    {id:'c5',type:'a-roll',title:'Weight loss mindset note',event:'Personal Brand OS',status:'edited',notes:'Hook on discipline, body confidence, and becoming the woman you keep promising yourself.',lane:'personal',owner:'Social Media Manager',adReady:false,source:'Laptop',img:null,date:'2026-03-20'},
   ]);
   seedIfEmpty(K.partners, [
     {id:'pt1',name:'Kavya Textiles',type:'Infra Provider',equity:5,contact:'kavya@example.com',notes:'Fabric supplier. Interested in equity deal for preferential pricing + co-branding at shows.'},
@@ -2275,7 +2270,7 @@ function renderContent() {
   const items=load(K.content).map(normalizeContentItem);
   const q = contentFilters.query.trim().toLowerCase();
   const filtered = items.filter(item => {
-    const haystack = [item.title,item.event,item.notes,item.source,item.owner,item.lane,item.link].join(' ').toLowerCase();
+    const haystack = [item.title,item.event,item.notes,item.source,item.owner,item.lane,item.link,item.folderName,item.importPath].join(' ').toLowerCase();
     if (q && !haystack.includes(q)) return false;
     if (contentFilters.owner !== 'all' && item.owner !== contentFilters.owner) return false;
     if (contentFilters.lane !== 'all' && item.lane !== contentFilters.lane) return false;
@@ -2326,6 +2321,7 @@ function renderContent() {
       <div class="content-body">
         <div class="content-title">${item.title}</div>
         <div class="content-sub">${laneStyles[2]} · ${item.owner}</div>
+        ${item.folderName?`<div class="content-sub">📁 ${item.folderName}</div>`:''}
         ${item.event?`<div class="content-sub">📍 ${item.event}</div>`:''}
         <div class="content-sub" style="margin-top:4px;">${item.source}${item.adReady?' · ad-ready ✓':''}</div>
         ${item.notes?`<div class="content-sub" style="margin-top:4px;">${item.notes.length>60?item.notes.slice(0,60)+'…':item.notes}</div>`:''}

@@ -54,6 +54,11 @@ function titleFromFilename(name = '') {
   return name.replace(/\.[^.]+$/, '').replace(/[_-]+/g, ' ').replace(/\s+/g, ' ').trim();
 }
 
+function primaryFolderName(relativeFilePath = '') {
+  const segments = relativeFilePath.split(path.sep).filter(Boolean);
+  return segments.length > 1 ? segments[0] : 'Ungrouped';
+}
+
 async function ensureBucket(supabaseUrl, serviceKey, bucket) {
   const resp = await fetch(`${supabaseUrl}/storage/v1/bucket`, {
     method: 'POST',
@@ -82,17 +87,41 @@ async function fetchSnapshot(supabaseUrl, serviceKey, workspace) {
     throw new Error(text || `Snapshot fetch failed (${resp.status})`);
   }
   const rows = await resp.json();
-  return rows[0]?.payload || {};
+  return {
+    exists: Boolean(rows[0]),
+    payload: rows[0]?.payload || {}
+  };
 }
 
-async function saveSnapshot(supabaseUrl, serviceKey, workspace, payload) {
-  const resp = await fetch(`${supabaseUrl}/rest/v1/app_snapshots?on_conflict=workspace`, {
+async function saveSnapshot(supabaseUrl, serviceKey, workspace, payload, exists) {
+  const patchResp = await fetch(`${supabaseUrl}/rest/v1/app_snapshots?workspace=eq.${encodeURIComponent(workspace)}`, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+      apikey: serviceKey,
+      Authorization: `Bearer ${serviceKey}`,
+      Prefer: 'return=representation'
+    },
+    body: JSON.stringify({
+      payload,
+      updated_at: new Date().toISOString()
+    })
+  });
+  if (!patchResp.ok) {
+    const text = await patchResp.text();
+    throw new Error(text || `Snapshot save failed (${patchResp.status})`);
+  }
+  const patched = await patchResp.json();
+  if (patched.length) return;
+  if (exists) throw new Error('Snapshot update returned no rows.');
+
+  const createResp = await fetch(`${supabaseUrl}/rest/v1/app_snapshots`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
       apikey: serviceKey,
       Authorization: `Bearer ${serviceKey}`,
-      Prefer: 'resolution=merge-duplicates,return=representation'
+      Prefer: 'return=representation'
     },
     body: JSON.stringify([{
       workspace,
@@ -100,9 +129,9 @@ async function saveSnapshot(supabaseUrl, serviceKey, workspace, payload) {
       updated_at: new Date().toISOString()
     }])
   });
-  if (!resp.ok) {
-    const text = await resp.text();
-    throw new Error(text || `Snapshot save failed (${resp.status})`);
+  if (!createResp.ok) {
+    const text = await createResp.text();
+    throw new Error(text || `Snapshot create failed (${createResp.status})`);
   }
 }
 
@@ -158,6 +187,7 @@ async function main() {
   const args = parseArgs(process.argv.slice(2));
   const intakeDir = path.resolve(args['intake-dir'] || DEFAULT_INTAKE_DIR);
   const workspace = String(args.workspace || DEFAULT_WORKSPACE).trim();
+  const replaceContent = Boolean(args['replace-content']);
   const supabaseUrl = process.env.SUPABASE_URL;
   const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
   const bucket = process.env.SUPABASE_STORAGE_BUCKET || DEFAULT_BUCKET;
@@ -167,8 +197,9 @@ async function main() {
 
   await ensureBucket(supabaseUrl, serviceKey, bucket);
 
-  const snapshot = await fetchSnapshot(supabaseUrl, serviceKey, workspace);
-  const rawContent = snapshot.sf3_content || '[]';
+  const snapshotState = await fetchSnapshot(supabaseUrl, serviceKey, workspace);
+  const snapshot = snapshotState.payload || {};
+  const rawContent = replaceContent ? '[]' : (snapshot.sf3_content || '[]');
   let contentItems;
   try {
     contentItems = JSON.parse(rawContent);
@@ -185,11 +216,14 @@ async function main() {
     for (const relativeFilePath of files) {
       const filePath = path.join(folderPath, relativeFilePath);
       const fileName = path.basename(relativeFilePath);
+      const folderLabel = primaryFolderName(relativeFilePath);
       const uploaded = await uploadFile(supabaseUrl, serviceKey, bucket, rule.lane, filePath, fileName);
       const item = {
         id: uid(),
         type: inferType(fileName),
-        title: titleFromFilename(fileName) || 'Untitled asset',
+        title: titleFromFilename(fileName) || folderLabel || 'Untitled asset',
+        folderName: folderLabel,
+        importPath: `${folderName}/${relativeFilePath}`,
         event: '',
         date: today(),
         notes: `Imported from local intake folder: ${folderName}/${relativeFilePath}`,
@@ -208,7 +242,7 @@ async function main() {
   }
 
   snapshot.sf3_content = JSON.stringify(contentItems);
-  await saveSnapshot(supabaseUrl, serviceKey, workspace, snapshot);
+  await saveSnapshot(supabaseUrl, serviceKey, workspace, snapshot, snapshotState.exists);
 
   for (const entry of pendingMoves) {
     const archivedTo = await moveToImported(entry.intakeDir, entry.folderName, entry.relativeFilePath, entry.filePath);
@@ -231,7 +265,7 @@ async function main() {
   const reportPath = path.join(intakeDir, 'imported', `import-report-${Date.now()}.json`);
   await fs.writeFile(reportPath, JSON.stringify(report, null, 2));
 
-  console.log(`\n✅ Imported ${imported.length} files into workspace "${workspace}".`);
+  console.log(`\n✅ Imported ${imported.length} files into workspace "${workspace}"${replaceContent ? ' (replace mode)' : ''}.`);
   console.log(`Report: ${reportPath}`);
   console.log('Next: open Serafina OS -> Cloud Sync -> Pull Cloud');
 }
