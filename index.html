@@ -267,6 +267,11 @@ html, body { min-height: 100vh; background: var(--cream); font-family: 'Segoe UI
 .content-upload-status.ok { color:var(--emerald); }
 .content-upload-status.warn { color:var(--gold); }
 .content-upload-status.err { color:var(--magenta); }
+.page-actions { display:flex; gap:10px; flex-wrap:wrap; justify-content:flex-end; }
+.content-sync-status { margin:0 0 16px; font-size:12px; color:var(--text2); background:var(--white); border:1.5px solid var(--border); border-radius:12px; padding:10px 14px; display:none; }
+.content-sync-status.ok { display:block; color:var(--emerald); background:var(--emerald-t); border-color:rgba(26,140,90,.15); }
+.content-sync-status.warn { display:block; color:var(--gold); background:var(--gold-t); border-color:rgba(200,137,28,.15); }
+.content-sync-status.err { display:block; color:var(--magenta); background:var(--magenta-t); border-color:rgba(214,41,106,.15); }
 .content-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 14px; }
 .content-card {
   background: var(--white); border-radius: var(--radius); border: 1.5px solid var(--border);
@@ -899,8 +904,13 @@ html, body { min-height: 100vh; background: var(--cream); font-family: 'Segoe UI
         <div class="page-title">Content Engine</div>
         <div class="page-sub">Raw to posted, with delegation and ad-pickup built in</div>
       </div>
-      <button class="btn btn-teal" onclick="openModal('modal-content')" style="background:var(--teal);color:white;">+ Add Asset</button>
+      <div class="page-actions">
+        <button class="btn btn-ghost" onclick="pullCloudIntoContent()">↺ Pull Cloud</button>
+        <button class="btn btn-ghost" onclick="syncSerafinaRawIntoContent()">📥 Sync Intake Folder</button>
+        <button class="btn btn-teal" onclick="openModal('modal-content')" style="background:var(--teal);color:white;">+ Add Asset</button>
+      </div>
     </div>
+    <div class="content-sync-status" id="content-sync-status"></div>
     <div class="stat-grid" id="content-stats"></div>
     <div class="content-toolbar">
       <input id="content-search" class="content-search" placeholder="Search clips, events, notes, sources..." oninput="setContentFilter('query', this.value)" />
@@ -1644,7 +1654,7 @@ const fmt   = n => n ? '₹'+Number(n).toLocaleString('en-IN') : '₹0';
 const fmtD  = d => { if(!d) return '—'; const dt=new Date(d); return dt.toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'2-digit'}); };
 const CLOUD_SETTINGS_KEY = 'sf3_cloud_settings';
 const MANIFESTATION_URL = 'https://dollydash-knzskech.manus.space/';
-let runtimeConfig = { loaded:false, features:{ cloudSync:false, contentStorage:false, managedShopify:false, vercelCron:false } };
+let runtimeConfig = { loaded:false, features:{ cloudSync:false, contentStorage:false, localIntake:false, managedShopify:false, vercelCron:false } };
 
 function loadBrief() {
   try {
@@ -2682,7 +2692,7 @@ async function loadRuntimeConfig(force=false) {
     const data = await resp.json();
     runtimeConfig = { loaded:true, ...(data||{}) };
   } catch (e) {
-    runtimeConfig = { loaded:true, features:{ cloudSync:false, contentStorage:false, managedShopify:false, vercelCron:false } };
+    runtimeConfig = { loaded:true, features:{ cloudSync:false, contentStorage:false, localIntake:false, managedShopify:false, vercelCron:false } };
   }
   return runtimeConfig;
 }
@@ -2694,6 +2704,14 @@ function setCloudStatus(html, color='var(--text)', bg='var(--cream)') {
   el.innerHTML = html;
   el.style.color = color;
   el.style.background = bg;
+}
+
+function setContentSyncStatus(message='', tone='') {
+  const el = document.getElementById('content-sync-status');
+  if (!el) return;
+  el.className = `content-sync-status${tone ? ` ${tone}` : ''}`;
+  el.style.display = message ? 'block' : 'none';
+  el.textContent = message;
 }
 
 function getCloudWorkspace() {
@@ -2768,6 +2786,51 @@ async function cloudPull() {
     setTimeout(() => location.reload(), 800);
   } catch (e) {
     setCloudStatus('Pull failed: ' + e.message, 'var(--magenta)', 'var(--magenta-t)');
+  }
+}
+
+async function pullCloudIntoContent() {
+  const cfg = await loadRuntimeConfig(true);
+  if (!cfg.features?.cloudSync) {
+    setContentSyncStatus('Cloud sync is not configured for this deployment yet.', 'warn');
+    return;
+  }
+  const workspace = getCloudWorkspace() || 'serafina-main';
+  setCloudWorkspace(workspace);
+  setContentSyncStatus(`Pulling latest content from cloud workspace "${workspace}"…`, '');
+  try {
+    const resp = await fetch(`/api/cloud/pull?workspace=${encodeURIComponent(workspace)}`, { cache:'no-store' });
+    const data = await resp.json();
+    if (!resp.ok) throw new Error(data.error || 'Pull failed');
+    applySnapshot(data.snapshot || {});
+    setContentSyncStatus(`Pulled ${workspace}. Reloading content…`, 'ok');
+    setTimeout(() => location.reload(), 500);
+  } catch (e) {
+    setContentSyncStatus('Cloud pull failed: ' + e.message, 'err');
+  }
+}
+
+async function syncSerafinaRawIntoContent() {
+  const cfg = await loadRuntimeConfig(true);
+  if (!cfg.features?.localIntake) {
+    setContentSyncStatus('Local folder sync works from localhost on your Mac, not from the deployed Vercel site. Open the local app to use this button.', 'warn');
+    return;
+  }
+  const workspace = getCloudWorkspace() || 'serafina-main';
+  setCloudWorkspace(workspace);
+  setContentSyncStatus('Syncing serafina-raw into cloud…', '');
+  try {
+    const resp = await fetch('/api/local/import-intake', {
+      method:'POST',
+      headers:{ 'Content-Type':'application/json' },
+      body: JSON.stringify({ folder:'serafina-raw', workspace })
+    });
+    const data = await resp.json();
+    if (!resp.ok) throw new Error(data.error || 'Local intake sync failed');
+    setContentSyncStatus(`Imported ${data.count || 0} files from serafina-raw. Pulling cloud now…`, 'ok');
+    await pullCloudIntoContent();
+  } catch (e) {
+    setContentSyncStatus('Local intake sync failed: ' + e.message, 'err');
   }
 }
 

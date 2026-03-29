@@ -188,6 +188,7 @@ async function main() {
   const intakeDir = path.resolve(args['intake-dir'] || DEFAULT_INTAKE_DIR);
   const workspace = String(args.workspace || DEFAULT_WORKSPACE).trim();
   const replaceContent = Boolean(args['replace-content']);
+  const jsonOutput = Boolean(args.json);
   const supabaseUrl = process.env.SUPABASE_URL;
   const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
   const bucket = process.env.SUPABASE_STORAGE_BUCKET || DEFAULT_BUCKET;
@@ -237,7 +238,7 @@ async function main() {
       };
       contentItems.push(item);
       pendingMoves.push({ intakeDir, folderName, relativeFilePath, filePath, lane: rule.lane, publicUrl: uploaded.publicUrl });
-      console.log(`Uploaded ${folderName}/${relativeFilePath}`);
+      if (!jsonOutput) console.log(`Uploaded ${folderName}/${relativeFilePath}`);
     }
   }
 
@@ -265,9 +266,13 @@ async function main() {
   const reportPath = path.join(intakeDir, 'imported', `import-report-${Date.now()}.json`);
   await fs.writeFile(reportPath, JSON.stringify(report, null, 2));
 
-  console.log(`\n✅ Imported ${imported.length} files into workspace "${workspace}"${replaceContent ? ' (replace mode)' : ''}.`);
-  console.log(`Report: ${reportPath}`);
-  console.log('Next: open Serafina OS -> Cloud Sync -> Pull Cloud');
+  if (jsonOutput) {
+    console.log(JSON.stringify({ ok: true, ...report, replaceContent, reportPath }));
+  } else {
+    console.log(`\n✅ Imported ${imported.length} files into workspace "${workspace}"${replaceContent ? ' (replace mode)' : ''}.`);
+    console.log(`Report: ${reportPath}`);
+    console.log('Next: open Serafina OS -> Cloud Sync -> Pull Cloud');
+  }
 }
 
 main().catch(err => fail(err.message));
