@@ -727,6 +727,7 @@ body.portal-mode .kriti-portal-shell { display:block; }
 .reel-ref-title { font-size:15px; font-weight:800; color:var(--text); }
 .reel-ref-sub { font-size:11px; color:var(--text2); margin-top:4px; }
 .reel-ref-section + .reel-ref-section { margin-top:12px; }
+.reel-ref-section.is-system { border:1px solid var(--border); border-radius:12px; padding:12px; background:linear-gradient(180deg,#fffdf9, #fff6ed); }
 .reel-ref-label { font-size:10px; font-weight:800; letter-spacing:1px; text-transform:uppercase; color:var(--text2); margin-bottom:6px; }
 .reel-ref-text { font-size:12px; color:var(--text); line-height:1.65; background:var(--cream); border-radius:10px; padding:9px 10px; }
 .reel-ref-actions { display:flex; gap:8px; flex-wrap:wrap; margin-top:14px; }
@@ -2005,6 +2006,10 @@ function normalizeReelRef(item) {
     saveWhy: item.saveWhy || '',
     dollyVersion: item.dollyVersion || '',
     remakePlan: item.remakePlan || '',
+    dollyEditRecipe: item.dollyEditRecipe || '',
+    videoleapChecklist: item.videoleapChecklist || '',
+    creatorShotList: item.creatorShotList || '',
+    executionSystem: item.executionSystem || '',
     motionText: item.motionText || '',
     createdAt: item.createdAt || today()
   };
@@ -5355,6 +5360,49 @@ function buildReelBreakdownDraft(input) {
       ? 'Choose one specific reel from this creator each time and remake the structure, not the copy.'
       : 'Remake the feeling, pacing, and story structure. Do not imitate line by line.'
   ].join(' ');
+  const creatorShotList = [
+    '1. Hook shot: your face, mirror, or emotionally loaded opening frame.',
+    '2. World-building shot: room, street, desk, fabric, coffee, or body detail.',
+    '3. Movement shot: walking, turning, reaching, packing, typing, or getting ready.',
+    '4. Texture shot: skin, fabric, jewelry, notes, laptop, product close-up.',
+    '5. Proof shot: the real action or evidence behind the story.',
+    '6. Payoff shot: a calmer image that emotionally lands the message.',
+    '7. CTA shot: final frame that can carry follow/save text.'
+  ].join(' ');
+  const dollyEditRecipe = [
+    `Hook (0-2s): ${hookPattern}`,
+    `Opening visual: ${opening}`,
+    `Scene build: ${sceneMap}`,
+    `Pacing: ${secondsPerScene}`,
+    `Edit feel: ${editStyle}`,
+    `Transitions: ${editMoves}`,
+    `Text style: ${textStyle}`,
+    `Text timing: ${textTiming}`,
+    `Emotion: ${emotionSequence}`,
+    `Finish with: ${ctaStyle}`
+  ].join('\n');
+  const videoleapChecklist = [
+    'Import all chosen clips and place hook shot first.',
+    'Trim dead air from the first second.',
+    'Arrange clips to match the scene map.',
+    'Hold only the most beautiful frames; remove filler.',
+    'Use 1-2 soft transitions only if needed.',
+    'Add the opening text first, then 1-2 supporting text lines.',
+    'Keep fonts consistent and elegant.',
+    'Lower music slightly if voice or text needs space.',
+    'Check the last frame works as a CTA frame.',
+    'Watch once without sound and once with sound before posting.'
+  ].join('\n');
+  const executionSystem = [
+    'Step 1: Save the reference.',
+    'Step 2: Upload 4 screenshots.',
+    'Step 3: Run AI analysis.',
+    'Step 4: Copy the Dolly edit recipe.',
+    'Step 5: Film the creator shot list with your own footage.',
+    'Step 6: Edit in Videoleap using the checklist.',
+    'Step 7: Bring the final structure into Story War Room if needed.',
+    'Step 8: Post and mark strong performers as future winners.'
+  ].join(' ');
   const ownVersion = [
     sourceType === 'account'
       ? 'Pick one reel from this creator that matches your mood today.'
@@ -5399,6 +5447,10 @@ function buildReelBreakdownDraft(input) {
     saveWhy,
     dollyVersion: ownVersion,
     remakePlan,
+    dollyEditRecipe,
+    videoleapChecklist,
+    creatorShotList,
+    executionSystem,
     motionText,
     createdAt: today()
   });
@@ -5439,8 +5491,15 @@ function renderReelLab() {
       <div class="reel-ref-section"><div class="reel-ref-label">CTA + why people save it</div><div class="reel-ref-text">${escapeHtml(ref.ctaStyle)} ${escapeHtml(ref.ctaMechanic)} ${escapeHtml(ref.saveWhy)}</div></div>
       <div class="reel-ref-section"><div class="reel-ref-label">Make my version</div><div class="reel-ref-text">${escapeHtml(ref.dollyVersion)}</div></div>
       <div class="reel-ref-section"><div class="reel-ref-label">Remake plan</div><div class="reel-ref-text">${escapeHtml(ref.remakePlan)}</div></div>
+      <div class="reel-ref-section is-system"><div class="reel-ref-label">Dolly Edit Recipe</div><div class="reel-ref-text">${escapeHtml(ref.dollyEditRecipe).replace(/\n/g,'<br>')}</div></div>
+      <div class="reel-ref-section is-system"><div class="reel-ref-label">Videoleap Checklist</div><div class="reel-ref-text">${escapeHtml(ref.videoleapChecklist).replace(/\n/g,'<br>')}</div></div>
+      <div class="reel-ref-section is-system"><div class="reel-ref-label">Shot List</div><div class="reel-ref-text">${escapeHtml(ref.creatorShotList).replace(/\n/g,'<br>')}</div></div>
+      <div class="reel-ref-section is-system"><div class="reel-ref-label">System</div><div class="reel-ref-text">${escapeHtml(ref.executionSystem)}</div></div>
       <div class="reel-ref-actions">
         <button class="btn btn-ghost btn-sm" onclick="copyReelBreakdown('${ref.id}')">Copy analysis</button>
+        <button class="btn btn-ghost btn-sm" onclick="copyDollyEditRecipe('${ref.id}')">Copy edit recipe</button>
+        <button class="btn btn-ghost btn-sm" onclick="copyVideoleapChecklist('${ref.id}')">Copy Videoleap</button>
+        <button class="btn btn-ghost btn-sm" onclick="copyReelShotList('${ref.id}')">Copy shot list</button>
         <button class="btn btn-ghost btn-sm" onclick="analyzeReelRefWithAI('${ref.id}')">AI analyze frames</button>
         <button class="btn btn-ghost btn-sm" onclick="sendReelToWarRoom('${ref.id}')">Send to War Room</button>
         <button class="btn btn-ghost btn-sm" onclick="deleteReelRef('${ref.id}')">Delete</button>
@@ -5537,6 +5596,37 @@ async function copyReelBreakdown(id) {
     `Remake plan: ${ref.remakePlan}`
   ].filter(Boolean).join('\n');
   await copyTextValue(text, 'Reel breakdown copied');
+}
+
+async function copyDollyEditRecipe(id) {
+  const ref = normalizeReelRef(load(K_REELS).find(x=>x.id===id) || {});
+  if (!ref.id) return;
+  const text = [
+    `Dolly Edit Recipe: ${ref.creator}`,
+    ref.goal ? `Goal: ${ref.goal}` : '',
+    ref.dollyEditRecipe
+  ].filter(Boolean).join('\n\n');
+  await copyTextValue(text, 'Dolly edit recipe copied');
+}
+
+async function copyVideoleapChecklist(id) {
+  const ref = normalizeReelRef(load(K_REELS).find(x=>x.id===id) || {});
+  if (!ref.id) return;
+  const text = [
+    `Videoleap Checklist: ${ref.creator}`,
+    ref.videoleapChecklist
+  ].filter(Boolean).join('\n\n');
+  await copyTextValue(text, 'Videoleap checklist copied');
+}
+
+async function copyReelShotList(id) {
+  const ref = normalizeReelRef(load(K_REELS).find(x=>x.id===id) || {});
+  if (!ref.id) return;
+  const text = [
+    `Shot List: ${ref.creator}`,
+    ref.creatorShotList
+  ].filter(Boolean).join('\n\n');
+  await copyTextValue(text, 'Shot list copied');
 }
 
 async function analyzeReelRefWithAI(id) {
