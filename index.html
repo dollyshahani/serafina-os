@@ -722,6 +722,14 @@ body.portal-mode .kriti-portal-shell { display:block; }
 .obs-filter-bar { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:20px; }
 .obs-filter { padding:6px 14px; border-radius:20px; border:1.5px solid var(--border); background:white; font-size:12px; font-weight:600; cursor:pointer; transition:all 0.12s; }
 .obs-filter.active { background:var(--text); color:white; border-color:var(--text); }
+.reel-lab-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(320px,1fr)); gap:16px; }
+.reel-ref-card { background:var(--white); border:1.5px solid var(--border); border-radius:16px; padding:18px; }
+.reel-ref-title { font-size:15px; font-weight:800; color:var(--text); }
+.reel-ref-sub { font-size:11px; color:var(--text2); margin-top:4px; }
+.reel-ref-section + .reel-ref-section { margin-top:12px; }
+.reel-ref-label { font-size:10px; font-weight:800; letter-spacing:1px; text-transform:uppercase; color:var(--text2); margin-bottom:6px; }
+.reel-ref-text { font-size:12px; color:var(--text); line-height:1.65; background:var(--cream); border-radius:10px; padding:9px 10px; }
+.reel-ref-actions { display:flex; gap:8px; flex-wrap:wrap; margin-top:14px; }
 
 /* ── TIME CAPSULE ── */
 .capsule-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:20px; }
@@ -807,6 +815,9 @@ body.portal-mode .kriti-portal-shell { display:block; }
     <div class="nav-section">Studio</div>
     <button class="nav-item" data-page="brainstorm">
       <span class="nav-dot" style="background:var(--magenta)"></span> Story War Room ✦
+    </button>
+    <button class="nav-item" data-page="reels">
+      <span class="nav-dot" style="background:var(--gold)"></span> Reel Lab
     </button>
     <button class="nav-item" data-page="obsession">
       <span class="nav-dot" style="background:var(--coral)"></span> Dolly Daily
@@ -1099,6 +1110,15 @@ body.portal-mode .kriti-portal-shell { display:block; }
       <div class="panel"><div class="panel-head"><span class="panel-title-sm">Current Offers</span></div><div id="pb-offers"></div></div>
     </div>
     <div class="obs-masonry" id="obs-grid"></div>
+  </div>
+
+  <div id="page-reels" class="page">
+    <div class="page-top">
+      <div><div class="greeting">✦ reference locker</div><div class="page-title">Reel Lab</div><div class="page-sub">Paste a reel you love, break down exactly why it works, and turn it into a Dolly version.</div></div>
+      <button class="btn btn-saffron" onclick="openModal('modal-reel')">+ Analyze Reel</button>
+    </div>
+    <div class="stat-grid" id="reel-lab-stats"></div>
+    <div class="reel-lab-grid" id="reel-lab-grid"></div>
   </div>
 
   <!-- ── UNIVERSE MAP ── -->
@@ -1745,6 +1765,34 @@ body.portal-mode .kriti-portal-shell { display:block; }
   </div>
 </div>
 
+<div class="overlay" id="modal-reel">
+  <div class="modal">
+    <div class="modal-head"><div class="modal-title">Analyze Reel Reference</div><button class="modal-x" onclick="closeModal('modal-reel')">×</button></div>
+    <input type="hidden" id="reel-id">
+    <div class="frow c2">
+      <div class="fgrp"><label>Reel link</label><input id="reel-link" placeholder="Paste Instagram reel link" /></div>
+      <div class="fgrp"><label>Creator / source</label><input id="reel-creator" placeholder="e.g. soleilssofia" /></div>
+    </div>
+    <div class="frow c2">
+      <div class="fgrp"><label>Why did you save it?</label><input id="reel-why" placeholder="opening / emotion / text / edit..." /></div>
+      <div class="fgrp"><label>Dolly pillar</label>
+        <select id="reel-pillar">
+          <option value="The Body">The Body</option>
+          <option value="The Build">The Build</option>
+          <option value="The Mind">The Mind</option>
+          <option value="The AI Angle">The AI Angle</option>
+          <option value="Founder x Serafina">Founder x Serafina</option>
+        </select>
+      </div>
+    </div>
+    <div class="frow"><div class="fgrp"><label>Any notes from you</label><textarea id="reel-notes" placeholder="What exactly felt good here?"></textarea></div></div>
+    <div class="modal-btns">
+      <button class="btn btn-ghost" onclick="closeModal('modal-reel')">Cancel</button>
+      <button class="btn btn-saffron" onclick="saveReelRef()">Save + Break Down</button>
+    </div>
+  </div>
+</div>
+
 <!-- CAPSULE MODAL -->
 <div class="overlay" id="modal-capsule">
   <div class="modal">
@@ -1800,6 +1848,7 @@ const K = { products:'sf3_prod', exh:'sf3_exh', tasks:'sf3_task', ideas:'sf3_ide
 const K_BRIEF = 'sf3_brief';
 const K_DROPS = 'sf3_drops';
 const K_OBS = 'sf3_obs';
+const K_REELS = 'sf3_reels';
 const load  = k => { try { return JSON.parse(localStorage.getItem(k))||[]; } catch(e){ return []; }};
 const save  = (k,v) => localStorage.setItem(k, JSON.stringify(v));
 const uid   = () => Date.now().toString(36)+Math.random().toString(36).slice(2);
@@ -1888,6 +1937,28 @@ function normalizeBrandEntry(item) {
     img: item.img || '',
     text: item.text || '',
     link: item.link || '',
+  };
+}
+
+function normalizeReelRef(item) {
+  return {
+    id: item.id || uid(),
+    link: item.link || '',
+    creator: item.creator || 'Reference',
+    why: item.why || '',
+    pillar: item.pillar || 'The Build',
+    notes: item.notes || '',
+    opening: item.opening || '',
+    pacing: item.pacing || '',
+    editStyle: item.editStyle || '',
+    textStyle: item.textStyle || '',
+    ctaStyle: item.ctaStyle || '',
+    hookPattern: item.hookPattern || '',
+    anglePattern: item.anglePattern || '',
+    emotionalArc: item.emotionalArc || '',
+    dollyVersion: item.dollyVersion || '',
+    motionText: item.motionText || '',
+    createdAt: item.createdAt || today()
   };
 }
 
@@ -1995,6 +2066,7 @@ function renderPage(p) {
   if (p==='tasks')       renderTasks();
   if (p==='ideas')       renderIdeas('all');
   if (p==='content')     renderContent();
+  if (p==='reels')       renderReelLab();
   if (p==='partners')    renderPartners();
   if (p==='finance')     renderFinance();
   if (p==='brainstorm')  bsInit();
@@ -5130,6 +5202,170 @@ function saveObs() {
   if (currentPage==='obsession') renderObs('all');
 }
 function deleteObs(id) { save(K_OBS, load(K_OBS).filter(x=>x.id!==id)); renderObs(document.querySelector('.obs-filter.active')?.dataset.tag||'all'); }
+
+function buildReelBreakdownDraft(input) {
+  const creator = String(input.creator || 'Reference').trim();
+  const why = String(input.why || '').toLowerCase();
+  const notes = String(input.notes || '').toLowerCase();
+  const pillar = input.pillar || 'The Build';
+  const cinematic = /lana|cinematic|story|emotional|soft|aesthetic|mood/.test(`${creator} ${why} ${notes}`);
+  const opening = cinematic
+    ? 'Opens on a real emotional image or intimate face moment. No filler title card.'
+    : 'Starts with a direct visual hook in the first 2 seconds.';
+  const pacing = cinematic
+    ? 'Slow-intentional pacing with 2-3 second clips, breathing room, and one emotional beat before payoff.'
+    : 'Tight pacing with clean scene changes and no wasted seconds.';
+  const editStyle = cinematic
+    ? 'Cinematic, diaristic, soft-luxury, memory-like edits with clean fades and intimate footage.'
+    : 'Simple but sharp storytelling edit that prioritizes narrative over trend effects.';
+  const textStyle = cinematic
+    ? 'Minimal motion text. One strong line at a time. Feels like a private thought, not marketing copy.'
+    : 'Bold first-line hook, then clean supporting text only when needed.';
+  const ctaStyle = 'Soft CTA at the end: follow, save, or come back tomorrow. Never emoji bait.';
+  const hookPattern = cinematic
+    ? 'Confession or emotionally loaded observation in the first line.'
+    : 'Direct tension, curiosity, or identity-based statement in the first line.';
+  const anglePattern = pillar === 'The Body'
+    ? 'Identity shift + self-respect + becoming'
+    : pillar === 'The Mind'
+      ? 'Truth bomb + belief shift + proof'
+      : pillar === 'Founder x Serafina'
+        ? 'Personal truth + brand bridge + lifestyle payoff'
+        : pillar === 'The AI Angle'
+          ? 'Behind the scenes + leverage + proof'
+          : 'Founder honesty + aspiration + reality';
+  const emotionalArc = 'Hook -> mood/visual world -> truth or proof -> emotional payoff -> soft CTA';
+  const dollyVersion = pillar === 'The Body'
+    ? 'Use your own body/discipline footage, keep the language intimate, and make the reel feel like a life shift instead of fitness content.'
+    : pillar === 'The Mind'
+      ? 'Anchor it in manifestation or identity, but show one real action so it feels believable.'
+      : pillar === 'Founder x Serafina'
+        ? 'Start with a personal truth, then bridge into Serafina through texture, process, or lifestyle.'
+        : 'Use founder footage, one intimate truth, and premium visual softness so it still feels like your world.';
+  const motionText = cinematic
+    ? 'Line 1: confession. Line 2: emotional truth. Line 3: quiet payoff.'
+    : 'Line 1: hook. Line 2: proof. Line 3: CTA.';
+  return normalizeReelRef({
+    ...input,
+    opening,
+    pacing,
+    editStyle,
+    textStyle,
+    ctaStyle,
+    hookPattern,
+    anglePattern,
+    emotionalArc,
+    dollyVersion,
+    motionText,
+    createdAt: today()
+  });
+}
+
+function renderReelLab() {
+  const refs = load(K_REELS).map(normalizeReelRef).sort((a,b)=>String(b.createdAt).localeCompare(String(a.createdAt)));
+  document.getElementById('reel-lab-stats').innerHTML = `
+    <div class="stat-card sc-saffron"><div class="stat-label">References Saved</div><div class="stat-val">${refs.length}</div><div class="stat-sub">your inspiration locker</div></div>
+    <div class="stat-card sc-coral"><div class="stat-label">Story-led</div><div class="stat-val">${refs.filter(r=>/story|emotional|confession/i.test([r.why,r.editStyle,r.hookPattern].join(' '))).length}</div><div class="stat-sub">strong narrative references</div></div>
+    <div class="stat-card sc-teal"><div class="stat-label">Dolly-ready</div><div class="stat-val">${refs.filter(r=>r.dollyVersion).length}</div><div class="stat-sub">adaptations written</div></div>
+    <div class="stat-card sc-magenta"><div class="stat-label">War Room Ready</div><div class="stat-val">${refs.length}</div><div class="stat-sub">push any card into storyboard</div></div>
+  `;
+  document.getElementById('reel-lab-grid').innerHTML = refs.map(ref => `
+    <div class="reel-ref-card">
+      <div class="reel-ref-title">${ref.creator}</div>
+      <div class="reel-ref-sub">${ref.pillar} · saved ${fmtD(ref.createdAt)}${ref.link ? ` · <a href="${ref.link}" target="_blank" style="color:var(--indigo);font-weight:700;">open reel ↗</a>` : ''}</div>
+      <div class="reel-ref-section"><div class="reel-ref-label">Why it works</div><div class="reel-ref-text">${escapeHtml(ref.why || ref.notes || 'Saved for storytelling reference.')}</div></div>
+      <div class="reel-ref-section"><div class="reel-ref-label">Opening</div><div class="reel-ref-text">${escapeHtml(ref.opening)}</div></div>
+      <div class="reel-ref-section"><div class="reel-ref-label">Pacing + Edit Style</div><div class="reel-ref-text">${escapeHtml(ref.pacing)} ${escapeHtml(ref.editStyle)}</div></div>
+      <div class="reel-ref-section"><div class="reel-ref-label">Hook + Text</div><div class="reel-ref-text">${escapeHtml(ref.hookPattern)} ${escapeHtml(ref.textStyle)}</div></div>
+      <div class="reel-ref-section"><div class="reel-ref-label">CTA + Angle</div><div class="reel-ref-text">${escapeHtml(ref.ctaStyle)} ${escapeHtml(ref.anglePattern)}</div></div>
+      <div class="reel-ref-section"><div class="reel-ref-label">Dolly version</div><div class="reel-ref-text">${escapeHtml(ref.dollyVersion)}</div></div>
+      <div class="reel-ref-actions">
+        <button class="btn btn-ghost btn-sm" onclick="copyReelBreakdown('${ref.id}')">Copy breakdown</button>
+        <button class="btn btn-ghost btn-sm" onclick="sendReelToWarRoom('${ref.id}')">Send to War Room</button>
+        <button class="btn btn-ghost btn-sm" onclick="deleteReelRef('${ref.id}')">Delete</button>
+      </div>
+    </div>
+  `).join('') || `<div class="playbook-card" style="grid-column:1/-1;"><div class="playbook-title">No reel references yet</div><div class="playbook-sub" style="margin-top:8px;">Paste reels you love here. This becomes your storytelling library and breakdown tool.</div></div>`;
+}
+
+function saveReelRef() {
+  const ref = buildReelBreakdownDraft({
+    id: document.getElementById('reel-id').value || uid(),
+    link: document.getElementById('reel-link').value.trim(),
+    creator: document.getElementById('reel-creator').value.trim() || 'Reference',
+    why: document.getElementById('reel-why').value.trim(),
+    pillar: document.getElementById('reel-pillar').value,
+    notes: document.getElementById('reel-notes').value.trim()
+  });
+  const refs = load(K_REELS).map(normalizeReelRef);
+  const idx = refs.findIndex(r => r.id === ref.id);
+  if (idx >= 0) refs[idx] = ref; else refs.unshift(ref);
+  save(K_REELS, refs);
+  closeModal('modal-reel');
+  ['reel-id','reel-link','reel-creator','reel-why','reel-notes'].forEach(id => { const el = document.getElementById(id); if (el) el.value=''; });
+  document.getElementById('reel-pillar').value = 'The Build';
+  if (currentPage === 'reels') renderReelLab();
+}
+
+async function copyReelBreakdown(id) {
+  const ref = normalizeReelRef(load(K_REELS).find(x=>x.id===id) || {});
+  if (!ref.id) return;
+  const text = [
+    `Reference: ${ref.creator}`,
+    ref.link ? `Link: ${ref.link}` : '',
+    `Pillar: ${ref.pillar}`,
+    `Why it works: ${ref.why || ref.notes}`,
+    `Opening: ${ref.opening}`,
+    `Pacing: ${ref.pacing}`,
+    `Edit style: ${ref.editStyle}`,
+    `Text style: ${ref.textStyle}`,
+    `Hook pattern: ${ref.hookPattern}`,
+    `CTA style: ${ref.ctaStyle}`,
+    `Angle pattern: ${ref.anglePattern}`,
+    `Emotional arc: ${ref.emotionalArc}`,
+    `Motion text: ${ref.motionText}`,
+    `Dolly version: ${ref.dollyVersion}`
+  ].filter(Boolean).join('\n');
+  await copyTextValue(text, 'Reel breakdown copied');
+}
+
+function sendReelToWarRoom(id) {
+  const ref = normalizeReelRef(load(K_REELS).find(x=>x.id===id) || {});
+  if (!ref.id) return;
+  const nodes = [
+    bsTemplateNode('text', 60, 40, '', '', '#fff', { w: 560, h: 110, text: `${ref.creator}\n${ref.why || ref.notes || 'Reference reel breakdown'}` }),
+    bsTemplateNode('sticky', 90, 180, 'Opening', ref.opening, '#fff9c4'),
+    bsTemplateNode('sticky', 360, 180, 'Pacing', ref.pacing, '#fce4ec'),
+    bsTemplateNode('sticky', 630, 180, 'Edit style', ref.editStyle, '#e8f5e9'),
+    bsTemplateNode('sticky', 900, 180, 'Text style', ref.textStyle, '#e3f2fd'),
+    bsTemplateNode('sticky', 90, 410, 'Hook pattern', ref.hookPattern, '#f3e5f5'),
+    bsTemplateNode('sticky', 360, 410, 'Angle pattern', ref.anglePattern, '#fff3e0'),
+    bsTemplateNode('sticky', 630, 410, 'CTA style', ref.ctaStyle, '#fff9c4'),
+    bsTemplateNode('sticky', 900, 410, 'Dolly version', ref.dollyVersion, '#e8f5e9'),
+    bsTemplateNode('sticky', 360, 640, 'Motion text', ref.motionText, '#fce4ec')
+  ];
+  bsState.nodes = nodes;
+  bsState.connections = [
+    { id:'bc'+uid(), from:nodes[0].id, to:nodes[1].id },
+    { id:'bc'+uid(), from:nodes[1].id, to:nodes[2].id },
+    { id:'bc'+uid(), from:nodes[2].id, to:nodes[3].id },
+    { id:'bc'+uid(), from:nodes[3].id, to:nodes[4].id },
+    { id:'bc'+uid(), from:nodes[5].id, to:nodes[8].id },
+    { id:'bc'+uid(), from:nodes[6].id, to:nodes[8].id },
+    { id:'bc'+uid(), from:nodes[7].id, to:nodes[8].id },
+    { id:'bc'+uid(), from:nodes[8].id, to:nodes[9].id }
+  ];
+  bsState.bx = 120;
+  bsState.by = 80;
+  bsState.scale = 0.9;
+  bsSave();
+  navigate('brainstorm');
+}
+
+function deleteReelRef(id) {
+  save(K_REELS, load(K_REELS).filter(x=>x.id!==id));
+  if (currentPage === 'reels') renderReelLab();
+}
 
 // ═══════════════════════════════════════
 //  TIME CAPSULE
