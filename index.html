@@ -9,7 +9,7 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  --cream:    #fdf7ee
+  --cream:    #fdf7ee;
   --white:    #ffffff;
   --border:   #e8dac8;
   --text:     #1c1028;
@@ -47,6 +47,20 @@ body.portal-mode #bs-wrap,
 body.portal-mode #bs-toolbar,
 body.portal-mode #bs-hint { display:none !important; }
 body.portal-mode { background:linear-gradient(180deg, var(--cream), #fffaf4); }
+body.mobile-nav-open { overflow:hidden; }
+
+#mobile-header, #mobile-nav-backdrop { display:none; }
+#mobile-header {
+  position: sticky; top: 0; z-index: 260;
+  background: rgba(253,247,238,.96); backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border); padding: 10px 14px;
+}
+.mobile-header-inner { display:flex; align-items:center; justify-content:space-between; gap:12px; }
+.mobile-header-title { font-size:12px; letter-spacing:1.5px; text-transform:uppercase; color:var(--text2); font-weight:700; }
+.mobile-header-brand { font-size:16px; font-weight:900; color:var(--text); }
+#mobile-nav-backdrop {
+  position: fixed; inset:0; background: rgba(28,16,40,.28); z-index: 190;
+}
 
 /* ─── SIDEBAR ─── */
 #sidebar {
@@ -783,9 +797,86 @@ body.portal-mode .kriti-portal-shell { display:block; }
 .wr-stat { text-align:center; padding:12px; background:rgba(255,255,255,.06); border-radius:10px; }
 .wr-stat-val { font-size:22px; font-weight:900; color:#ffd166; }
 .wr-stat-lab { font-size:10px; opacity:.5; margin-top:4px; }
+
+@media (max-width: 900px) {
+  #mobile-header, #mobile-nav-backdrop { display:block; }
+  #sidebar {
+    transform: translateX(-100%);
+    transition: transform 0.2s ease;
+    width: min(86vw, 320px);
+    box-shadow: 0 18px 42px rgba(28,16,40,.18);
+  }
+  body.mobile-nav-open #sidebar { transform: translateX(0); }
+  body:not(.mobile-nav-open) #mobile-nav-backdrop { display:none; }
+  #main {
+    margin-left: 0;
+    padding: 18px 14px 90px;
+  }
+  .page-top,
+  .panel-head,
+  .warroom-topbar {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  .g2, .g3, .g4, .dash-grid, .reel-grid, .fin-pl-grid, .roi-inputs, .roi-results, .csv-col-map, .frow.c2, .frow.c3, .reel-upload-grid, .warroom-grid {
+    grid-template-columns: 1fr !important;
+  }
+  .page-title { font-size: 22px; }
+  .stat-val { font-size: 22px; }
+  .modal {
+    width: min(96vw, 560px);
+    max-height: 88vh;
+    padding-bottom: 18px;
+  }
+  .review-thumb, .drop-card-hero, .pcard-img { height: 150px; }
+  .batch-grid, .drop-grid, .reel-lab-grid, .review-grid, .content-grid, .idea-grid, .doc-grid, .capsule-grid {
+    grid-template-columns: 1fr !important;
+  }
+  .queue-grid, .playbook-grid, .kanban, .obs-masonry {
+    grid-template-columns: 1fr !important;
+    columns: 1 !important;
+  }
+  .warroom-wrap {
+    padding: 18px 14px 32px;
+  }
+  #wr-stats {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 10px !important;
+  }
+  #bs-toolbar {
+    left: 50%;
+    transform: translateX(-50%);
+    width: calc(100vw - 20px);
+    max-width: calc(100vw - 20px);
+    overflow-x: auto;
+  }
+  #bs-sidepanel {
+    left: 10px;
+    top: 82px;
+    width: calc(100vw - 20px);
+    max-height: 42vh;
+  }
+  .voice-btn {
+    right: 14px;
+    bottom: 14px;
+  }
+}
 </style>
 </head>
 <body>
+
+<div id="mobile-header">
+  <div class="mobile-header-inner">
+    <button class="btn btn-ghost btn-sm" type="button" onclick="toggleMobileNav()">☰ Menu</button>
+    <div>
+      <div class="mobile-header-title">Founder OS</div>
+      <div class="mobile-header-brand">Serafina</div>
+    </div>
+    <button class="btn btn-ghost btn-sm" type="button" onclick="navigate('dashboard')">Morning Brief</button>
+  </div>
+</div>
+<div id="mobile-nav-backdrop" onclick="closeMobileNav()"></div>
 
 <!-- SIDEBAR -->
 <nav id="sidebar">
@@ -816,7 +907,7 @@ body.portal-mode .kriti-portal-shell { display:block; }
       <span class="nav-dot" style="background:var(--purple)"></span> Ideas & Learnings
     </button>
     <button class="nav-item" data-page="content">
-      <span class="nav-dot" style="background:var(--teal)"></span> Content Vault
+      <span class="nav-dot" style="background:var(--teal)"></span> Content Engine
     </button>
     <div class="nav-section">Growth</div>
     <button class="nav-item" data-page="partners">
@@ -2146,8 +2237,17 @@ const PORTAL_MODE = new URLSearchParams(location.search).get('portal') || '';
 
 document.querySelectorAll('.nav-item').forEach(b => b.addEventListener('click', () => navigate(b.dataset.page)));
 
+function toggleMobileNav() {
+  document.body.classList.toggle('mobile-nav-open');
+}
+
+function closeMobileNav() {
+  document.body.classList.remove('mobile-nav-open');
+}
+
 function navigate(page) {
   currentPage = page;
+  closeMobileNav();
   document.querySelectorAll('.nav-item').forEach(b => b.classList.toggle('active', b.dataset.page === page));
   // brainstorm is full-screen overlay, not a .page div
   const isBs = page === 'brainstorm';
