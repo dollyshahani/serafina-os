@@ -5441,6 +5441,7 @@ function renderReelLab() {
       <div class="reel-ref-section"><div class="reel-ref-label">Remake plan</div><div class="reel-ref-text">${escapeHtml(ref.remakePlan)}</div></div>
       <div class="reel-ref-actions">
         <button class="btn btn-ghost btn-sm" onclick="copyReelBreakdown('${ref.id}')">Copy analysis</button>
+        <button class="btn btn-ghost btn-sm" onclick="analyzeReelRefWithAI('${ref.id}')">AI analyze frames</button>
         <button class="btn btn-ghost btn-sm" onclick="sendReelToWarRoom('${ref.id}')">Send to War Room</button>
         <button class="btn btn-ghost btn-sm" onclick="deleteReelRef('${ref.id}')">Delete</button>
       </div>
@@ -5536,6 +5537,37 @@ async function copyReelBreakdown(id) {
     `Remake plan: ${ref.remakePlan}`
   ].filter(Boolean).join('\n');
   await copyTextValue(text, 'Reel breakdown copied');
+}
+
+async function analyzeReelRefWithAI(id) {
+  const cfg = await ensureRuntimeConfig(true);
+  if (!cfg.features?.reelVision) {
+    alert('Add OPENAI_API_KEY in Vercel first to enable real frame analysis.');
+    return;
+  }
+  const refs = load(K_REELS).map(normalizeReelRef);
+  const idx = refs.findIndex(x => x.id === id);
+  if (idx < 0) return;
+  const ref = refs[idx];
+  if (!ref.openingShotImg && !ref.middleShotImg && !ref.textShotImg && !ref.ctaShotImg) {
+    alert('Add at least one screenshot first. Opening, middle, text, and CTA frames are best.');
+    return;
+  }
+  try {
+    const resp = await fetch('/api/reels/analyze', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ reference: ref })
+    });
+    const data = await resp.json();
+    if (!resp.ok) throw new Error(data?.error || 'AI analysis failed');
+    refs[idx] = normalizeReelRef({ ...ref, ...(data.analysis || {}) });
+    save(K_REELS, refs);
+    if (currentPage === 'reels') renderReelLab();
+    alert(`AI analysis complete${data.model ? ` using ${data.model}` : ''}.`);
+  } catch (err) {
+    alert(`AI analysis failed: ${err.message}`);
+  }
 }
 
 function sendReelToWarRoom(id) {
