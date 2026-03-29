@@ -700,10 +700,10 @@ html, body { min-height: 100vh; background: var(--cream); font-family: 'Segoe UI
       <span class="nav-dot" style="background:var(--magenta)"></span> Brainstorm ✦
     </button>
     <button class="nav-item" data-page="obsession">
-      <span class="nav-dot" style="background:var(--coral)"></span> Obsession Board
+      <span class="nav-dot" style="background:var(--coral)"></span> Personal Brand OS
     </button>
     <button class="nav-item" data-page="drops">
-      <span class="nav-dot" style="background:var(--purple)"></span> Drop Planner
+      <span class="nav-dot" style="background:var(--purple)"></span> Launch HQ
     </button>
     <button class="nav-item" data-page="universe">
       <span class="nav-dot" style="background:var(--indigo)"></span> Universe Map
@@ -712,7 +712,7 @@ html, body { min-height: 100vh; background: var(--cream); font-family: 'Segoe UI
       <span class="nav-dot" style="background:var(--gold)"></span> Time Capsule
     </button>
     <button class="nav-item" data-page="finance">
-      <span class="nav-dot" style="background:var(--emerald)"></span> Finance & Tax
+      <span class="nav-dot" style="background:var(--emerald)"></span> Profitability
     </button>
   </div>
   <div class="sidebar-footer">
@@ -734,17 +734,17 @@ html, body { min-height: 100vh; background: var(--cream); font-family: 'Segoe UI
     <div class="page-top">
       <div>
         <div class="greeting" id="dash-greeting">✦ morning brief</div>
-        <div class="page-title">Serafina at a Glance</div>
+        <div class="page-title">Morning Brief</div>
         <div class="page-sub" id="dash-date"></div>
       </div>
-      <button class="btn btn-magenta" onclick="openModal('modal-idea')">✦ Capture Idea</button>
+      <button class="btn btn-magenta" onclick="openModal('modal-brief')">✦ Update Brief</button>
     </div>
     <div class="alert-row" id="dash-alerts"></div>
     <div class="stat-grid" id="dash-stats"></div>
     <div class="dash-grid">
       <div class="panel">
-        <div class="panel-head"><span class="panel-title-sm">Revenue by Show</span></div>
-        <div class="chart-wrap"><canvas id="rev-chart"></canvas></div>
+        <div class="panel-head"><span class="panel-title-sm">Control the Week</span></div>
+        <div id="dash-brief-controls"></div>
       </div>
       <div class="panel">
         <div class="panel-head">
@@ -756,12 +756,22 @@ html, body { min-height: 100vh; background: var(--cream); font-family: 'Segoe UI
     </div>
     <div class="g2">
       <div class="panel">
-        <div class="panel-head"><span class="panel-title-sm">Inventory Health</span><button class="btn btn-ghost btn-sm" onclick="navigate('products')">View all →</button></div>
+        <div class="panel-head"><span class="panel-title-sm">Content Engine Snapshot</span><button class="btn btn-ghost btn-sm" onclick="navigate('content')">Open engine →</button></div>
+        <div id="dash-content-pipeline"></div>
+      </div>
+      <div class="panel">
+        <div class="panel-head"><span class="panel-title-sm">Launch HQ</span><button class="btn btn-ghost btn-sm" onclick="navigate('drops')">Open launch →</button></div>
+        <div id="dash-launch-preview"></div>
+      </div>
+    </div>
+    <div class="g2">
+      <div class="panel">
+        <div class="panel-head"><span class="panel-title-sm">Inventory Pressure</span><button class="btn btn-ghost btn-sm" onclick="navigate('products')">View all →</button></div>
         <div id="dash-inv-health"></div>
       </div>
       <div class="panel">
-        <div class="panel-head"><span class="panel-title-sm">Latest Ideas & Learnings ✨</span><button class="btn btn-ghost btn-sm" onclick="navigate('ideas')">View all →</button></div>
-        <div id="dash-ideas-preview"></div>
+        <div class="panel-head"><span class="panel-title-sm">Founder Signals</span><button class="btn btn-ghost btn-sm" onclick="navigate('obsession')">Open founder OS →</button></div>
+        <div id="dash-founder-preview"></div>
       </div>
     </div>
   </div>
@@ -865,9 +875,9 @@ html, body { min-height: 100vh; background: var(--cream); font-family: 'Segoe UI
   <div id="page-content" class="page">
     <div class="page-top">
       <div>
-        <div class="greeting">✦ content vault</div>
-        <div class="page-title">Content Assets</div>
-        <div class="page-sub">A-roll, B-roll, reels, scripts — all in one place</div>
+        <div class="greeting">✦ content engine</div>
+        <div class="page-title">Content Engine</div>
+        <div class="page-sub">Raw to posted, with delegation and ad-pickup built in</div>
       </div>
       <button class="btn btn-teal" onclick="openModal('modal-content')" style="background:var(--teal);color:white;">+ Add Asset</button>
     </div>
@@ -921,8 +931,8 @@ html, body { min-height: 100vh; background: var(--cream); font-family: 'Segoe UI
   <!-- ── DROP PLANNER ── -->
   <div id="page-drops" class="page">
     <div class="page-top">
-      <div><div class="greeting">✦ next collections</div><div class="page-title">Drop Planner</div><div class="page-sub">Your next 3 drops — mood, production, countdown</div></div>
-      <button class="btn btn-magenta" onclick="openModal('modal-drop')">+ New Drop</button>
+      <div><div class="greeting">✦ modal launch hq</div><div class="page-title">Launch HQ</div><div class="page-sub">Run your next collection without carrying the whole launch in your brain</div></div>
+      <button class="btn btn-magenta" onclick="openModal('modal-drop')">+ Add Launch</button>
     </div>
     <div class="drop-grid" id="drop-grid"></div>
   </div>
@@ -930,17 +940,20 @@ html, body { min-height: 100vh; background: var(--cream); font-family: 'Segoe UI
   <!-- ── OBSESSION BOARD ── -->
   <div id="page-obsession" class="page">
     <div class="page-top">
-      <div><div class="greeting">✦ what inspires you</div><div class="page-title">Obsession Board</div><div class="page-sub">Images, quotes, references — your creative DNA</div></div>
-      <button class="btn btn-coral" onclick="openModal('modal-obs')" style="background:var(--coral);color:white;">+ Add Reference</button>
+      <div><div class="greeting">✦ founder growth engine</div><div class="page-title">Personal Brand OS</div><div class="page-sub">Weight loss, discipline, manifestation, Serafina, and digital products in one founder lane</div></div>
+      <button class="btn btn-coral" onclick="openModal('modal-obs')" style="background:var(--coral);color:white;">+ Add Founder Note</button>
     </div>
     <div class="obs-filter-bar" id="obs-filters">
       <button class="obs-filter active" data-tag="all" onclick="obsFilter(this,'all')">All</button>
-      <button class="obs-filter" data-tag="colour" onclick="obsFilter(this,'colour')">🎨 Colour</button>
-      <button class="obs-filter" data-tag="silhouette" onclick="obsFilter(this,'silhouette')">👗 Silhouette</button>
-      <button class="obs-filter" data-tag="culture" onclick="obsFilter(this,'culture')">🏺 Culture</button>
-      <button class="obs-filter" data-tag="texture" onclick="obsFilter(this,'texture')">🧵 Texture</button>
-      <button class="obs-filter" data-tag="brand" onclick="obsFilter(this,'brand')">✨ Brand</button>
-      <button class="obs-filter" data-tag="quote" onclick="obsFilter(this,'quote')">💬 Quote</button>
+      <button class="obs-filter" data-tag="weight-loss" onclick="obsFilter(this,'weight-loss')">⚡ Weight Loss</button>
+      <button class="obs-filter" data-tag="discipline" onclick="obsFilter(this,'discipline')">📓 Discipline</button>
+      <button class="obs-filter" data-tag="manifestation" onclick="obsFilter(this,'manifestation')">✨ Manifestation</button>
+      <button class="obs-filter" data-tag="serafina" onclick="obsFilter(this,'serafina')">🪡 Serafina</button>
+      <button class="obs-filter" data-tag="digital-product" onclick="obsFilter(this,'digital-product')">💻 Digital Product</button>
+    </div>
+    <div class="g2" style="margin-bottom:18px;">
+      <div class="panel"><div class="panel-head"><span class="panel-title-sm">Founder Pillars</span></div><div id="pb-pillars"></div></div>
+      <div class="panel"><div class="panel-head"><span class="panel-title-sm">Current Offers</span></div><div id="pb-offers"></div></div>
     </div>
     <div class="obs-masonry" id="obs-grid"></div>
   </div>
@@ -1229,18 +1242,55 @@ html, body { min-height: 100vh; background: var(--cream); font-family: 'Segoe UI
         <select id="c-type"><option value="a-roll">🎥 A-Roll</option><option value="b-roll">🎞 B-Roll</option><option value="reel">📱 Reel</option><option value="photo">📸 Photo</option><option value="script">📝 Script</option></select>
       </div>
       <div class="fgrp"><label>Status</label>
-        <select id="c-status"><option value="raw">Raw</option><option value="editing">Editing</option><option value="ready">Ready to Post</option><option value="posted">Posted ✓</option></select>
+        <select id="c-status"><option value="raw">Raw</option><option value="in-progress">In Progress</option><option value="edited">Edited</option><option value="scheduled">Scheduled</option><option value="posted">Posted ✓</option></select>
       </div>
     </div>
     <div class="frow"><div class="fgrp"><label>Title</label><input id="c-title" placeholder="What's this clip?" /></div></div>
     <div class="frow c2">
+      <div class="fgrp"><label>Belongs To</label>
+        <select id="c-lane"><option value="serafina">Serafina HQ</option><option value="personal">Personal Brand OS</option><option value="both">Both</option></select>
+      </div>
+      <div class="fgrp"><label>Delegate To</label>
+        <select id="c-owner"><option value="Me">Me</option><option value="Social Media Manager">Social Media Manager</option><option value="Performance Marketing Manager">Performance Marketing Manager</option></select>
+      </div>
+    </div>
+    <div class="frow c2">
       <div class="fgrp"><label>Show / Event</label><input id="c-event" placeholder="Which show?" /></div>
       <div class="fgrp"><label>Date</label><input id="c-date" type="date" /></div>
+    </div>
+    <div class="frow c2">
+      <div class="fgrp"><label>Use for ads too?</label>
+        <select id="c-ad-ready"><option value="no">No</option><option value="yes">Yes</option></select>
+      </div>
+      <div class="fgrp"><label>Asset source</label><input id="c-source" placeholder="Supabase / iPhone / Drive / Laptop" /></div>
     </div>
     <div class="frow"><div class="fgrp"><label>Notes</label><textarea id="c-notes" placeholder="What's in this, where to use it…"></textarea></div></div>
     <div class="modal-btns">
       <button class="btn btn-ghost" onclick="closeModal('modal-content')">Cancel</button>
       <button class="btn" onclick="saveContent()" style="background:var(--teal);color:white;">Save Asset</button>
+    </div>
+  </div>
+</div>
+
+<!-- MORNING BRIEF MODAL -->
+<div class="overlay" id="modal-brief">
+  <div class="modal">
+    <div class="modal-head"><div class="modal-title">Update Morning Brief</div><button class="modal-x" onclick="closeModal('modal-brief')">×</button></div>
+    <div class="frow c2">
+      <div class="fgrp"><label>Sales Yesterday</label><input id="mb-sales" type="number" placeholder="0" /></div>
+      <div class="fgrp"><label>Cash Out This Week</label><input id="mb-cash" type="number" placeholder="0" /></div>
+    </div>
+    <div class="frow c2">
+      <div class="fgrp"><label>Meta Spend</label><input id="mb-spend" type="number" placeholder="0" /></div>
+      <div class="fgrp"><label>Meta Revenue</label><input id="mb-revenue" type="number" placeholder="0" /></div>
+    </div>
+    <div class="frow c2">
+      <div class="fgrp"><label>Conversion Rate %</label><input id="mb-cvr" type="number" step="0.1" placeholder="0" /></div>
+      <div class="fgrp"><label>Top Focus</label><input id="mb-note" placeholder="What matters most this week?" /></div>
+    </div>
+    <div class="modal-btns">
+      <button class="btn btn-ghost" onclick="closeModal('modal-brief')">Cancel</button>
+      <button class="btn btn-magenta" onclick="saveBrief()">Save Brief</button>
     </div>
   </div>
 </div>
@@ -1413,7 +1463,7 @@ html, body { min-height: 100vh; background: var(--cream); font-family: 'Segoe UI
 <!-- DROP MODAL -->
 <div class="overlay" id="modal-drop">
   <div class="modal">
-    <div class="modal-head"><div class="modal-title">New Drop / Collection</div><button class="modal-x" onclick="closeModal('modal-drop')">×</button></div>
+    <div class="modal-head"><div class="modal-title">New Launch / Collection</div><button class="modal-x" onclick="closeModal('modal-drop')">×</button></div>
     <input type="hidden" id="drop-id">
     <div class="frow c2">
       <div class="fgrp"><label>Collection Name</label><input id="drop-name" placeholder="e.g. The Monsoon Edit"/></div>
@@ -1423,11 +1473,11 @@ html, body { min-height: 100vh; background: var(--cream); font-family: 'Segoe UI
       <div class="fgrp"><label>Launch Date</label><input id="drop-date" type="date"/></div>
       <div class="fgrp"><label>Status</label>
         <select id="drop-status">
-          <option value="0">🎨 Designing</option>
+          <option value="0">🧠 Concept</option>
           <option value="1">🧵 Sampling</option>
           <option value="2">🏭 Production</option>
-          <option value="3">✅ Ready</option>
-          <option value="4">🚀 Launched</option>
+          <option value="3">🎬 Content Ready</option>
+          <option value="4">🚀 Launching</option>
         </select>
       </div>
     </div>
@@ -1443,34 +1493,33 @@ html, body { min-height: 100vh; background: var(--cream); font-family: 'Segoe UI
 <!-- OBSESSION MODAL -->
 <div class="overlay" id="modal-obs">
   <div class="modal">
-    <div class="modal-head"><div class="modal-title">Add to Obsession Board</div><button class="modal-x" onclick="closeModal('modal-obs')">×</button></div>
+    <div class="modal-head"><div class="modal-title">Add to Personal Brand OS</div><button class="modal-x" onclick="closeModal('modal-obs')">×</button></div>
     <input type="hidden" id="obs-id">
     <div class="frow c2">
       <div class="fgrp"><label>Type</label>
         <select id="obs-type">
-          <option value="image">🖼 Image</option>
-          <option value="quote">💬 Quote</option>
-          <option value="colour">🎨 Colour Palette</option>
-          <option value="reference">✨ Brand Reference</option>
+          <option value="idea">💡 Idea</option>
+          <option value="script">🎙 Hook / Script</option>
+          <option value="proof">📸 Proof / Win</option>
+          <option value="offer">💻 Offer</option>
         </select>
       </div>
       <div class="fgrp"><label>Tag</label>
         <select id="obs-tag">
-          <option value="colour">Colour</option>
-          <option value="silhouette">Silhouette</option>
-          <option value="culture">Culture</option>
-          <option value="texture">Texture</option>
-          <option value="brand">Brand</option>
-          <option value="quote">Quote</option>
+          <option value="weight-loss">Weight Loss</option>
+          <option value="discipline">Discipline</option>
+          <option value="manifestation">Manifestation</option>
+          <option value="serafina">Serafina</option>
+          <option value="digital-product">Digital Product</option>
         </select>
       </div>
     </div>
-    <div class="frow"><div class="fgrp"><label>Image URL / Drive link</label><input id="obs-img" placeholder="Paste image URL or Google Drive share link"/></div></div>
-    <div class="frow"><div class="fgrp"><label>Caption / Quote / Notes</label><textarea id="obs-text" placeholder="What does this mean to Serafina?"></textarea></div></div>
-    <div class="frow"><div class="fgrp"><label>Linked product or collection (optional)</label><input id="obs-link" placeholder="e.g. Monsoon Edit, Wrap Dress"/></div></div>
+    <div class="frow"><div class="fgrp"><label>Image URL (optional)</label><input id="obs-img" placeholder="Paste image URL if you want a visual"/></div></div>
+    <div class="frow"><div class="fgrp"><label>Note / Script / Thought</label><textarea id="obs-text" placeholder="What should future Dolly remember, post, or build?"></textarea></div></div>
+    <div class="frow"><div class="fgrp"><label>Offer / link / context (optional)</label><input id="obs-link" placeholder="e.g. manifestation dashboard, launch CTA, founder angle"/></div></div>
     <div class="modal-btns">
       <button class="btn btn-ghost" onclick="closeModal('modal-obs')">Cancel</button>
-      <button class="btn btn-coral" onclick="saveObs()" style="background:var(--coral);color:white;">Pin It</button>
+      <button class="btn btn-coral" onclick="saveObs()" style="background:var(--coral);color:white;">Save Note</button>
     </div>
   </div>
 </div>
@@ -1527,6 +1576,9 @@ html, body { min-height: 100vh; background: var(--cream); font-family: 'Segoe UI
 //  DATA
 // ═══════════════════════════════════════
 const K = { products:'sf3_prod', exh:'sf3_exh', tasks:'sf3_task', ideas:'sf3_idea', content:'sf3_content', partners:'sf3_partner', customers:'sf3_customers' };
+const K_BRIEF = 'sf3_brief';
+const K_DROPS = 'sf3_drops';
+const K_OBS = 'sf3_obs';
 const load  = k => { try { return JSON.parse(localStorage.getItem(k))||[]; } catch(e){ return []; }};
 const save  = (k,v) => localStorage.setItem(k, JSON.stringify(v));
 const uid   = () => Date.now().toString(36)+Math.random().toString(36).slice(2);
@@ -1534,7 +1586,77 @@ const today = () => new Date().toISOString().split('T')[0];
 const fmt   = n => n ? '₹'+Number(n).toLocaleString('en-IN') : '₹0';
 const fmtD  = d => { if(!d) return '—'; const dt=new Date(d); return dt.toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'2-digit'}); };
 const CLOUD_SETTINGS_KEY = 'sf3_cloud_settings';
+const MANIFESTATION_URL = 'https://dollydash-knzskech.manus.space/';
 let runtimeConfig = { loaded:false, features:{ cloudSync:false, managedShopify:false, vercelCron:false } };
+
+function loadBrief() {
+  try {
+    const raw = JSON.parse(localStorage.getItem(K_BRIEF) || '{}');
+    return {
+      salesYesterday: Number(raw.salesYesterday || 0),
+      cashOutWeek: Number(raw.cashOutWeek || 0),
+      adSpend: Number(raw.adSpend || 0),
+      adRevenue: Number(raw.adRevenue || 0),
+      cvr: Number(raw.cvr || 0),
+      note: raw.note || '',
+    };
+  } catch(_) {
+    return { salesYesterday:0, cashOutWeek:0, adSpend:0, adRevenue:0, cvr:0, note:'' };
+  }
+}
+
+function hydrateBriefModal() {
+  const brief = loadBrief();
+  document.getElementById('mb-sales').value = brief.salesYesterday || '';
+  document.getElementById('mb-cash').value = brief.cashOutWeek || '';
+  document.getElementById('mb-spend').value = brief.adSpend || '';
+  document.getElementById('mb-revenue').value = brief.adRevenue || '';
+  document.getElementById('mb-cvr').value = brief.cvr || '';
+  document.getElementById('mb-note').value = brief.note || '';
+}
+
+function saveBrief() {
+  localStorage.setItem(K_BRIEF, JSON.stringify({
+    salesYesterday: Number(document.getElementById('mb-sales').value || 0),
+    cashOutWeek: Number(document.getElementById('mb-cash').value || 0),
+    adSpend: Number(document.getElementById('mb-spend').value || 0),
+    adRevenue: Number(document.getElementById('mb-revenue').value || 0),
+    cvr: Number(document.getElementById('mb-cvr').value || 0),
+    note: document.getElementById('mb-note').value.trim(),
+  }));
+  closeModal('modal-brief');
+  if (currentPage === 'dashboard') renderDash();
+}
+
+function normalizeContentStatus(status) {
+  if (status === 'editing') return 'in-progress';
+  if (status === 'ready') return 'edited';
+  return status || 'raw';
+}
+
+function normalizeContentItem(item) {
+  return {
+    ...item,
+    status: normalizeContentStatus(item.status),
+    lane: item.lane || 'serafina',
+    owner: item.owner || 'Me',
+    adReady: item.adReady === true || item.adReady === 'yes',
+    source: item.source || 'Mixed',
+  };
+}
+
+function normalizeBrandEntry(item) {
+  const typeMap = { image:'proof', quote:'script', colour:'idea', reference:'offer' };
+  const tagMap = { colour:'serafina', silhouette:'serafina', culture:'manifestation', texture:'serafina', brand:'digital-product', quote:'discipline' };
+  return {
+    ...item,
+    type: typeMap[item.type] || item.type || 'idea',
+    tag: tagMap[item.tag] || item.tag || 'serafina',
+    img: item.img || '',
+    text: item.text || '',
+    link: item.link || '',
+  };
+}
 
 const SERAFINA_PRODUCTS = [
     {id:'p1', sku:'SC-001', name:'Rose Quartz Hair Comb Massager', cat:'Hair Combs', qty:250, cost:0, price:1699, reorder:20, status:'active', notes:'', img:null},
@@ -1558,20 +1680,21 @@ const SERAFINA_PRODUCTS = [
 ];
 
 function seed() {
+  const seedIfEmpty = (key, value) => { if (!load(key).length) save(key, value); };
   // Replace demo products with real Serafina Collective products
   const existing = load(K.products);
   const hasDemo = existing.length > 0 && existing[0].sku === 'SF-001';
   if (existing.length === 0 || hasDemo) {
     save(K.products, SERAFINA_PRODUCTS);
   }
-  save(K.exh, [
+  seedIfEmpty(K.exh, [
     {id:'e1',name:'Delhi Trunk Show',city:'Delhi',start:'2025-11-15',end:'2025-11-17',rev:38000,units:11,exp:8000,stall:5000,status:'completed',notes:'Wrap dress was top seller. Need better display.',img:null},
     {id:'e2',name:'Bangalore Design Bazaar',city:'Bangalore',start:'2025-12-05',end:'2025-12-07',rev:52000,units:16,exp:11000,stall:7500,status:'completed',notes:'Highest revenue. Co-ords flew off. Very style-forward crowd.',img:null},
     {id:'e3',name:'Mumbai Pop-up — Bandra',city:'Mumbai',start:'2026-01-18',end:'2026-01-19',rev:29000,units:8,exp:9000,stall:6000,status:'completed',notes:'Smaller crowd. Great stylist contacts made.',img:null},
     {id:'e4',name:'Jaipur Heritage Market',city:'Jaipur',start:'2026-02-14',end:'2026-02-16',rev:44000,units:13,exp:7500,stall:4500,status:'completed',notes:'Artisanal angle worked. Customers wanted fusion pieces.',img:null},
     {id:'e5',name:'Hyderabad Style Summit',city:'Hyderabad',start:'2026-04-10',end:'2026-04-12',rev:0,units:0,exp:0,stall:8000,status:'upcoming',notes:'Booked stall. Prepare 3 new SKUs.',img:null},
   ]);
-  save(K.tasks, [
+  seedIfEmpty(K.tasks, [
     {id:'t1',title:'Restock Linen Co-ord Set — order 5 more',owner:'Me',due:'2026-04-02',priority:'urgent',cat:'Production',status:'todo',notes:''},
     {id:'t2',title:'Create April Instagram content plan',owner:'Me',due:'2026-04-01',priority:'urgent',cat:'Content',status:'todo',notes:''},
     {id:'t3',title:'Design new Blazer silhouette — final sign-off',owner:'Me',due:'2026-03-28',priority:'urgent',cat:'Production',status:'todo',notes:''},
@@ -1580,29 +1703,40 @@ function seed() {
     {id:'t6',title:'Follow up with Bangalore stylist contacts',owner:'Me',due:'2026-04-03',priority:'backlog',cat:'Sales',status:'todo',notes:''},
     {id:'t7',title:'Book travel + stay for Hyderabad',owner:'Me',due:'2026-03-31',priority:'active',cat:'Operations',status:'done',notes:''},
   ]);
-  save(K.ideas, [
+  seedIfEmpty(K.ideas, [
     {id:'i1',title:'Bundle pricing — "Complete the Look"',type:'idea',body:'Offer co-ord top+bottom together at a slight discount. Increases average order value and feels more intentional.',tags:['pricing','upsell'],src:'Bangalore show',date:'2025-12-07'},
     {id:'i2',title:'Made-to-measure waitlist',type:'idea',body:'Multiple customers at Delhi asked for custom sizing. Create a simple MTM order form. Premium offering.',tags:['product','premium'],src:'Delhi Trunk Show',date:'2025-11-17'},
     {id:'i3',title:'Display quality = conversion rate',type:'learning',body:'High footfall ≠ high sales. The way garments are hung determines buyer intent. Better display = more sales. Invest in good hangers, racks.',tags:['exhibition','conversion'],src:'Mumbai Pop-up',date:'2026-01-19'},
     {id:'i4',title:'Brand storytelling raises perceived value',type:'learning',body:'When I explained fabric sourcing + design process, customers paid full price without negotiating. Story = value.',tags:['branding','pricing'],src:'Jaipur show',date:'2026-02-15'},
     {id:'i5',title:'Equity deal with infra partner to reduce capital needs',type:'idea',body:'Offer stall cost split to fabric/infra partner in exchange for % of show revenue. Reduces upfront capital. Test with Kavya Textiles.',tags:['equity','finance'],src:'Own thinking',date:'2026-03-20'},
   ]);
-  save(K.content, [
-    {id:'c1',type:'b-roll',title:'Stall setup — Bangalore',event:'Bangalore Design Bazaar',status:'raw',notes:'Time-lapse setup. Good garment display shots.',img:null,date:'2025-12-05'},
-    {id:'c2',type:'a-roll',title:'Brand intro — who is Serafina?',event:'',status:'editing',notes:'Talking-head. Needs editing. Strong footage.',img:null,date:'2026-01-10'},
-    {id:'c3',type:'reel',title:'Customer try-ons — Jaipur',event:'Jaipur Heritage Market',status:'ready',notes:'Natural customer reactions. Great energy.',img:null,date:'2026-02-15'},
-    {id:'c4',type:'a-roll',title:'Fabric sourcing vlog',event:'',status:'raw',notes:'Fabric market visit. Raw footage.',img:null,date:'2026-03-05'},
+  seedIfEmpty(K.content, [
+    {id:'c1',type:'b-roll',title:'Stall setup — Bangalore',event:'Bangalore Design Bazaar',status:'raw',notes:'Time-lapse setup. Good garment display shots.',lane:'serafina',owner:'Social Media Manager',adReady:false,source:'iPhone',img:null,date:'2025-12-05'},
+    {id:'c2',type:'a-roll',title:'Brand intro — who is Serafina?',event:'',status:'in-progress',notes:'Talking-head. Needs editing. Strong footage.',lane:'serafina',owner:'Social Media Manager',adReady:true,source:'Laptop',img:null,date:'2026-01-10'},
+    {id:'c3',type:'reel',title:'Customer try-ons — Jaipur',event:'Jaipur Heritage Market',status:'edited',notes:'Natural customer reactions. Great energy.',lane:'serafina',owner:'Performance Marketing Manager',adReady:true,source:'Drive',img:null,date:'2026-02-15'},
+    {id:'c4',type:'a-roll',title:'Fabric sourcing vlog',event:'',status:'raw',notes:'Fabric market visit. Raw footage.',lane:'serafina',owner:'Me',adReady:false,source:'iPhone',img:null,date:'2026-03-05'},
+    {id:'c5',type:'a-roll',title:'Weight loss mindset note',event:'Personal Brand OS',status:'edited',notes:'Hook on discipline, body confidence, and becoming the woman you keep promising yourself.',lane:'personal',owner:'Social Media Manager',adReady:false,source:'Laptop',img:null,date:'2026-03-20'},
   ]);
-  save(K.partners, [
+  seedIfEmpty(K.partners, [
     {id:'pt1',name:'Kavya Textiles',type:'Infra Provider',equity:5,contact:'kavya@example.com',notes:'Fabric supplier. Interested in equity deal for preferential pricing + co-branding at shows.'},
   ]);
-  save(K.customers, [
+  seedIfEmpty(K.customers, [
     {id:'c1',name:'Priya Mehra',phone:'9876543210',email:'priya@gmail.com',city:'Mumbai',showId:'e1',showName:'Delhi Trunk Show',items:'Wrap Dress, Linen Co-ord',totalSpend:10300,tag:'vip',followUpDate:'2026-04-05',notes:'Loves earth tones. Asked about next Mumbai show.'},
     {id:'c2',name:'Aditi Rao',phone:'9823456781',email:'',city:'Bangalore',showId:'e2',showName:'Bangalore Design Week',items:'Open Back Kurta',totalSpend:3200,tag:'new',followUpDate:'',notes:'Instagram: @aditi.wears'},
     {id:'c3',name:'Sunaina Kapoor',phone:'9911223344',email:'sunaina@work.com',city:'Delhi',showId:'e1',showName:'Delhi Trunk Show',items:'Draped Palazzo × 2, Wrap Dress',totalSpend:13400,tag:'repeat',followUpDate:'2026-04-15',notes:'Regular buyer. Wants custom sizing.'},
     {id:'c4',name:'Meera Iyer',phone:'9745678901',email:'',city:'Mumbai',showId:'e3',showName:'Mumbai Pop-Up',items:'Linen Co-ord',totalSpend:5800,tag:'new',followUpDate:'',notes:'Came with a friend, both bought.'},
     {id:'c5',name:'Tara Singh',phone:'9654321098',email:'tara@design.in',city:'Jaipur',showId:'e4',showName:'Jaipur Heritage Fair',items:'Wrap Dress, Open Back Kurta',totalSpend:7700,tag:'repeat',followUpDate:'2026-05-01',notes:'Stylist — potential collab.'},
   ]);
+  seedIfEmpty(K_DROPS, [{id:'d1',name:'Butter Soft Modal',theme:'Quiet luxury, Indian confidence, classy-sexy comfort',date:'2026-05-01',status:'1',notes:'3 styles · 4-5 colors · hoodies and pants. Soft, classy, sexy modal essentials.',img:''}]);
+  seedIfEmpty(K_OBS, [
+    {id:'pb1',type:'idea',tag:'weight-loss',text:'Build founder content around becoming the woman who keeps promises to herself.',link:'weight loss angle',img:''},
+    {id:'pb2',type:'script',tag:'discipline',text:'Discipline is not punishment. It is what makes your future self lighter.',link:'reel opener',img:''},
+    {id:'pb3',type:'offer',tag:'digital-product',text:'Manifestation dashboard = one place to hold goals, identity, routines, and proof.',link:MANIFESTATION_URL,img:''},
+    {id:'pb4',type:'proof',tag:'serafina',text:'Personal brand should make Serafina more trusted, not separate from it.',link:'founder x brand bridge',img:''},
+  ]);
+  if (!localStorage.getItem(K_BRIEF)) {
+    localStorage.setItem(K_BRIEF, JSON.stringify({salesYesterday:28600,cashOutWeek:42000,adSpend:8500,adRevenue:36200,cvr:2.4,note:'Protect profitability. Delegate content. Keep founder energy for launch + personal brand.'}));
+  }
 }
 
 // ═══════════════════════════════════════
@@ -1650,91 +1784,64 @@ function renderPage(p) {
 function renderDash() {
   const hr = new Date().getHours();
   document.getElementById('dash-greeting').textContent = hr<12 ? '✦ good morning' : hr<17 ? '✦ good afternoon' : '✦ good evening';
-  document.getElementById('dash-date').textContent = new Date().toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  document.getElementById('dash-date').textContent = new Date().toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'long',year:'numeric'}) + ' · keep it profitable and simple';
 
-  const exhs = load(K.exh), prods = load(K.products), tasks = load(K.tasks), ideas = load(K.ideas);
-  const done = exhs.filter(e=>e.status==='completed');
-  const totalRev = done.reduce((s,e)=>s+Number(e.rev||0),0);
-  const totalExp = done.reduce((s,e)=>s+Number(e.exp||0)+Number(e.stall||0),0);
-  const totalUnits = done.reduce((s,e)=>s+Number(e.units||0),0);
+  const brief = loadBrief();
+  const exhs = load(K.exh);
+  const prods = load(K.products);
+  const tasks = load(K.tasks).map(t => ({...t, priority: normalizeTaskPriority(t.priority), cat:t.cat||'General', owner:t.owner||t.assignee||'Me'}));
+  const content = load(K.content).map(normalizeContentItem);
+  const founder = load(K_OBS).map(normalizeBrandEntry);
+  const launch = load(K_DROPS)[0];
   const lowStock = prods.filter(p=>Number(p.qty)<=Number(p.reorder)&&p.status!=='discontinued');
   const openTasks = tasks.filter(t=>t.status!=='done');
-  const upcoming = exhs.filter(e=>e.status==='upcoming');
+  const roas = brief.adSpend ? (brief.adRevenue / brief.adSpend) : 0;
 
-  // Alerts
-  const alertDiv = document.getElementById('dash-alerts');
-  alertDiv.innerHTML = lowStock.map(p=>`<div class="alert-chip">⚠️ Low stock: <strong>${p.name}</strong> (${p.qty} left)</div>`).join('');
+  document.getElementById('dash-alerts').innerHTML = [
+    launch ? `<div class="alert-chip">🚀 Launch focus: <strong>${launch.name}</strong></div>` : '',
+    lowStock[0] ? `<div class="alert-chip">⚠️ Low stock: <strong>${lowStock[0].name}</strong> (${lowStock[0].qty} left)</div>` : '',
+    brief.note ? `<div class="alert-chip">🧠 ${brief.note}</div>` : ''
+  ].filter(Boolean).join('') || `<div class="alert-chip">✦ Clean slate. Build profit, not noise.</div>`;
 
-  // Stats
   document.getElementById('dash-stats').innerHTML = `
-    <div class="stat-card sc-saffron"><div class="stat-label">Total Revenue</div><div class="stat-val">${fmt(totalRev)}</div><div class="stat-sub">${done.length} shows</div></div>
-    <div class="stat-card sc-emerald"><div class="stat-label">Net Profit</div><div class="stat-val">${fmt(totalRev-totalExp)}</div><div class="stat-sub">after expenses</div></div>
-    <div class="stat-card sc-teal"><div class="stat-label">Units Sold</div><div class="stat-val">${totalUnits}</div><div class="stat-sub">all shows</div></div>
-    <div class="stat-card sc-magenta"><div class="stat-label">Active SKUs</div><div class="stat-val">${prods.filter(p=>p.status==='active').length}</div><div class="stat-sub">${lowStock.length} low stock</div></div>
-    <div class="stat-card sc-coral"><div class="stat-label">Open Tasks</div><div class="stat-val">${openTasks.length}</div><div class="stat-sub">${tasks.filter(t=>t.priority==='urgent'&&t.status!=='done').length} urgent</div></div>
-    <div class="stat-card sc-purple"><div class="stat-label">Next Show</div><div class="stat-val" style="font-size:16px;font-weight:800;">${upcoming[0]?upcoming[0].name:'None yet'}</div><div class="stat-sub">${upcoming[0]?upcoming[0].city:''}</div></div>
+    <div class="stat-card sc-saffron"><div class="stat-label">Sales Yesterday</div><div class="stat-val">${fmt(brief.salesYesterday)}</div><div class="stat-sub">manual founder snapshot</div></div>
+    <div class="stat-card sc-coral"><div class="stat-label">Cash Out This Week</div><div class="stat-val">${fmt(brief.cashOutWeek)}</div><div class="stat-sub">production, rent, shows, salaries</div></div>
+    <div class="stat-card sc-teal"><div class="stat-label">Ads Snapshot</div><div class="stat-val">${roas.toFixed(1)}x</div><div class="stat-sub">${fmt(brief.adSpend)} spend · ${fmt(brief.adRevenue)} revenue</div></div>
+    <div class="stat-card sc-magenta"><div class="stat-label">Content Ready</div><div class="stat-val">${content.filter(i=>['edited','scheduled'].includes(i.status)).length}</div><div class="stat-sub">${content.filter(i=>i.adReady).length} ad-eligible</div></div>
   `;
 
-  // Chart
-  if (revChartObj) revChartObj.destroy();
-  const ctx = document.getElementById('rev-chart').getContext('2d');
-  revChartObj = new Chart(ctx, {
-    type: 'bar',
-    data: {
-      labels: done.map(e=>e.name.length>14?e.name.slice(0,14)+'…':e.name),
-      datasets: [
-        { label: 'Revenue ₹', data: done.map(e=>e.rev), backgroundColor: '#f4a01c', borderRadius: 8, borderSkipped: false },
-        { label: 'Expenses ₹', data: done.map(e=>Number(e.exp||0)+Number(e.stall||0)), backgroundColor: '#e8dac8', borderRadius: 8, borderSkipped: false },
-      ]
-    },
-    options: {
-      responsive:true, maintainAspectRatio:false,
-      plugins: { legend: { labels: { color:'#8a7898', font:{size:11} } } },
-      scales: {
-        x: { ticks:{color:'#8a7898',font:{size:10}}, grid:{color:'#f0e8d8'} },
-        y: { ticks:{color:'#8a7898',font:{size:10},callback:v=>'₹'+v.toLocaleString('en-IN')}, grid:{color:'#f0e8d8'} }
-      }
-    }
-  });
-
-  // Today tasks (urgent)
-  const urgent = tasks.filter(t=>t.priority==='urgent'&&t.status!=='done');
-  document.getElementById('dash-task-count').textContent = urgent.length + ' urgent';
-  document.getElementById('dash-tasks-list').innerHTML = urgent.length
-    ? urgent.map(t=>`<div class="today-task">
-        <div class="today-dot" style="background:var(--coral)"></div>
-        <div>
-          <div style="font-size:13px;font-weight:600;">${t.title}</div>
-          <div style="font-size:11px;color:var(--text2);margin-top:2px;">${t.cat} · Due ${fmtD(t.due)}</div>
-        </div>
-      </div>`).join('')
-    : '<div style="text-align:center;padding:20px;color:var(--text2);font-size:13px;">🎉 All clear!</div>';
-
-  // Inventory health
-  document.getElementById('dash-inv-health').innerHTML = prods.map(p=>{
-    const isLow = Number(p.qty)<=Number(p.reorder);
-    const pct = Math.min(100, Math.round((p.qty/Math.max(p.reorder*2,1))*100));
-    return `<div style="margin-bottom:12px;">
-      <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px;">
-        <span style="font-weight:600;">${p.name} <span style="font-weight:400;color:var(--text2)">${p.sku}</span></span>
-        <span style="color:${isLow?'var(--coral)':'var(--emerald)'};font-weight:700;">${p.qty} in stock</span>
-      </div>
-      <div style="background:var(--cream);border-radius:20px;height:5px;overflow:hidden;">
-        <div style="width:${pct}%;height:100%;border-radius:20px;background:${isLow?'var(--coral)':'var(--saffron)'};"></div>
-      </div>
-    </div>`;
-  }).join('');
-
-  // Ideas preview
-  const recent = [...ideas].reverse().slice(0,3);
-  const ideaCols = ['ic-purple','ic-saffron','ic-teal'];
-  document.getElementById('dash-ideas-preview').innerHTML = recent.map((i,idx)=>`
-    <div class="idea-card ${ideaCols[idx%ideaCols.length]}" style="margin-bottom:10px;cursor:pointer;" onclick="navigate('ideas')">
-      <div class="idea-type-label">${i.type==='idea'?'💡 Idea':'📚 Learning'}</div>
-      <div class="idea-title">${i.title}</div>
-      ${i.body?`<div class="idea-body">${i.body.slice(0,80)}${i.body.length>80?'…':''}</div>`:''}
+  document.getElementById('dash-brief-controls').innerHTML = `
+    <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;">
+      <div style="background:var(--cream);border:1px solid var(--border);border-radius:12px;padding:12px;"><div style="font-size:11px;color:var(--text2);">Sales Yesterday</div><div style="font-size:20px;font-weight:900;color:var(--saffron);">${fmt(brief.salesYesterday)}</div></div>
+      <div style="background:var(--cream);border:1px solid var(--border);border-radius:12px;padding:12px;"><div style="font-size:11px;color:var(--text2);">Cash Out This Week</div><div style="font-size:20px;font-weight:900;color:var(--coral);">${fmt(brief.cashOutWeek)}</div></div>
+      <div style="background:var(--cream);border:1px solid var(--border);border-radius:12px;padding:12px;"><div style="font-size:11px;color:var(--text2);">Meta Spend</div><div style="font-size:20px;font-weight:900;color:var(--teal);">${fmt(brief.adSpend)}</div></div>
+      <div style="background:var(--cream);border:1px solid var(--border);border-radius:12px;padding:12px;"><div style="font-size:11px;color:var(--text2);">Conversion Rate</div><div style="font-size:20px;font-weight:900;color:var(--magenta);">${brief.cvr ? brief.cvr.toFixed(1) : '0.0'}%</div></div>
     </div>
-  `).join('');
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:14px;font-size:12px;color:var(--text2);"><span>${brief.note || 'Use this like your real founder dashboard.'}</span><button class="btn btn-ghost btn-sm" onclick="openModal('modal-brief')">Update →</button></div>
+  `;
+
+  document.getElementById('dash-task-count').textContent = `${openTasks.filter(t=>t.priority==='urgent').length} urgent · ${openTasks.length} open`;
+  document.getElementById('dash-tasks-list').innerHTML = openTasks.slice(0,5).map(t=>`<div class="today-task"><div class="today-dot" style="background:${t.priority==='urgent'?'var(--coral)':'var(--saffron)'}"></div><div><div style="font-size:13px;font-weight:600;">${t.title}</div><div style="font-size:11px;color:var(--text2);margin-top:2px;">${t.cat} · ${t.owner} · Due ${fmtD(t.due)}</div></div></div>`).join('') || '<div style="text-align:center;padding:20px;color:var(--text2);font-size:13px;">🎉 All clear!</div>';
+
+  document.getElementById('dash-content-pipeline').innerHTML = `
+    <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-bottom:14px;">
+      <div style="background:var(--coral-t);border-radius:12px;padding:12px;"><div style="font-size:11px;color:var(--coral);">Raw</div><div style="font-size:22px;font-weight:900;color:var(--coral);">${content.filter(i=>i.status==='raw').length}</div></div>
+      <div style="background:var(--indigo-t);border-radius:12px;padding:12px;"><div style="font-size:11px;color:var(--indigo);">In Progress</div><div style="font-size:22px;font-weight:900;color:var(--indigo);">${content.filter(i=>i.status==='in-progress').length}</div></div>
+      <div style="background:var(--saffron-t);border-radius:12px;padding:12px;"><div style="font-size:11px;color:var(--gold);">Edited / Scheduled</div><div style="font-size:22px;font-weight:900;color:var(--gold);">${content.filter(i=>['edited','scheduled'].includes(i.status)).length}</div></div>
+      <div style="background:var(--emerald-t);border-radius:12px;padding:12px;"><div style="font-size:11px;color:var(--emerald);">Ad Eligible</div><div style="font-size:22px;font-weight:900;color:var(--emerald);">${content.filter(i=>i.adReady).length}</div></div>
+    </div>`;
+
+  document.getElementById('dash-launch-preview').innerHTML = launch ? `<div style="background:linear-gradient(135deg,var(--magenta-t),var(--purple-t));border-radius:16px;padding:16px;"><div style="font-size:11px;color:var(--text2);margin-bottom:6px;">Primary launch focus</div><div style="font-size:22px;font-weight:900;">${launch.name}</div><div style="font-size:12px;color:var(--text2);margin-top:4px;">${launch.theme||''}</div><div style="font-size:12px;line-height:1.8;color:var(--text2);margin-top:12px;">${launch.notes||''}</div></div>` : '<div style="font-size:13px;color:var(--text2);">Add your modal collection in Launch HQ.</div>';
+
+  document.getElementById('dash-inv-health').innerHTML = lowStock.slice(0,4).map(p=>`<div style="margin-bottom:12px;"><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px;"><span style="font-weight:600;">${p.name}</span><span style="color:var(--coral);font-weight:700;">${p.qty} left</span></div><div style="background:var(--cream);border-radius:20px;height:5px;overflow:hidden;"><div style="width:${Math.min(100, Math.round((p.qty/Math.max(p.reorder*2,1))*100))}%;height:100%;border-radius:20px;background:var(--coral);"></div></div></div>`).join('') || '<div style="font-size:12px;color:var(--text2);">No urgent stock pressure right now.</div>';
+
+  document.getElementById('dash-founder-preview').innerHTML = `
+    <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-bottom:14px;">
+      <div style="background:var(--purple-t);border-radius:12px;padding:12px;"><div style="font-size:11px;color:var(--purple);">Founder assets</div><div style="font-size:22px;font-weight:900;color:var(--purple);">${content.filter(i=>i.lane==='personal'||i.lane==='both').length}</div></div>
+      <div style="background:var(--teal-t);border-radius:12px;padding:12px;"><div style="font-size:11px;color:var(--teal);">Strategic notes</div><div style="font-size:22px;font-weight:900;color:var(--teal);">${founder.length}</div></div>
+    </div>
+    <div style="font-size:12px;line-height:1.8;color:var(--text2);"><div><strong style="color:var(--text);">Primary pillars:</strong> weight loss, discipline, manifestation, founder x Serafina</div><div><strong style="color:var(--text);">Digital product:</strong> <a href="${MANIFESTATION_URL}" target="_blank" style="color:var(--indigo);font-weight:700;">Manifestation dashboard ↗</a></div></div>
+  `;
 }
 
 // ═══════════════════════════════════════
@@ -2088,16 +2195,15 @@ function saveIdea() {
 //  CONTENT
 // ═══════════════════════════════════════
 const TYPE_ICONS = {'a-roll':'🎥','b-roll':'🎞','reel':'📱','photo':'📸','script':'📝'};
-const STATUS_COLORS = {raw:['var(--coral-t)','var(--coral)'],editing:['var(--indigo-t)','var(--indigo)'],ready:['var(--saffron-t)','var(--saffron)'],posted:['var(--emerald-t)','var(--emerald)']};
+const STATUS_COLORS = {raw:['var(--coral-t)','var(--coral)'],'in-progress':['var(--indigo-t)','var(--indigo)'],edited:['var(--saffron-t)','var(--saffron)'],scheduled:['var(--purple-t)','var(--purple)'],posted:['var(--emerald-t)','var(--emerald)']};
 
 function renderContent() {
-  const items=load(K.content);
-  const byStatus = s=>items.filter(i=>i.status===s).length;
+  const items=load(K.content).map(normalizeContentItem);
   document.getElementById('content-stats').innerHTML = `
     <div class="stat-card sc-coral"><div class="stat-label">Total Assets</div><div class="stat-val">${items.length}</div></div>
-    <div class="stat-card sc-saffron"><div class="stat-label">Ready to Post</div><div class="stat-val">${byStatus('ready')}</div></div>
-    <div class="stat-card sc-emerald"><div class="stat-label">Posted</div><div class="stat-val">${byStatus('posted')}</div></div>
-    <div class="stat-card sc-teal"><div class="stat-label">In Editing</div><div class="stat-val">${byStatus('editing')}</div></div>
+    <div class="stat-card sc-saffron"><div class="stat-label">Ready to Delegate</div><div class="stat-val">${items.filter(i=>['edited','scheduled'].includes(i.status)).length}</div></div>
+    <div class="stat-card sc-emerald"><div class="stat-label">Ad Eligible</div><div class="stat-val">${items.filter(i=>i.adReady).length}</div></div>
+    <div class="stat-card sc-teal"><div class="stat-label">Founder Lane</div><div class="stat-val">${items.filter(i=>i.lane==='personal'||i.lane==='both').length}</div></div>
   `;
   document.getElementById('content-grid').innerHTML = items.map(item=>{
     const sc = STATUS_COLORS[item.status]||['var(--cream)','var(--text2)'];
@@ -2109,7 +2215,9 @@ function renderContent() {
       </div>
       <div class="content-body">
         <div class="content-title">${item.title}</div>
+        <div class="content-sub">${item.lane==='personal'?'Personal Brand OS':item.lane==='both'?'Both lanes':'Serafina HQ'} · ${item.owner}</div>
         ${item.event?`<div class="content-sub">📍 ${item.event}</div>`:''}
+        <div class="content-sub" style="margin-top:4px;">${item.source}${item.adReady?' · ad-ready ✓':''}</div>
         ${item.notes?`<div class="content-sub" style="margin-top:4px;">${item.notes.length>60?item.notes.slice(0,60)+'…':item.notes}</div>`:''}
       </div>
       <div class="content-foot">
@@ -2124,7 +2232,7 @@ function deleteContent(id) {
   save(K.content,load(K.content).filter(i=>i.id!==id)); renderContent();
 }
 function editContent(id) {
-  const item = load(K.content).find(x=>x.id===id); if(!item) return;
+  const item = normalizeContentItem(load(K.content).find(x=>x.id===id) || {}); if(!item.id) return;
   document.getElementById('c-id').value=item.id;
   document.getElementById('c-type').value=item.type;
   document.getElementById('c-title').value=item.title||'';
@@ -2132,6 +2240,10 @@ function editContent(id) {
   document.getElementById('c-date').value=item.date||'';
   document.getElementById('c-notes').value=item.notes||'';
   document.getElementById('c-status').value=item.status||'raw';
+  document.getElementById('c-lane').value=item.lane||'serafina';
+  document.getElementById('c-owner').value=item.owner||'Me';
+  document.getElementById('c-ad-ready').value=item.adReady?'yes':'no';
+  document.getElementById('c-source').value=item.source||'';
   document.getElementById('c-img-data').value=item.img||'';
   if (item.img) {
     document.getElementById('c-img-area').innerHTML=`<img src="${item.img}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;" /><input type="file" id="c-img-file" accept="image/*" onchange="previewUpload(event,'c-img-area','c-img-data')" /><span style="position:absolute;bottom:8px;background:rgba(0,0,0,.5);color:white;font-size:11px;padding:2px 10px;border-radius:4px;z-index:2;">Change</span>`;
@@ -2149,6 +2261,10 @@ function saveContent() {
     date:document.getElementById('c-date').value||existing?.date||today(),
     notes:document.getElementById('c-notes').value,
     status:document.getElementById('c-status').value,
+    lane:document.getElementById('c-lane').value,
+    owner:document.getElementById('c-owner').value,
+    adReady:document.getElementById('c-ad-ready').value==='yes',
+    source:document.getElementById('c-source').value.trim()||'Mixed',
     img:document.getElementById('c-img-data').value||null,
   };
   const items=load(K.content);
@@ -2158,9 +2274,12 @@ function saveContent() {
     else items.push(item);
   } else items.push(item);
   save(K.content,items); closeModal('modal-content');
-  ['c-id','c-title','c-event','c-date','c-notes','c-img-data'].forEach(x=>{const el=document.getElementById(x);if(el)el.value='';});
+  ['c-id','c-title','c-event','c-date','c-notes','c-img-data','c-source'].forEach(x=>{const el=document.getElementById(x);if(el)el.value='';});
   document.getElementById('c-type').value='a-roll';
   document.getElementById('c-status').value='raw';
+  document.getElementById('c-lane').value='serafina';
+  document.getElementById('c-owner').value='Me';
+  document.getElementById('c-ad-ready').value='no';
   document.getElementById('c-img-area').innerHTML=`<span style="font-size:28px">🎬</span><span>Upload thumbnail</span><input type="file" id="c-img-file" accept="image/*" onchange="previewUpload(event,'c-img-area','c-img-data')" />`;
   renderContent();
 }
@@ -2215,7 +2334,10 @@ function savePartner() {
 // ═══════════════════════════════════════
 //  MODAL HELPERS
 // ═══════════════════════════════════════
-function openModal(id) { document.getElementById(id).classList.add('open'); }
+function openModal(id) {
+  if (id==='modal-brief') hydrateBriefModal();
+  document.getElementById(id).classList.add('open');
+}
 function closeModal(id) { document.getElementById(id).classList.remove('open'); }
 document.querySelectorAll('.overlay').forEach(m=>m.addEventListener('click',e=>{ if(e.target===m) m.classList.remove('open'); }));
 document.addEventListener('keydown',e=>{ if(e.key==='Escape') document.querySelectorAll('.overlay.open').forEach(m=>m.classList.remove('open')); });
@@ -3281,8 +3403,7 @@ function showVoiceConfirm(text) {
 // ═══════════════════════════════════════
 //  DROP PLANNER
 // ═══════════════════════════════════════
-const K_DROPS = 'sf3_drops';
-const DROP_STAGES = ['🎨 Design','🧵 Sample','🏭 Produce','✅ Ready','🚀 Live'];
+const DROP_STAGES = ['🧠 Concept','🧵 Sampling','🏭 Production','🎬 Content','🚀 Launch'];
 
 function renderDrops() {
   const drops = load(K_DROPS);
@@ -3291,12 +3412,21 @@ function renderDrops() {
     grid.innerHTML = `
       <button class="drop-add-card" onclick="openModal('modal-drop')">
         <span style="font-size:36px">✦</span>
-        <span style="font-weight:800;font-size:15px;">Plan your next drop</span>
-        <span style="font-size:12px;opacity:.5;">Add collection · mood · countdown</span>
+        <span style="font-weight:800;font-size:15px;">Build your modal launch HQ</span>
+        <span style="font-size:12px;opacity:.5;">Add collection · story · countdown</span>
       </button>`;
     return;
   }
-  grid.innerHTML = drops.map(d => {
+  const current = drops[0];
+  grid.innerHTML = `
+    <div class="drop-card" style="grid-column:1/-1;background:linear-gradient(135deg,#fff8ed,#fff1f7);border:1px solid rgba(124,58,237,.08);">
+      <div class="drop-card-body">
+        <div class="drop-card-name">Current launch focus: ${current.name}</div>
+        <div class="drop-card-theme">${current.theme||''}</div>
+        <div style="font-size:12px;color:var(--text2);line-height:1.8;margin-top:12px;">${current.notes||''}</div>
+      </div>
+    </div>
+  ` + drops.map(d => {
     const now = new Date(), launch = d.date ? new Date(d.date) : null;
     const days = launch ? Math.ceil((launch-now)/864e5) : null;
     const countdown = days !== null ? (days > 0 ? `${days}d to go` : days === 0 ? 'TODAY 🔥' : 'Launched!') : '';
@@ -3323,7 +3453,7 @@ function renderDrops() {
         </div>
       </div>
     </div>`;
-  }).join('') + `<button class="drop-add-card" onclick="openModal('modal-drop')"><span style="font-size:28px">+</span><span>Add Drop</span></button>`;
+  }).join('') + `<button class="drop-add-card" onclick="openModal('modal-drop')"><span style="font-size:28px">+</span><span>Add Launch</span></button>`;
 }
 
 function saveDrop() {
@@ -3346,14 +3476,28 @@ function deleteDrop(id) { if(!confirm('Remove this drop?')) return; save(K_DROPS
 // ═══════════════════════════════════════
 //  OBSESSION BOARD
 // ═══════════════════════════════════════
-const K_OBS = 'sf3_obs';
-const OBS_COLORS = { image:'var(--saffron)', quote:'var(--purple)', colour:'var(--magenta)', reference:'var(--teal)' };
+const OBS_COLORS = { idea:'var(--saffron)', script:'var(--purple)', proof:'var(--magenta)', offer:'var(--teal)' };
 
 function renderObs(tag) {
-  const all = load(K_OBS).filter(o => tag==='all' || o.tag===tag);
+  const all = load(K_OBS).map(normalizeBrandEntry).filter(o => tag==='all' || o.tag===tag);
   const grid = document.getElementById('obs-grid');
+  document.getElementById('pb-pillars').innerHTML = `
+    <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;">
+      <div style="background:var(--purple-t);border-radius:12px;padding:12px;"><div style="font-size:11px;color:var(--purple);">Pillar 01</div><div style="font-size:13px;font-weight:800;">Weight loss</div></div>
+      <div style="background:var(--saffron-t);border-radius:12px;padding:12px;"><div style="font-size:11px;color:var(--gold);">Pillar 02</div><div style="font-size:13px;font-weight:800;">Discipline</div></div>
+      <div style="background:var(--teal-t);border-radius:12px;padding:12px;"><div style="font-size:11px;color:var(--teal);">Pillar 03</div><div style="font-size:13px;font-weight:800;">Manifestation</div></div>
+      <div style="background:var(--coral-t);border-radius:12px;padding:12px;"><div style="font-size:11px;color:var(--coral);">Pillar 04</div><div style="font-size:13px;font-weight:800;">Founder x Serafina</div></div>
+    </div>`;
+  document.getElementById('pb-offers').innerHTML = `
+    <div style="display:flex;flex-direction:column;gap:10px;">
+      <div style="background:var(--cream);border:1px solid var(--border);border-radius:12px;padding:12px;">
+        <div style="font-size:11px;color:var(--text2);margin-bottom:4px;">Live offer</div>
+        <div style="font-size:13px;font-weight:800;">Manifestation Dashboard</div>
+        <a href="${MANIFESTATION_URL}" target="_blank" style="font-size:12px;color:var(--indigo);font-weight:700;">Open product ↗</a>
+      </div>
+    </div>`;
   if (!all.length) {
-    grid.innerHTML = `<div style="text-align:center;padding:48px;color:var(--text2);"><div style="font-size:36px;margin-bottom:12px;">🖼</div><div style="font-weight:700;">Nothing yet — add what inspires you</div><div style="font-size:12px;margin-top:4px;">Images, quotes, colour palettes, brand references</div></div>`;
+    grid.innerHTML = `<div style="text-align:center;padding:48px;color:var(--text2);"><div style="font-size:36px;margin-bottom:12px;">🧠</div><div style="font-weight:700;">Nothing here yet</div><div style="font-size:12px;margin-top:4px;">Add founder hooks, manifestation notes, and digital product prompts.</div></div>`;
     return;
   }
   grid.innerHTML = all.map(o => {
@@ -3364,7 +3508,7 @@ function renderObs(tag) {
       ${imgSrc ? `<img class="obs-card-img" src="${imgSrc}" alt="" loading="lazy">` : ''}
       <div class="obs-card-body">
         <div class="obs-type-pill" style="background:${bg}20;color:${bg};">${o.type}</div>
-        ${o.text ? `<div class="obs-card-text">${o.type==='quote'?`"${o.text}"`:o.text}</div>` : ''}
+        ${o.text ? `<div class="obs-card-text">${o.text}</div>` : ''}
         <div class="obs-tags">
           <span class="obs-tag">${o.tag}</span>
           ${o.link ? `<span class="obs-tag">→ ${o.link}</span>` : ''}
