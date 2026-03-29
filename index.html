@@ -267,6 +267,11 @@ html, body { min-height: 100vh; background: var(--cream); font-family: 'Segoe UI
 .content-upload-status.ok { color:var(--emerald); }
 .content-upload-status.warn { color:var(--gold); }
 .content-upload-status.err { color:var(--magenta); }
+.content-mode-tabs { display:flex; gap:8px; flex-wrap:wrap; margin:10px 0 4px; }
+.content-mode-chip { border:1.5px solid var(--border); background:var(--white); color:var(--text2); border-radius:999px; padding:7px 12px; font-size:11px; font-weight:700; cursor:pointer; }
+.content-mode-chip.active { background:var(--teal); border-color:var(--teal); color:white; }
+.content-mode-panel { display:none; }
+.content-mode-panel.active { display:block; }
 .page-actions { display:flex; gap:10px; flex-wrap:wrap; justify-content:flex-end; }
 .content-sync-status { margin:0 0 16px; font-size:12px; color:var(--text2); background:var(--white); border:1.5px solid var(--border); border-radius:12px; padding:10px 14px; display:none; }
 .content-sync-status.ok { display:block; color:var(--emerald); background:var(--emerald-t); border-color:rgba(26,140,90,.15); }
@@ -1348,12 +1353,27 @@ html, body { min-height: 100vh; background: var(--cream); font-family: 'Segoe UI
     <div class="frow"><div class="fgrp"><button class="btn btn-ghost" type="button" onclick="generateContentBrief()">Generate hook + angle + instructions</button></div></div>
     <div class="frow">
       <div class="fgrp">
-        <label>Cloud upload</label>
-        <div class="content-upload-row">
-          <button class="btn btn-ghost" type="button" onclick="document.getElementById('c-asset-file').click()">Choose file</button>
-          <button class="btn" type="button" onclick="uploadContentAsset()" style="background:var(--indigo);color:white;">Upload to Cloud</button>
-          <button class="btn" type="button" onclick="bulkUploadContentAssets()" style="background:var(--teal);color:white;">Bulk upload intake</button>
-          <input id="c-asset-file" class="content-upload-file" type="file" multiple />
+        <label>Intake mode</label>
+        <div class="content-mode-tabs">
+          <button class="content-mode-chip active" type="button" id="mode-cloud-btn" onclick="setContentIntakeMode('cloud')">Cloud Upload</button>
+          <button class="content-mode-chip" type="button" id="mode-drive-btn" onclick="setContentIntakeMode('drive')">Google Drive Batch</button>
+        </div>
+        <div class="content-mode-panel active" id="content-cloud-panel">
+          <div class="content-upload-row">
+            <button class="btn btn-ghost" type="button" onclick="document.getElementById('c-asset-file').click()">Choose file</button>
+            <button class="btn" type="button" onclick="uploadContentAsset()" style="background:var(--indigo);color:white;">Upload to Cloud</button>
+            <button class="btn" type="button" onclick="bulkUploadContentAssets()" style="background:var(--teal);color:white;">Bulk upload intake</button>
+            <input id="c-asset-file" class="content-upload-file" type="file" multiple />
+          </div>
+        </div>
+        <div class="content-mode-panel" id="content-drive-panel">
+          <div class="frow c2" style="margin-top:0;">
+            <div class="fgrp"><label>Drive folder link</label><input id="c-drive-folder" placeholder="Paste Google Drive folder link" /></div>
+            <div class="fgrp"><label>Approx file count</label><input id="c-drive-count" type="number" min="1" placeholder="How many clips/videos?" /></div>
+          </div>
+          <div class="content-upload-row" style="margin-top:4px;">
+            <button class="btn" type="button" onclick="saveDriveBatch()" style="background:var(--gold);color:white;">Save Drive batch</button>
+          </div>
         </div>
         <div class="content-upload-status" id="c-upload-status">Choose one or many files. Single upload fills this asset; bulk upload creates a whole intake batch automatically.</div>
       </div>
@@ -2301,10 +2321,25 @@ const STATUS_COLORS = {
   posted:['var(--emerald-t)','var(--emerald)']
 };
 let contentFilters = { query:'', owner:'all', lane:'all', queue:'all' };
+let contentIntakeMode = 'cloud';
 
 function setContentFilter(key, value) {
   contentFilters[key] = value;
   renderContent();
+}
+
+function setContentIntakeMode(mode) {
+  contentIntakeMode = mode;
+  document.getElementById('mode-cloud-btn').classList.toggle('active', mode === 'cloud');
+  document.getElementById('mode-drive-btn').classList.toggle('active', mode === 'drive');
+  document.getElementById('content-cloud-panel').classList.toggle('active', mode === 'cloud');
+  document.getElementById('content-drive-panel').classList.toggle('active', mode === 'drive');
+  setContentUploadStatus(
+    mode === 'cloud'
+      ? 'Choose one or many files. Single upload fills this asset; bulk upload creates a whole intake batch automatically.'
+      : 'Paste one Google Drive folder for your pro-video batch. The dashboard will still handle Kriti, Dolly, and Badri workflow.',
+    ''
+  );
 }
 
 function batchNameForItem(item) {
@@ -2361,6 +2396,14 @@ function buildDefaultInstructions(item) {
     item.adReady ? 'Also think about whether this can become a strong ad creative and note the ad angle.' : 'If this unexpectedly feels ad-worthy, mark it ad-ready.',
     'Upload the final creative back into this app and move it to Ready for Dolly.'
   ].filter(Boolean).join(' ');
+}
+
+function normalizeDriveLink(link='') {
+  return String(link || '').trim();
+}
+
+function isDriveLink(link='') {
+  return /drive\.google\.com/i.test(String(link || ''));
 }
 
 function suggestHook(item) {
@@ -2454,12 +2497,13 @@ function renderContent() {
   const adCandidates = items.filter(i=>i.adReady && ['raw','selected','editing','ready-review'].includes(i.status));
   const batches = Object.values(items.reduce((acc, item) => {
     const key = batchNameForItem(item);
-    if (!acc[key]) acc[key] = { name:key, count:0, ready:0, adReady:0, owner:item.owner || 'Kriti', lane:item.lane, latest:item.date || '', deadline:item.deadline || '' };
+    if (!acc[key]) acc[key] = { name:key, count:0, ready:0, adReady:0, owner:item.owner || 'Kriti', lane:item.lane, latest:item.date || '', deadline:item.deadline || '', driveLink:item.driveLink || '' };
     acc[key].count += 1;
     if (['ready-review','approved','scheduled','posted'].includes(item.status)) acc[key].ready += 1;
     if (item.adReady) acc[key].adReady += 1;
     if (item.date && (!acc[key].latest || item.date > acc[key].latest)) acc[key].latest = item.date;
     if (!acc[key].deadline && item.deadline) acc[key].deadline = item.deadline;
+    if (!acc[key].driveLink && item.driveLink) acc[key].driveLink = item.driveLink;
     return acc;
   }, {})).sort((a,b)=>String(b.latest||'').localeCompare(String(a.latest||'')));
   document.getElementById('content-playbooks').innerHTML = ['Kriti','Badri'].map(role => {
@@ -2498,10 +2542,12 @@ function renderContent() {
         <span class="batch-chip">${batch.ready} progressed</span>
         <span class="batch-chip">${batch.adReady} ad-ready</span>
         ${batch.deadline?`<span class="batch-chip">due ${fmtD(batch.deadline)}</span>`:''}
+        ${batch.driveLink?`<span class="batch-chip">Drive batch</span>`:''}
       </div>
       <div class="batch-actions">
         <button class="btn btn-ghost btn-sm" onclick="setContentFilter('query', '${String(batch.name).replace(/'/g, "\\'")}'); document.getElementById('content-search').value='${String(batch.name).replace(/'/g, "\\'")}';">Open batch</button>
         <button class="btn btn-ghost btn-sm" onclick="sendBatchHandoffWhatsApp('${String(batch.name).replace(/'/g, "\\'")}')">WhatsApp Kriti</button>
+        ${batch.driveLink?`<a class="btn btn-ghost btn-sm" href="${batch.driveLink}" target="_blank" rel="noopener noreferrer">Open Drive</a>`:''}
       </div>
     </div>
   `).join('') || '';
@@ -2542,11 +2588,12 @@ function renderContent() {
         ${item.folderName?`<div class="content-sub">📁 ${item.folderName}</div>`:''}
         ${item.event?`<div class="content-sub">📍 ${item.event}</div>`:''}
         <div class="content-sub" style="margin-top:4px;">${item.source}${item.adReady?' · ad-ready ✓':''}${item.deadline?` · due ${fmtD(item.deadline)}`:''}</div>
+        ${item.driveLink?`<a class="content-link" href="${item.driveLink}" target="_blank" rel="noopener noreferrer">↗ Open Drive folder</a>`:''}
         ${item.hook?`<div class="content-sub" style="margin-top:4px;">🪝 ${item.hook}</div>`:''}
         ${item.adAngle?`<div class="content-sub" style="margin-top:4px;">🎯 ${item.adAngle}</div>`:''}
         ${item.notes?`<div class="content-sub" style="margin-top:4px;">${item.notes.length>60?item.notes.slice(0,60)+'…':item.notes}</div>`:''}
         <span class="content-lane-pill" style="background:${laneStyles[0]};color:${laneStyles[1]};">${laneStyles[2]}</span>
-        ${item.link?`<a class="content-link" href="${item.link}" target="_blank">↗ Open asset</a>`:''}
+        ${item.link && !item.driveLink?`<a class="content-link" href="${item.link}" target="_blank">↗ Open asset</a>`:''}
       </div>
       <div class="content-foot">
         <button class="btn btn-ghost btn-sm" onclick="copyContentHandoff('${item.id}')">Copy brief</button>
@@ -2601,6 +2648,7 @@ function buildContentHandoff(item) {
     item.instructions ? `Instructions: ${item.instructions}` : `Instructions: ${buildDefaultInstructions(item)}`,
     item.source ? `Source: ${item.source}` : '',
     item.adReady ? 'Ad-ready: Yes' : 'Ad-ready: No',
+    item.driveLink ? `Drive folder: ${item.driveLink}` : '',
     item.link ? `Asset link: ${item.link}` : 'Asset link: add cloud link before delegating',
     item.notes ? `Notes: ${item.notes}` : ''
   ].filter(Boolean);
@@ -2609,6 +2657,7 @@ function buildContentHandoff(item) {
 
 function buildBatchHandoff(batchName, items) {
   const deadline = items.map(item => item.deadline).filter(Boolean).sort()[0] || defaultDeadlineISO();
+  const driveLink = items.find(item => item.driveLink)?.driveLink || '';
   const lines = items.slice(0,10).map((item, idx) => `${idx+1}. ${item.title} · ${statusLabel(item.status)}${item.link ? ` · ${item.link}` : ''}`);
   return [
     `New content batch uploaded: ${batchName}`,
@@ -2617,6 +2666,7 @@ function buildBatchHandoff(batchName, items) {
     'Editing style should feel premium, sharp, feminine, and story-led.',
     'Use this structure: hook -> texture/detail -> payoff -> CTA.',
     'Upload finals back into the dashboard and move them to Ready for Dolly.',
+    driveLink ? `Drive folder: ${driveLink}` : '',
     '',
     ...lines,
     '',
@@ -2690,6 +2740,7 @@ function setContentUploadStatus(message, tone='') {
 
 function resetContentModal() {
   ['c-id','c-title','c-event','c-date','c-deadline','c-notes','c-img-data','c-source','c-link','c-audience','c-hook','c-ad-angle','c-instructions'].forEach(x=>{const el=document.getElementById(x);if(el)el.value='';});
+  ['c-drive-folder','c-drive-count'].forEach(x=>{const el=document.getElementById(x);if(el)el.value='';});
   document.getElementById('c-type').value='a-roll';
   document.getElementById('c-status').value='raw';
   document.getElementById('c-lane').value='serafina';
@@ -2697,6 +2748,7 @@ function resetContentModal() {
   document.getElementById('c-ad-ready').value='no';
   document.getElementById('c-deadline').value = defaultDeadlineISO();
   document.getElementById('c-audience').value = defaultAudienceForLane('serafina');
+  setContentIntakeMode('cloud');
   const fileInput = document.getElementById('c-asset-file');
   if (fileInput) fileInput.value = '';
   setContentUploadStatus('Choose one or many files. Single upload fills this asset; bulk upload creates a whole intake batch automatically.');
@@ -2847,6 +2899,8 @@ function editContent(id) {
   document.getElementById('c-instructions').value=item.instructions||buildDefaultInstructions(item);
   document.getElementById('c-source').value=item.source||'';
   document.getElementById('c-link').value=item.link||'';
+  if (document.getElementById('c-drive-folder')) document.getElementById('c-drive-folder').value=item.driveLink||'';
+  if (document.getElementById('c-drive-count')) document.getElementById('c-drive-count').value=item.assetCount||'';
   const fileInput = document.getElementById('c-asset-file');
   if (fileInput) fileInput.value = '';
   setContentUploadStatus(item.link ? 'This asset already has a saved cloud link.' : 'Upload once and this asset gets a cloud link your team can open directly.', item.link ? 'ok' : '');
@@ -2855,6 +2909,55 @@ function editContent(id) {
     document.getElementById('c-img-area').innerHTML=`<img src="${item.img}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;" /><input type="file" id="c-img-file" accept="image/*" onchange="previewUpload(event,'c-img-area','c-img-data')" /><span style="position:absolute;bottom:8px;background:rgba(0,0,0,.5);color:white;font-size:11px;padding:2px 10px;border-radius:4px;z-index:2;">Change</span>`;
   }
   openModal('modal-content');
+}
+
+function saveDriveBatch() {
+  const driveLink = normalizeDriveLink(document.getElementById('c-drive-folder').value);
+  if (!isDriveLink(driveLink)) {
+    setContentUploadStatus('Paste a valid Google Drive folder link first.', 'warn');
+    return;
+  }
+  const lane = document.getElementById('c-lane').value || 'serafina';
+  const owner = document.getElementById('c-owner').value || 'Kriti';
+  const title = document.getElementById('c-title').value.trim() || document.getElementById('c-event').value.trim() || 'Drive video batch';
+  const assetCount = Math.max(1, Number(document.getElementById('c-drive-count').value || 1));
+  const deadline = document.getElementById('c-deadline').value || defaultDeadlineISO();
+  const audience = document.getElementById('c-audience').value.trim() || defaultAudienceForLane(lane);
+  const notes = document.getElementById('c-notes').value.trim();
+  const hook = document.getElementById('c-hook').value.trim();
+  const adAngle = document.getElementById('c-ad-angle').value.trim();
+  const instructions = document.getElementById('c-instructions').value.trim() || buildDefaultInstructions({ lane, adReady: document.getElementById('c-ad-ready').value==='yes', deadline });
+  const items = load(K.content);
+  for (let i = 0; i < assetCount; i++) {
+    items.push({
+      id: uid(),
+      type: 'b-roll',
+      title: assetCount === 1 ? title : `${title} ${i + 1}`,
+      event: document.getElementById('c-event').value.trim() || title,
+      date: document.getElementById('c-date').value || today(),
+      deadline,
+      notes: notes || 'Professional b-roll batch stored in Google Drive.',
+      status: 'raw',
+      lane,
+      owner,
+      adReady: document.getElementById('c-ad-ready').value==='yes',
+      audience,
+      hook,
+      adAngle,
+      instructions,
+      source: 'Google Drive',
+      link: '',
+      driveLink,
+      folderName: title,
+      importPath: `drive/${title}`,
+      assetCount
+    });
+  }
+  save(K.content, items);
+  renderContent();
+  closeModal('modal-content');
+  resetContentModal();
+  alert(`✅ Drive batch saved. Kriti can now work this from the dashboard with the Drive folder linked.`);
 }
 function saveContent() {
   const id = document.getElementById('c-id').value;
@@ -2881,9 +2984,11 @@ function saveContent() {
     }),
     source:document.getElementById('c-source').value.trim()||'Mixed',
     link:document.getElementById('c-link').value.trim(),
+    driveLink: normalizeDriveLink(document.getElementById('c-drive-folder')?.value || existing?.driveLink || ''),
     img:document.getElementById('c-img-data').value||null,
     folderName: existing?.folderName || '',
     importPath: existing?.importPath || '',
+    assetCount: Number(document.getElementById('c-drive-count')?.value || existing?.assetCount || 0) || 0,
   };
   const items=load(K.content);
   if (id) {
@@ -4162,6 +4267,12 @@ function renderObs(tag) {
         <div style="font-size:11px;color:var(--text2);margin-bottom:4px;">Live offer</div>
         <div style="font-size:13px;font-weight:800;">Manifestation Dashboard</div>
         <a href="${MANIFESTATION_URL}" target="_blank" style="font-size:12px;color:var(--indigo);font-weight:700;">Open product ↗</a>
+      </div>
+      <div style="background:linear-gradient(135deg,#FAF5EE,#F5EFE6);border:1px solid #D4A853;border-radius:12px;padding:12px;">
+        <div style="font-size:11px;color:#9A6808;margin-bottom:4px;">✦ Coming soon · Free</div>
+        <div style="font-size:13px;font-weight:800;">Manifest &amp; Move</div>
+        <div style="font-size:11px;color:#666;margin-top:2px;margin-bottom:6px;">Daily rituals, stories &amp; SATS for the woman becoming her</div>
+        <a href="http://localhost:4445" target="_blank" style="font-size:12px;color:#9A6808;font-weight:700;">Preview app ↗</a>
       </div>
     </div>`;
   if (!all.length) {
