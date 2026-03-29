@@ -130,17 +130,28 @@ async function uploadFile(supabaseUrl, serviceKey, bucket, lane, filePath, fileN
   };
 }
 
-async function moveToImported(intakeDir, sourceFolder, fileName, fromPath) {
-  const importedDir = path.join(intakeDir, 'imported', sourceFolder);
+async function moveToImported(intakeDir, sourceFolder, relativeFilePath, fromPath) {
+  const importedDir = path.join(intakeDir, 'imported', sourceFolder, path.dirname(relativeFilePath));
   await fs.mkdir(importedDir, { recursive: true });
-  const target = path.join(importedDir, `${Date.now()}-${fileName}`);
+  const target = path.join(importedDir, `${Date.now()}-${path.basename(relativeFilePath)}`);
   await fs.rename(fromPath, target);
   return target;
 }
 
-async function listFiles(folderPath) {
+async function listFilesRecursive(folderPath, prefix = '') {
   const entries = await fs.readdir(folderPath, { withFileTypes: true });
-  return entries.filter(entry => entry.isFile() && !entry.name.startsWith('.')).map(entry => entry.name);
+  const files = [];
+  for (const entry of entries) {
+    if (entry.name.startsWith('.')) continue;
+    const entryPath = path.join(folderPath, entry.name);
+    const relPath = prefix ? path.join(prefix, entry.name) : entry.name;
+    if (entry.isDirectory()) {
+      files.push(...await listFilesRecursive(entryPath, relPath));
+    } else if (entry.isFile()) {
+      files.push(relPath);
+    }
+  }
+  return files;
 }
 
 async function main() {
@@ -170,9 +181,10 @@ async function main() {
   const pendingMoves = [];
   for (const [folderName, rule] of Object.entries(folderRules)) {
     const folderPath = path.join(intakeDir, folderName);
-    const files = await listFiles(folderPath).catch(() => []);
-    for (const fileName of files) {
-      const filePath = path.join(folderPath, fileName);
+    const files = await listFilesRecursive(folderPath).catch(() => []);
+    for (const relativeFilePath of files) {
+      const filePath = path.join(folderPath, relativeFilePath);
+      const fileName = path.basename(relativeFilePath);
       const uploaded = await uploadFile(supabaseUrl, serviceKey, bucket, rule.lane, filePath, fileName);
       const item = {
         id: uid(),
@@ -180,7 +192,7 @@ async function main() {
         title: titleFromFilename(fileName) || 'Untitled asset',
         event: '',
         date: today(),
-        notes: `Imported from local intake folder: ${folderName}`,
+        notes: `Imported from local intake folder: ${folderName}/${relativeFilePath}`,
         status: 'raw',
         lane: rule.lane,
         owner: rule.owner,
@@ -190,8 +202,8 @@ async function main() {
         img: inferType(fileName) === 'photo' ? uploaded.publicUrl : null,
       };
       contentItems.push(item);
-      pendingMoves.push({ intakeDir, folderName, fileName, filePath, lane: rule.lane, publicUrl: uploaded.publicUrl });
-      console.log(`Uploaded ${folderName}/${fileName}`);
+      pendingMoves.push({ intakeDir, folderName, relativeFilePath, filePath, lane: rule.lane, publicUrl: uploaded.publicUrl });
+      console.log(`Uploaded ${folderName}/${relativeFilePath}`);
     }
   }
 
@@ -199,9 +211,9 @@ async function main() {
   await saveSnapshot(supabaseUrl, serviceKey, workspace, snapshot);
 
   for (const entry of pendingMoves) {
-    const archivedTo = await moveToImported(entry.intakeDir, entry.folderName, entry.fileName, entry.filePath);
+    const archivedTo = await moveToImported(entry.intakeDir, entry.folderName, entry.relativeFilePath, entry.filePath);
     imported.push({
-      fileName: entry.fileName,
+      fileName: entry.relativeFilePath,
       folderName: entry.folderName,
       lane: entry.lane,
       archivedTo,
