@@ -6,5 +6,9 @@
   "scripts": {
     "check": "node scripts/check-html.js",
     "import:intake": "node scripts/import-intake.js"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.100.1",
+    "tus-js-client": "^4.3.1"
   }
 }

@@ -1,11 +1,15 @@
 #!/usr/bin/env node
 
 const fs = require('fs/promises');
+const fsSync = require('fs');
 const path = require('path');
+const tus = require('tus-js-client');
+const { createClient } = require('@supabase/supabase-js');
 
 const DEFAULT_INTAKE_DIR = '/Users/dollyshahani/Documents/Playground/serafina-intake';
 const DEFAULT_WORKSPACE = 'serafina-main';
 const DEFAULT_BUCKET = process.env.SUPABASE_STORAGE_BUCKET || 'serafina-assets';
+const RESUMABLE_THRESHOLD_BYTES = 6 * 1024 * 1024;
 
 const folderRules = {
   'serafina-raw': { lane: 'serafina', owner: 'Kriti', sourceLabel: 'Local Intake / Serafina' },
@@ -168,15 +172,67 @@ async function saveSnapshot(supabaseUrl, serviceKey, workspace, payload, exists)
 }
 
 async function uploadFile(supabaseUrl, serviceKey, bucket, lane, filePath, fileName) {
-  const bytes = await fs.readFile(filePath);
   const safeName = fileName.replace(/[^a-zA-Z0-9._-]/g, '-');
   const objectPath = `${lane}/${Date.now()}-${safeName}`;
+  const stat = await fs.stat(filePath);
+  const lowerName = fileName.toLowerCase();
+  const contentType = lowerName.endsWith('.mov') ? 'video/quicktime'
+    : lowerName.endsWith('.mp4') || lowerName.endsWith('.m4v') ? 'video/mp4'
+    : lowerName.endsWith('.avi') ? 'video/x-msvideo'
+    : lowerName.endsWith('.mkv') ? 'video/x-matroska'
+    : lowerName.endsWith('.png') ? 'image/png'
+    : lowerName.endsWith('.webp') ? 'image/webp'
+    : lowerName.endsWith('.gif') ? 'image/gif'
+    : (lowerName.endsWith('.jpg') || lowerName.endsWith('.jpeg')) ? 'image/jpeg'
+    : 'application/octet-stream';
+
+  if (stat.size > RESUMABLE_THRESHOLD_BYTES) {
+    const directHost = new URL(supabaseUrl).hostname.replace('.supabase.co', '.storage.supabase.co');
+    const endpoint = `https://${directHost}/storage/v1/upload/resumable`;
+    const supabase = createClient(supabaseUrl, serviceKey, {
+      auth: { persistSession: false, autoRefreshToken: false }
+    });
+    const { data, error } = await supabase.storage.from(bucket).createSignedUploadUrl(objectPath, { upsert: true });
+    if (error || !data?.token) throw new Error(error?.message || 'Could not create signed upload token');
+    await new Promise((resolve, reject) => {
+      const upload = new tus.Upload(fsSync.createReadStream(filePath), {
+        endpoint,
+        uploadSize: stat.size,
+        retryDelays: [0, 3000, 5000, 10000, 20000],
+        headers: {
+          authorization: `Bearer ${data.token}`
+        },
+        uploadDataDuringCreation: true,
+        removeFingerprintOnSuccess: true,
+        metadata: {
+          bucketName: bucket,
+          objectName: objectPath,
+          contentType,
+          cacheControl: '3600'
+        },
+        chunkSize: 6 * 1024 * 1024,
+        onError: reject,
+        onSuccess: resolve
+      });
+
+      upload.findPreviousUploads().then(previousUploads => {
+        if (previousUploads.length) upload.resumeFromPreviousUpload(previousUploads[0]);
+        upload.start();
+      }).catch(reject);
+    });
+    return {
+      path: objectPath,
+      publicUrl: `${supabaseUrl}/storage/v1/object/public/${bucket}/${objectPath}`
+    };
+  }
+
+  const bytes = await fs.readFile(filePath);
   const resp = await fetch(`${supabaseUrl}/storage/v1/object/${bucket}/${objectPath}`, {
     method: 'POST',
     headers: {
       apikey: serviceKey,
       Authorization: `Bearer ${serviceKey}`,
-      'Content-Type': 'application/octet-stream',
+      'Content-Type': contentType,
       'x-upsert': 'true'
     },
     body: bytes
