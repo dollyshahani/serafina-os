@@ -1090,7 +1090,7 @@ html, body { min-height: 100vh; background: var(--cream); font-family: 'Segoe UI
         5. Enable: products, inventory, orders → Save → <strong>Install app</strong> → copy token
       </div>
       <div class="frow c1"><div class="fgrp"><label>Shopify Store URL</label>
-        <input id="sh-store" placeholder="serafinacollective.myshopify.com" class="fgrp input" style="width:100%;" value="serafinacollective.myshopify.com">
+        <input id="sh-store" placeholder="yourstore.myshopify.com" class="fgrp input" style="width:100%;">
       </div></div>
       <div class="frow c1"><div class="fgrp"><label>Storefront Access Token (starts with shpat_ or public token)</label>
         <input id="sh-token" placeholder="Paste your token here…" type="password" style="width:100%;">
@@ -3633,10 +3633,18 @@ function closeWarRoom() { document.getElementById('warroom-wrap').classList.remo
 // ═══════════════════════════════════════
 const SHOPIFY_KEY = 'sf3_shopify';
 
-function openShopifySync() {
+async function openShopifySync() {
   const creds = JSON.parse(localStorage.getItem(SHOPIFY_KEY)||'{}');
   if (creds.store) document.getElementById('sh-store').value = creds.store;
   if (creds.token) document.getElementById('sh-token').value = creds.token;
+  if (!creds.store || !creds.token) {
+    try {
+      const r = await fetch('/api/shopify/creds');
+      const d = await r.json();
+      if (d.store && !creds.store) document.getElementById('sh-store').value = d.store;
+      if (d.token && !creds.token) document.getElementById('sh-token').value = d.token;
+    } catch(_) {}
+  }
   document.getElementById('sh-status').style.display = 'none';
   openModal('modal-shopify');
 }
