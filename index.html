@@ -738,7 +738,8 @@ body.portal-mode .kriti-portal-shell { display:block; }
 .reel-upload-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; }
 .reel-upload-grid > div { min-width:0; }
 .reel-upload-grid input[type=file] { width:100%; max-width:100%; font-size:12px; display:block; }
-#modal-reel .modal-btns { position: sticky; bottom: -30px; background: linear-gradient(180deg, rgba(255,255,255,0), var(--white) 22px); padding-top: 16px; z-index: 2; }
+#modal-reel .modal-btns { position: static; background: transparent; padding-top: 0; z-index: auto; }
+#modal-reel .modal-btns .btn { position: relative; z-index: 3; pointer-events: auto; }
 
 /* ── TIME CAPSULE ── */
 .capsule-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:20px; }
@@ -1804,6 +1805,10 @@ body.portal-mode .kriti-portal-shell { display:block; }
       <div class="fgrp"><label>What do you want from it?</label><input id="reel-goal" placeholder="e.g. make my own version for founder reel" /></div>
     </div>
     <div class="frow"><div class="fgrp"><label>Anything else you noticed?</label><textarea id="reel-notes" placeholder="What exactly felt good here? What do you want to steal and remake?"></textarea></div></div>
+    <div class="modal-btns" style="justify-content:flex-start;margin-bottom:8px;">
+      <button class="btn btn-saffron" type="button" onclick="saveReelRef()">Save + Analyze</button>
+      <span style="font-size:11px;color:var(--text2);align-self:center;">Use this after pasting the link and adding screenshots.</span>
+    </div>
     <div class="frow">
       <div class="fgrp">
         <label>Add 4 key screenshots from the reel</label>
@@ -1816,8 +1821,8 @@ body.portal-mode .kriti-portal-shell { display:block; }
       </div>
     </div>
     <div class="modal-btns">
-      <button class="btn btn-ghost" onclick="closeModal('modal-reel')">Cancel</button>
-      <button class="btn btn-saffron" onclick="saveReelRef()">Save + Analyze</button>
+      <button class="btn btn-ghost" type="button" onclick="closeModal('modal-reel')">Cancel</button>
+      <button class="btn btn-saffron" type="button" onclick="saveReelRef()">Save + Analyze</button>
     </div>
   </div>
 </div>
