@@ -5,7 +5,8 @@
   "description": "Serafina OS static app with Vercel serverless integrations",
   "scripts": {
     "check": "node scripts/check-html.js",
-    "import:intake": "node scripts/import-intake.js"
+    "import:intake": "node scripts/import-intake.js",
+    "shopify:sync": "node scripts/shopify-sync.js --workspace serafina-main"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.100.1",

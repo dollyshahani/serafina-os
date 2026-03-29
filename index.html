@@ -1544,7 +1544,10 @@ body.portal-mode .kriti-portal-shell { display:block; }
         <div style="font-weight:700;color:var(--text);margin-bottom:2px;">Update Shopify Snapshot</div>
         Export your Shopify Orders CSV, upload it here, and refresh sales/orders/repeat in Morning Brief.
       </div>
-      <button class="btn btn-ghost btn-sm" onclick="importShopifyOrders()">📥 Upload Shopify CSV</button>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;">
+        <button class="btn btn-ghost btn-sm" onclick="importShopifyOrders()">📥 Upload Shopify CSV</button>
+        <button class="btn btn-ghost btn-sm" onclick="syncLatestShopifyExport()">⚡ Pull Shopify (Mac)</button>
+      </div>
     </div>
     <div class="modal-btns">
       <button class="btn btn-ghost" onclick="closeModal('modal-brief')">Cancel</button>
@@ -2478,6 +2481,35 @@ async function hydrateDashLiveCommerce() {
   } catch (_) {
   } finally {
     liveCommerceLoading = false;
+  }
+}
+
+async function syncLatestShopifyExport() {
+  const cfg = await loadRuntimeConfig(true);
+  if (!cfg.features?.localShopifyPull) {
+    alert('Local Shopify pull works from localhost on your Mac. On the deployed site, use Upload Shopify CSV or run the local helper.');
+    return;
+  }
+  const workspace = getCloudWorkspace() || 'serafina-main';
+  setCloudWorkspace(workspace);
+  try {
+    setShStatus('🔄 Looking for the latest Shopify orders export in Downloads…', 'var(--text2)', 'var(--cream)');
+    const resp = await fetch('/api/local/shopify-sync', {
+      method:'POST',
+      headers:{ 'Content-Type':'application/json' },
+      body: JSON.stringify({
+        workspace,
+        cloudBaseUrl: 'https://serafina-os-vercel.vercel.app'
+      })
+    });
+    const data = await resp.json();
+    if (!resp.ok) throw new Error(data.error || 'Shopify local sync failed');
+    saveShopifySnapshot(data.snapshot || {});
+    liveCommerceSummary = data.snapshot || null;
+    if (currentPage === 'dashboard') renderDash();
+    setShStatus(`✅ Pulled latest Shopify export from your Mac.<br><small>${fmt(data.snapshot?.salesYesterday || 0)} yesterday · ${data.snapshot?.ordersYesterday || 0} orders · cloud updated for ${workspace}.</small>`, 'var(--emerald)', 'var(--emerald-t)');
+  } catch (e) {
+    setShStatus('❌ Local Shopify pull failed: ' + e.message + '<br><small>Be sure the latest Shopify orders CSV is already downloaded in Downloads.</small>', 'var(--magenta)', 'var(--magenta-t)');
   }
 }
 
@@ -6368,7 +6400,7 @@ function importShopifyOrders() {
 //  EXPORT / IMPORT / PUBLISH
 // ═══════════════════════════════════════
 const ALL_KEYS = ['sf3_prod','sf3_exh','sf3_task','sf3_idea','sf3_content','sf3_partner',
-  'sf3_customers','sf3_docs','sf3_drops','sf3_obs','sf3_capsule','sf3_bs'];
+  'sf3_customers','sf3_docs','sf3_drops','sf3_obs','sf3_capsule','sf3_bs','sf3_brief','sf3_reels','sf3_shopify_snapshot'];
 
 function exportData() {
   const data = { _app:'Serafina OS', _version:'1.0', _exported: new Date().toISOString() };
