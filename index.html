@@ -730,6 +730,11 @@ body.portal-mode .kriti-portal-shell { display:block; }
 .reel-ref-label { font-size:10px; font-weight:800; letter-spacing:1px; text-transform:uppercase; color:var(--text2); margin-bottom:6px; }
 .reel-ref-text { font-size:12px; color:var(--text); line-height:1.65; background:var(--cream); border-radius:10px; padding:9px 10px; }
 .reel-ref-actions { display:flex; gap:8px; flex-wrap:wrap; margin-top:14px; }
+.reel-shot-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; margin-top:10px; }
+.reel-shot-slot { border:1.5px solid var(--border); border-radius:12px; overflow:hidden; background:var(--cream); }
+.reel-shot-slot img { width:100%; height:140px; object-fit:cover; display:block; background:var(--cream); }
+.reel-shot-caption { font-size:10px; font-weight:800; letter-spacing:1px; text-transform:uppercase; color:var(--text2); padding:8px 10px; border-top:1px solid var(--border); background:white; }
+.reel-upload-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; }
 
 /* ── TIME CAPSULE ── */
 .capsule-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:20px; }
@@ -1795,6 +1800,17 @@ body.portal-mode .kriti-portal-shell { display:block; }
       <div class="fgrp"><label>What do you want from it?</label><input id="reel-goal" placeholder="e.g. make my own version for founder reel" /></div>
     </div>
     <div class="frow"><div class="fgrp"><label>Anything else you noticed?</label><textarea id="reel-notes" placeholder="What exactly felt good here? What do you want to steal and remake?"></textarea></div></div>
+    <div class="frow">
+      <div class="fgrp">
+        <label>Add 4 key screenshots from the reel</label>
+        <div class="reel-upload-grid" style="margin-top:10px;">
+          <div><input id="reel-shot-opening" type="file" accept="image/*"><div style="font-size:11px;color:var(--text2);margin-top:4px;">Opening frame</div></div>
+          <div><input id="reel-shot-middle" type="file" accept="image/*"><div style="font-size:11px;color:var(--text2);margin-top:4px;">Middle frame</div></div>
+          <div><input id="reel-shot-text" type="file" accept="image/*"><div style="font-size:11px;color:var(--text2);margin-top:4px;">Text overlay frame</div></div>
+          <div><input id="reel-shot-cta" type="file" accept="image/*"><div style="font-size:11px;color:var(--text2);margin-top:4px;">CTA frame</div></div>
+        </div>
+      </div>
+    </div>
     <div class="modal-btns">
       <button class="btn btn-ghost" onclick="closeModal('modal-reel')">Cancel</button>
       <button class="btn btn-saffron" onclick="saveReelRef()">Analyze + Make My Version</button>
@@ -1959,6 +1975,10 @@ function normalizeReelRef(item) {
     pillar: item.pillar || 'The Build',
     goal: item.goal || '',
     notes: item.notes || '',
+    openingShotImg: item.openingShotImg || '',
+    middleShotImg: item.middleShotImg || '',
+    textShotImg: item.textShotImg || '',
+    ctaShotImg: item.ctaShotImg || '',
     opening: item.opening || '',
     pacing: item.pacing || '',
     editStyle: item.editStyle || '',
@@ -5366,6 +5386,13 @@ function renderReelLab() {
     <div class="reel-ref-card">
       <div class="reel-ref-title">${ref.creator}</div>
       <div class="reel-ref-sub">${ref.sourceType === 'account' ? 'creator account' : 'reel reference'} · ${ref.pillar} · saved ${fmtD(ref.createdAt)}${ref.link ? ` · <a href="${ref.link}" target="_blank" style="color:var(--indigo);font-weight:700;">open ↗</a>` : ''}</div>
+      ${(ref.openingShotImg || ref.middleShotImg || ref.textShotImg || ref.ctaShotImg) ? `
+      <div class="reel-shot-grid">
+        ${ref.openingShotImg ? `<div class="reel-shot-slot"><img src="${ref.openingShotImg}" alt="Opening frame"><div class="reel-shot-caption">Opening</div></div>` : ''}
+        ${ref.middleShotImg ? `<div class="reel-shot-slot"><img src="${ref.middleShotImg}" alt="Middle frame"><div class="reel-shot-caption">Middle</div></div>` : ''}
+        ${ref.textShotImg ? `<div class="reel-shot-slot"><img src="${ref.textShotImg}" alt="Text frame"><div class="reel-shot-caption">Text Overlay</div></div>` : ''}
+        ${ref.ctaShotImg ? `<div class="reel-shot-slot"><img src="${ref.ctaShotImg}" alt="CTA frame"><div class="reel-shot-caption">CTA</div></div>` : ''}
+      </div>` : ''}
       <div class="reel-ref-section"><div class="reel-ref-label">Why you saved it</div><div class="reel-ref-text">${escapeHtml(ref.why || ref.notes || 'Saved for storytelling reference.')}</div></div>
       <div class="reel-ref-section"><div class="reel-ref-label">Opening</div><div class="reel-ref-text">${escapeHtml(ref.opening)}</div></div>
       <div class="reel-ref-section"><div class="reel-ref-label">Scene map</div><div class="reel-ref-text">${escapeHtml(ref.sceneMap)}</div></div>
@@ -5387,7 +5414,25 @@ function renderReelLab() {
   `).join('') || `<div class="playbook-card" style="grid-column:1/-1;"><div class="playbook-title">No reel references yet</div><div class="playbook-sub" style="margin-top:8px;">Paste reels you love here. This becomes your storytelling library and breakdown tool.</div></div>`;
 }
 
-function saveReelRef() {
+function readFileAsDataURL(inputId) {
+  const input = document.getElementById(inputId);
+  const file = input?.files?.[0];
+  if (!file) return Promise.resolve('');
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result || ''));
+    reader.onerror = () => reject(new Error(`Failed to read ${inputId}`));
+    reader.readAsDataURL(file);
+  });
+}
+
+async function saveReelRef() {
+  const [openingShotImg, middleShotImg, textShotImg, ctaShotImg] = await Promise.all([
+    readFileAsDataURL('reel-shot-opening'),
+    readFileAsDataURL('reel-shot-middle'),
+    readFileAsDataURL('reel-shot-text'),
+    readFileAsDataURL('reel-shot-cta')
+  ]);
   const ref = buildReelBreakdownDraft({
     id: document.getElementById('reel-id').value || uid(),
     sourceType: document.getElementById('reel-source-type').value,
@@ -5396,7 +5441,11 @@ function saveReelRef() {
     why: document.getElementById('reel-why').value.trim(),
     pillar: document.getElementById('reel-pillar').value,
     goal: document.getElementById('reel-goal').value.trim(),
-    notes: document.getElementById('reel-notes').value.trim()
+    notes: document.getElementById('reel-notes').value.trim(),
+    openingShotImg,
+    middleShotImg,
+    textShotImg,
+    ctaShotImg
   });
   const refs = load(K_REELS).map(normalizeReelRef);
   const idx = refs.findIndex(r => r.id === ref.id);
@@ -5404,6 +5453,7 @@ function saveReelRef() {
   save(K_REELS, refs);
   closeModal('modal-reel');
   ['reel-id','reel-link','reel-creator','reel-why','reel-goal','reel-notes'].forEach(id => { const el = document.getElementById(id); if (el) el.value=''; });
+  ['reel-shot-opening','reel-shot-middle','reel-shot-text','reel-shot-cta'].forEach(id => { const el = document.getElementById(id); if (el) el.value=''; });
   document.getElementById('reel-source-type').value = 'reel';
   document.getElementById('reel-pillar').value = 'The Build';
   if (currentPage === 'reels') renderReelLab();
@@ -5418,6 +5468,10 @@ async function copyReelBreakdown(id) {
     `Pillar: ${ref.pillar}`,
     `Type: ${ref.sourceType === 'account' ? 'creator account' : 'reel reference'}`,
     `Why it works: ${ref.why || ref.notes}`,
+    ref.openingShotImg ? 'Opening frame attached: yes' : '',
+    ref.middleShotImg ? 'Middle frame attached: yes' : '',
+    ref.textShotImg ? 'Text frame attached: yes' : '',
+    ref.ctaShotImg ? 'CTA frame attached: yes' : '',
     `Opening: ${ref.opening}`,
     `Scene map: ${ref.sceneMap}`,
     `Shot grammar: ${ref.shotGrammar}`,
