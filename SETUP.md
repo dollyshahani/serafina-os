@@ -32,7 +32,7 @@
 
 ## Cron
 
-`vercel.json` schedules `/api/cron/daily-sync` once per day.
+Cron sync is currently disabled on the Vercel Hobby plan to stay under the serverless function limit.
 
 You can also protect manual cron calls with:
 
