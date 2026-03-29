@@ -1539,6 +1539,13 @@ body.portal-mode .kriti-portal-shell { display:block; }
       <div class="fgrp"><label>Conversion Rate %</label><input id="mb-cvr" type="number" step="0.1" placeholder="0" /></div>
       <div class="fgrp"><label>Top Focus</label><input id="mb-note" placeholder="What matters most this week?" /></div>
     </div>
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 14px;border-radius:14px;background:var(--cream);border:1px solid var(--border);margin-top:6px;">
+      <div style="font-size:12px;color:var(--text2);line-height:1.6;">
+        <div style="font-weight:700;color:var(--text);margin-bottom:2px;">Update Shopify Snapshot</div>
+        Export your Shopify Orders CSV, upload it here, and refresh sales/orders/repeat in Morning Brief.
+      </div>
+      <button class="btn btn-ghost btn-sm" onclick="importShopifyOrders()">📥 Upload Shopify CSV</button>
+    </div>
     <div class="modal-btns">
       <button class="btn btn-ghost" onclick="closeModal('modal-brief')">Cancel</button>
       <button class="btn btn-magenta" onclick="saveBrief()">Save Brief</button>
@@ -1883,6 +1890,7 @@ const K_BRIEF = 'sf3_brief';
 const K_DROPS = 'sf3_drops';
 const K_OBS = 'sf3_obs';
 const K_REELS = 'sf3_reels';
+const K_SHOPIFY_SNAPSHOT = 'sf3_shopify_snapshot';
 const load  = k => { try { return JSON.parse(localStorage.getItem(k))||[]; } catch(e){ return []; }};
 const save  = (k,v) => localStorage.setItem(k, JSON.stringify(v));
 const uid   = () => Date.now().toString(36)+Math.random().toString(36).slice(2);
@@ -1909,6 +1917,33 @@ function loadBrief() {
   } catch(_) {
     return { salesYesterday:0, cashOutWeek:0, adSpend:0, adRevenue:0, cvr:0, note:'' };
   }
+}
+
+function loadShopifySnapshot() {
+  try {
+    const raw = JSON.parse(localStorage.getItem(K_SHOPIFY_SNAPSHOT) || 'null');
+    if (!raw || typeof raw !== 'object') return null;
+    return {
+      source: raw.source || 'shopify-csv',
+      importedAt: raw.importedAt || '',
+      salesYesterday: Number(raw.salesYesterday || 0),
+      ordersYesterday: Number(raw.ordersYesterday || 0),
+      repeatYesterday: typeof raw.repeatYesterday === 'boolean' ? raw.repeatYesterday : null,
+      salesToday: Number(raw.salesToday || 0),
+      ordersToday: Number(raw.ordersToday || 0),
+      ordersTotal: Number(raw.ordersTotal || 0)
+    };
+  } catch(_) {
+    return null;
+  }
+}
+
+function saveShopifySnapshot(snapshot) {
+  localStorage.setItem(K_SHOPIFY_SNAPSHOT, JSON.stringify({
+    ...snapshot,
+    importedAt: new Date().toISOString(),
+    source: snapshot?.source || 'shopify-csv'
+  }));
 }
 
 function hydrateBriefModal() {
@@ -2336,11 +2371,17 @@ function renderDash() {
     brief.note ? `<div class="alert-chip">🧠 ${brief.note}</div>` : ''
   ].filter(Boolean).join('') || `<div class="alert-chip">✦ Clean slate. Build profit, not noise.</div>`;
 
-  const salesYesterday = liveCommerceSummary?.salesYesterday ?? brief.salesYesterday;
-  const ordersYesterday = liveCommerceSummary?.ordersYesterday ?? 0;
-  const repeatYesterday = liveCommerceSummary?.repeatYesterday;
+  const commerceSummary = liveCommerceSummary || loadShopifySnapshot();
+  const salesYesterday = commerceSummary?.salesYesterday ?? brief.salesYesterday;
+  const ordersYesterday = commerceSummary?.ordersYesterday ?? 0;
+  const repeatYesterday = commerceSummary?.repeatYesterday;
+  const commerceSourceLabel = commerceSummary?.source === 'shopify-admin'
+    ? 'live Shopify admin data'
+    : commerceSummary?.source === 'shopify-csv'
+      ? `Shopify CSV snapshot${commerceSummary.importedAt ? ' · ' + new Date(commerceSummary.importedAt).toLocaleDateString('en-IN',{day:'numeric',month:'short'}) : ''}`
+      : 'manual founder snapshot';
   document.getElementById('dash-stats').innerHTML = `
-    <div class="stat-card sc-saffron"><div class="stat-label">Sales Yesterday</div><div class="stat-val">${fmt(salesYesterday)}</div><div class="stat-sub">${liveCommerceSummary ? 'live Shopify admin data' : 'manual founder snapshot'}</div></div>
+    <div class="stat-card sc-saffron"><div class="stat-label">Sales Yesterday</div><div class="stat-val">${fmt(salesYesterday)}</div><div class="stat-sub">${commerceSourceLabel}</div></div>
     <div class="stat-card sc-coral"><div class="stat-label">Cash Out This Week</div><div class="stat-val">${fmt(brief.cashOutWeek)}</div><div class="stat-sub">production, rent, shows, salaries</div></div>
     <div class="stat-card sc-teal"><div class="stat-label">Ads Snapshot</div><div class="stat-val">${roas.toFixed(1)}x</div><div class="stat-sub">${fmt(brief.adSpend)} spend · ${fmt(brief.adRevenue)} revenue</div></div>
     <div class="stat-card sc-magenta"><div class="stat-label">Kriti + Review</div><div class="stat-val">${kritiQueue.length}</div><div class="stat-sub">${readyForDolly.length} ready for Dolly</div></div>
@@ -2389,7 +2430,7 @@ function renderDash() {
       <div style="background:var(--cream);border:1px solid var(--border);border-radius:12px;padding:12px;"><div style="font-size:11px;color:var(--text2);">Conversion Rate</div><div style="font-size:20px;font-weight:900;color:var(--magenta);">${brief.cvr ? brief.cvr.toFixed(1) : '0.0'}%</div></div>
       <div style="background:var(--cream);border:1px solid var(--border);border-radius:12px;padding:12px;"><div style="font-size:11px;color:var(--text2);">Repeat Yesterday</div><div style="font-size:20px;font-weight:900;color:var(--emerald);">${repeatYesterday == null ? '—' : repeatYesterday ? 'Yes' : 'No'}</div></div>
     </div>
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:14px;font-size:12px;color:var(--text2);"><span>${liveCommerceSummary ? 'Shopify sales/orders are live. Ads + cash are still founder-entered.' : (brief.note || 'Use this like your real founder dashboard.')}</span><button class="btn btn-ghost btn-sm" onclick="openModal('modal-brief')">Update →</button></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:14px;font-size:12px;color:var(--text2);"><span>${commerceSummary ? `${commerceSourceLabel}. Ads + cash are still founder-entered.` : (brief.note || 'Use this like your real founder dashboard.')}</span><button class="btn btn-ghost btn-sm" onclick="openModal('modal-brief')">Update →</button></div>
   `;
 
   document.getElementById('dash-task-count').textContent = `${urgentDashboardTasks.filter(t=>t.priority==='urgent').length} urgent · ${urgentDashboardTasks.length} in focus`;
@@ -2432,7 +2473,7 @@ async function hydrateDashLiveCommerce() {
     });
     const data = await resp.json();
     if (!resp.ok) throw new Error(data?.error || 'Shopify summary failed');
-    liveCommerceSummary = data.summary || null;
+    liveCommerceSummary = data.summary ? { ...data.summary, source:'shopify-admin' } : null;
     if (currentPage === 'dashboard') renderDash();
   } catch (_) {
   } finally {
@@ -6204,9 +6245,11 @@ function importShopifyOrders() {
         const phoneCol = col('phone');
         const cityCol  = col('city');
         const dateCol  = col('created');
+        const orderIdCol = col('order');
 
         const custs = load(K.customers);
         let added = 0, updated = 0;
+        const orders = [];
 
         for (let i = 1; i < lines.length; i++) {
           const raw = lines[i]; if (!raw.trim()) continue;
@@ -6220,8 +6263,21 @@ function importShopifyOrders() {
           const city  = c(cityCol);
           const total = parseFloat(c(totalCol)) || 0;
           const date  = c(dateCol);
+          const orderId = c(orderIdCol) || `shopify-row-${i}`;
+          const customerKey = (email || phone || name || `row-${i}`).toLowerCase();
 
           if (!name && !email) continue;
+
+          orders.push({
+            id: orderId,
+            customerKey,
+            total,
+            date,
+            name,
+            email,
+            phone,
+            city
+          });
 
           const found = custs.find(x => (email && x.email === email) || (phone && x.phone === phone));
           if (found) {
@@ -6246,7 +6302,58 @@ function importShopifyOrders() {
         }
 
         save(K.customers, custs);
-        setShStatus(`✅ Orders imported! <strong>${added}</strong> new customers · <strong>${updated}</strong> updated.`, 'var(--emerald)', 'var(--emerald-t)');
+        const now = new Date();
+        const localDateString = d => {
+          const dt = new Date(d);
+          if (Number.isNaN(dt.getTime())) return '';
+          const yyyy = dt.getFullYear();
+          const mm = String(dt.getMonth() + 1).padStart(2, '0');
+          const dd = String(dt.getDate()).padStart(2, '0');
+          return `${yyyy}-${mm}-${dd}`;
+        };
+        const todayStr = localDateString(now);
+        const yesterdayDate = new Date(now);
+        yesterdayDate.setDate(now.getDate() - 1);
+        const yesterdayStr = localDateString(yesterdayDate);
+
+        const seenBefore = new Set();
+        let salesYesterday = 0;
+        let ordersYesterday = 0;
+        let repeatYesterday = false;
+        let salesToday = 0;
+        let ordersToday = 0;
+
+        orders
+          .filter(order => order.date)
+          .sort((a,b) => new Date(a.date) - new Date(b.date))
+          .forEach(order => {
+            const orderDay = localDateString(order.date);
+            const isRepeat = seenBefore.has(order.customerKey);
+            if (orderDay === yesterdayStr) {
+              salesYesterday += order.total;
+              ordersYesterday += 1;
+              if (isRepeat) repeatYesterday = true;
+            }
+            if (orderDay === todayStr) {
+              salesToday += order.total;
+              ordersToday += 1;
+            }
+            seenBefore.add(order.customerKey);
+          });
+
+        const snapshot = {
+          source: 'shopify-csv',
+          salesYesterday,
+          ordersYesterday,
+          repeatYesterday,
+          salesToday,
+          ordersToday,
+          ordersTotal: orders.length
+        };
+        saveShopifySnapshot(snapshot);
+        liveCommerceSummary = snapshot;
+        if (currentPage === 'dashboard') renderDash();
+        setShStatus(`✅ Orders imported! <strong>${added}</strong> new customers · <strong>${updated}</strong> updated.<br><small>Morning Brief refreshed from Shopify CSV: ${ordersYesterday} orders yesterday · ${fmt(salesYesterday)} yesterday sales.</small>`, 'var(--emerald)', 'var(--emerald-t)');
 
       } catch(err) {
         setShStatus('❌ Could not parse CSV: ' + err.message + '<br><small>Make sure you downloaded the Shopify orders export.</small>', 'var(--magenta)', 'var(--magenta-t)');
