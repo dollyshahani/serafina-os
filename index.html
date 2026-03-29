@@ -332,6 +332,17 @@ body.portal-mode .kriti-portal-shell { display:block; }
 .ai-suggestion-list { display:flex; flex-direction:column; gap:8px; }
 .ai-suggestion-item { background:var(--cream); border-radius:12px; padding:10px 12px; font-size:12px; color:var(--text); display:flex; justify-content:space-between; gap:10px; align-items:flex-start; }
 .ai-suggestion-item span { line-height:1.5; }
+.reel-brief { background:linear-gradient(135deg,#fff7ef,#fef1e8); border:1.5px solid rgba(244,160,28,.2); border-radius:16px; padding:18px; margin-bottom:18px; }
+.reel-brief-top { display:flex; justify-content:space-between; gap:12px; align-items:flex-start; flex-wrap:wrap; }
+.reel-pill { display:inline-flex; align-items:center; gap:6px; font-size:10px; font-weight:800; padding:4px 9px; border-radius:999px; background:rgba(244,160,28,.14); color:var(--gold); text-transform:uppercase; letter-spacing:.8px; }
+.reel-title { font-size:22px; font-weight:900; color:var(--text); margin-top:10px; }
+.reel-sub { font-size:12px; color:var(--text2); margin-top:6px; line-height:1.7; max-width:760px; }
+.reel-grid { display:grid; grid-template-columns:1.1fr .9fr; gap:16px; margin-top:16px; }
+.reel-card { background:rgba(255,255,255,.78); border:1px solid var(--border); border-radius:14px; padding:14px; }
+.reel-card-title { font-size:11px; color:var(--text2); text-transform:uppercase; letter-spacing:1px; margin-bottom:8px; font-weight:800; }
+.reel-shot-list { display:flex; flex-direction:column; gap:8px; }
+.reel-shot-item { font-size:12px; color:var(--text); line-height:1.6; background:var(--cream); border-radius:10px; padding:9px 10px; }
+.reel-actions { display:flex; gap:8px; flex-wrap:wrap; margin-top:14px; }
 .content-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 14px; }
 .content-card {
   background: var(--white); border-radius: var(--radius); border: 1.5px solid var(--border);
@@ -826,6 +837,7 @@ body.portal-mode .kriti-portal-shell { display:block; }
     </div>
     <div class="alert-row" id="dash-alerts"></div>
     <div class="stat-grid" id="dash-stats"></div>
+    <div id="dash-reel-brief"></div>
     <div class="dash-grid">
       <div class="panel">
         <div class="panel-head"><span class="panel-title-sm">Control the Week</span></div>
@@ -1957,6 +1969,124 @@ function renderPage(p) {
 // ═══════════════════════════════════════
 //  DASHBOARD
 // ═══════════════════════════════════════
+function getDailyReelPillar() {
+  const pillars = ['weight-loss', 'discipline', 'founder-journey', 'manifestation', 'serafina-bridge'];
+  const dayIndex = Math.floor(Date.now() / 86400000);
+  return pillars[dayIndex % pillars.length];
+}
+
+function buildDailyReelBrief(content, founder) {
+  const pillar = getDailyReelPillar();
+  const founderAssets = content.filter(i => ['personal','both'].includes(i.lane));
+  const founderRaw = founderAssets.filter(i => ['raw','selected','editing'].includes(i.status));
+  const sourceDrop = founderRaw[0]?.folderName || founderRaw[0]?.title || founder[0]?.text || 'today\'s founder footage';
+  const map = {
+    'weight-loss': {
+      pillar: 'Weight loss',
+      title: 'The woman who keeps promises to herself',
+      hook: 'POV: your body starts changing after your standards do.',
+      angle: 'Document, don’t create. Show the quiet proof, not a loud transformation speech.',
+      mood: 'Lana Del Rey softness + intimate founder realism',
+      shots: [
+        'Shot 1: slow mirror or getting-ready moment with no talking, just the mood.',
+        'Shot 2: one tiny disciplined action, like water, steps, gym bag, or meal prep.',
+        'Shot 3: close-up texture/detail shot that feels cinematic and feminine.',
+        'Shot 4: one working shot of you building Serafina or sitting with your laptop.',
+        'Shot 5: closing payoff with a face shot or walking-away shot plus the hook as text.'
+      ],
+      caption: 'A soft life is still built on discipline.',
+      repurpose: 'Reel for Instagram, 3 story frames from the same clips, one tweet-style text post.'
+    },
+    'discipline': {
+      pillar: 'Discipline',
+      title: 'Discipline is lighter than regret',
+      hook: 'Nobody talks about how peaceful life feels once you stop negotiating with yourself.',
+      angle: 'Attention first, truth second, aesthetic always. Make the first line feel like a private thought.',
+      mood: 'Soft-luxe, structured, intimate, high self-respect',
+      shots: [
+        'Shot 1: close-up on a routine trigger like alarm, notes app, shoes, or coffee.',
+        'Shot 2: quick movement clip that signals action over mood.',
+        'Shot 3: desk/work clip showing founder consistency.',
+        'Shot 4: one beauty/fashion shot so it still feels like your world.',
+        'Shot 5: direct-to-camera or text-only ending that lands the lesson.'
+      ],
+      caption: 'The life you want is hidden inside the things you repeat.',
+      repurpose: 'Reel, carousel of 4 discipline truths, and one story poll.'
+    },
+    'founder-journey': {
+      pillar: 'Founder journey',
+      title: 'Building the brand while building yourself',
+      hook: 'What nobody tells you about building a brand alone.',
+      angle: 'Use founder transparency as the hook, then bridge into Serafina naturally.',
+      mood: 'Founder documentary with feminine polish',
+      shots: [
+        'Shot 1: one behind-the-scenes founder shot from your real day.',
+        'Shot 2: product/detail shot from Serafina.',
+        'Shot 3: task or packing clip that proves this is real work.',
+        'Shot 4: one emotional pause shot: coffee, notes, mirror, or commute.',
+        'Shot 5: final founder payoff with text about what this season is teaching you.'
+      ],
+      caption: 'I am building the woman and the brand at the same time.',
+      repurpose: 'Reel, founder story, and one bridge post pointing back to Serafina.'
+    },
+    manifestation: {
+      pillar: 'Manifestation',
+      title: 'Manifestation is identity, not magic',
+      hook: 'Manifestation started working when I stopped treating it like a vision board.',
+      angle: 'Truth bomb + identity shift + one proof point.',
+      mood: 'Dreamy but grounded',
+      shots: [
+        'Shot 1: journaling, notes app, or planning scene.',
+        'Shot 2: one tactile beauty shot that feels aspirational.',
+        'Shot 3: work scene showing you acting on the vision.',
+        'Shot 4: quiet lifestyle shot, ideally in soft light.',
+        'Shot 5: ending with the core belief written as text on screen.'
+      ],
+      caption: 'You manifest what you become available for.',
+      repurpose: 'Reel, 5-story sequence, CTA into the manifestation dashboard.'
+    },
+    'serafina-bridge': {
+      pillar: 'Founder x Serafina',
+      title: 'Your personal brand should make Serafina more trusted',
+      hook: 'The brand feels more expensive when the founder feels real.',
+      angle: 'Bridge personal identity and product world in the same narrative.',
+      mood: 'Quiet luxury founder energy',
+      shots: [
+        'Shot 1: founder opening shot with strong aesthetic framing.',
+        'Shot 2: Serafina fabric/product detail.',
+        'Shot 3: packaging, notes, fittings, or content workflow shot.',
+        'Shot 4: you wearing or touching the product in a lived-in way.',
+        'Shot 5: closing line that connects the woman and the brand.'
+      ],
+      caption: 'Serafina grows best when people can feel the woman behind it.',
+      repurpose: 'Reel, brand story sequence, and soft CTA into product interest.'
+    }
+  };
+  return {
+    ...map[pillar],
+    sourceDrop
+  };
+}
+
+async function copyDailyReelBrief() {
+  const brief = buildDailyReelBrief(load(K.content).map(normalizeContentItem), load(K_OBS).map(normalizeBrandEntry));
+  const text = [
+    `Daily reel: ${brief.title}`,
+    `Pillar: ${brief.pillar}`,
+    `Hook: ${brief.hook}`,
+    `Angle: ${brief.angle}`,
+    `Mood: ${brief.mood}`,
+    `Source: ${brief.sourceDrop}`,
+    '',
+    'Shot list:',
+    ...brief.shots.map((shot, idx) => `${idx + 1}. ${shot}`),
+    '',
+    `Caption direction: ${brief.caption}`,
+    `Repurpose: ${brief.repurpose}`
+  ].join('\n');
+  await copyTextValue(text, 'Daily reel brief copied');
+}
+
 function renderDash() {
   const hr = new Date().getHours();
   document.getElementById('dash-greeting').textContent = hr<12 ? '✦ good morning' : hr<17 ? '✦ good afternoon' : '✦ good evening';
@@ -1972,9 +2102,22 @@ function renderDash() {
   const lowStock = prods.filter(p=>Number(p.qty)<=Number(p.reorder)&&p.status!=='discontinued');
   const openTasks = tasks.filter(t=>t.status!=='done');
   const roas = brief.adSpend ? (brief.adRevenue / brief.adSpend) : 0;
+  const readyForDolly = content.filter(i=>i.status==='ready-review');
+  const kritiQueue = content.filter(i=>i.owner==='Kriti' && ['raw','selected','editing'].includes(i.status));
+  const overdueKriti = kritiQueue.filter(i => i.deadline && i.deadline < today());
+  const upcomingExhibitions = exhs.filter(e=>e.status==='upcoming').sort((a,b)=>String(a.start||'').localeCompare(String(b.start||'')));
+  const urgentDashboardTasks = [
+    ...openTasks.filter(t=>['urgent','high'].includes(t.priority) || ['Content','Launch','Operations'].includes(t.cat)),
+    ...readyForDolly.map(i => ({ title:`Review ${i.title}`, cat:'Kriti', owner:'Dolly', due:i.deadline || today(), priority:'urgent' })),
+    ...overdueKriti.map(i => ({ title:`Follow up with Kriti on ${i.title}`, cat:'Kriti', owner:'Dolly', due:i.deadline || today(), priority:'urgent' })),
+    ...upcomingExhibitions.slice(0,2).map(e => ({ title:`Prep for ${e.name}`, cat:'Exhibition', owner:'Dolly', due:e.start || today(), priority:'high' }))
+  ].sort((a,b)=>String(a.due||'').localeCompare(String(b.due||''))).slice(0,6);
+  const reel = buildDailyReelBrief(content, founder);
 
   document.getElementById('dash-alerts').innerHTML = [
+    `<div class="alert-chip">🎥 First move: <strong>post your personal brand reel</strong></div>`,
     launch ? `<div class="alert-chip">🚀 Launch focus: <strong>${launch.name}</strong></div>` : '',
+    readyForDolly[0] ? `<div class="alert-chip">✅ Ready for review: <strong>${readyForDolly.length}</strong></div>` : '',
     lowStock[0] ? `<div class="alert-chip">⚠️ Low stock: <strong>${lowStock[0].name}</strong> (${lowStock[0].qty} left)</div>` : '',
     brief.note ? `<div class="alert-chip">🧠 ${brief.note}</div>` : ''
   ].filter(Boolean).join('') || `<div class="alert-chip">✦ Clean slate. Build profit, not noise.</div>`;
@@ -1983,7 +2126,41 @@ function renderDash() {
     <div class="stat-card sc-saffron"><div class="stat-label">Sales Yesterday</div><div class="stat-val">${fmt(brief.salesYesterday)}</div><div class="stat-sub">manual founder snapshot</div></div>
     <div class="stat-card sc-coral"><div class="stat-label">Cash Out This Week</div><div class="stat-val">${fmt(brief.cashOutWeek)}</div><div class="stat-sub">production, rent, shows, salaries</div></div>
     <div class="stat-card sc-teal"><div class="stat-label">Ads Snapshot</div><div class="stat-val">${roas.toFixed(1)}x</div><div class="stat-sub">${fmt(brief.adSpend)} spend · ${fmt(brief.adRevenue)} revenue</div></div>
-    <div class="stat-card sc-magenta"><div class="stat-label">Content Ready</div><div class="stat-val">${content.filter(i=>['edited','scheduled'].includes(i.status)).length}</div><div class="stat-sub">${content.filter(i=>i.adReady).length} ad-eligible</div></div>
+    <div class="stat-card sc-magenta"><div class="stat-label">Kriti + Review</div><div class="stat-val">${kritiQueue.length}</div><div class="stat-sub">${readyForDolly.length} ready for Dolly</div></div>
+  `;
+
+  document.getElementById('dash-reel-brief').innerHTML = `
+    <div class="reel-brief">
+      <div class="reel-brief-top">
+        <div>
+          <span class="reel-pill">Today’s first move</span>
+          <div class="reel-title">${reel.title}</div>
+          <div class="reel-sub">${reel.hook}</div>
+          <div class="reel-sub"><strong style="color:var(--text);">Gary Vee logic:</strong> ${reel.angle}</div>
+        </div>
+        <div class="reel-actions">
+          <button class="btn btn-ghost btn-sm" onclick="copyDailyReelBrief()">Copy brief</button>
+          <button class="btn btn-ghost btn-sm" onclick="navigate('obsession')">Open Personal Brand OS</button>
+          <button class="btn btn-ghost btn-sm" onclick="navigate('content')">Open Content Engine</button>
+        </div>
+      </div>
+      <div class="reel-grid">
+        <div class="reel-card">
+          <div class="reel-card-title">Shot List</div>
+          <div class="reel-shot-list">
+            ${reel.shots.map(shot => `<div class="reel-shot-item">${shot}</div>`).join('')}
+          </div>
+        </div>
+        <div class="reel-card">
+          <div class="reel-card-title">Execution</div>
+          <div class="reel-shot-item"><strong>Pillar:</strong> ${reel.pillar}</div>
+          <div class="reel-shot-item"><strong>Mood:</strong> ${reel.mood}</div>
+          <div class="reel-shot-item"><strong>Source to use:</strong> ${reel.sourceDrop}</div>
+          <div class="reel-shot-item"><strong>Caption direction:</strong> ${reel.caption}</div>
+          <div class="reel-shot-item"><strong>Repurpose:</strong> ${reel.repurpose}</div>
+        </div>
+      </div>
+    </div>
   `;
 
   document.getElementById('dash-brief-controls').innerHTML = `
@@ -1996,16 +2173,17 @@ function renderDash() {
     <div style="display:flex;justify-content:space-between;align-items:center;margin-top:14px;font-size:12px;color:var(--text2);"><span>${brief.note || 'Use this like your real founder dashboard.'}</span><button class="btn btn-ghost btn-sm" onclick="openModal('modal-brief')">Update →</button></div>
   `;
 
-  document.getElementById('dash-task-count').textContent = `${openTasks.filter(t=>t.priority==='urgent').length} urgent · ${openTasks.length} open`;
-  document.getElementById('dash-tasks-list').innerHTML = openTasks.slice(0,5).map(t=>`<div class="today-task"><div class="today-dot" style="background:${t.priority==='urgent'?'var(--coral)':'var(--saffron)'}"></div><div><div style="font-size:13px;font-weight:600;">${t.title}</div><div style="font-size:11px;color:var(--text2);margin-top:2px;">${t.cat} · ${t.owner} · Due ${fmtD(t.due)}</div></div></div>`).join('') || '<div style="text-align:center;padding:20px;color:var(--text2);font-size:13px;">🎉 All clear!</div>';
+  document.getElementById('dash-task-count').textContent = `${urgentDashboardTasks.filter(t=>t.priority==='urgent').length} urgent · ${urgentDashboardTasks.length} in focus`;
+  document.getElementById('dash-tasks-list').innerHTML = urgentDashboardTasks.map(t=>`<div class="today-task"><div class="today-dot" style="background:${t.priority==='urgent'?'var(--coral)':'var(--saffron)'}"></div><div><div style="font-size:13px;font-weight:600;">${t.title}</div><div style="font-size:11px;color:var(--text2);margin-top:2px;">${t.cat} · ${t.owner} · Due ${fmtD(t.due)}</div></div></div>`).join('') || '<div style="text-align:center;padding:20px;color:var(--text2);font-size:13px;">🎉 All clear!</div>';
 
   document.getElementById('dash-content-pipeline').innerHTML = `
     <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-bottom:14px;">
-      <div style="background:var(--coral-t);border-radius:12px;padding:12px;"><div style="font-size:11px;color:var(--coral);">Raw</div><div style="font-size:22px;font-weight:900;color:var(--coral);">${content.filter(i=>i.status==='raw').length}</div></div>
-      <div style="background:var(--indigo-t);border-radius:12px;padding:12px;"><div style="font-size:11px;color:var(--indigo);">In Progress</div><div style="font-size:22px;font-weight:900;color:var(--indigo);">${content.filter(i=>i.status==='in-progress').length}</div></div>
-      <div style="background:var(--saffron-t);border-radius:12px;padding:12px;"><div style="font-size:11px;color:var(--gold);">Edited / Scheduled</div><div style="font-size:22px;font-weight:900;color:var(--gold);">${content.filter(i=>['edited','scheduled'].includes(i.status)).length}</div></div>
-      <div style="background:var(--emerald-t);border-radius:12px;padding:12px;"><div style="font-size:11px;color:var(--emerald);">Ad Eligible</div><div style="font-size:22px;font-weight:900;color:var(--emerald);">${content.filter(i=>i.adReady).length}</div></div>
-    </div>`;
+      <div style="background:var(--coral-t);border-radius:12px;padding:12px;"><div style="font-size:11px;color:var(--coral);">Kriti queue</div><div style="font-size:22px;font-weight:900;color:var(--coral);">${kritiQueue.length}</div></div>
+      <div style="background:var(--indigo-t);border-radius:12px;padding:12px;"><div style="font-size:11px;color:var(--indigo);">Overdue with Kriti</div><div style="font-size:22px;font-weight:900;color:var(--indigo);">${overdueKriti.length}</div></div>
+      <div style="background:var(--saffron-t);border-radius:12px;padding:12px;"><div style="font-size:11px;color:var(--gold);">Ready for Dolly</div><div style="font-size:22px;font-weight:900;color:var(--gold);">${readyForDolly.length}</div></div>
+      <div style="background:var(--emerald-t);border-radius:12px;padding:12px;"><div style="font-size:11px;color:var(--emerald);">Founder assets</div><div style="font-size:22px;font-weight:900;color:var(--emerald);">${content.filter(i=>['personal','both'].includes(i.lane)).length}</div></div>
+    </div>
+    <div style="font-size:12px;color:var(--text2);line-height:1.8;">Kriti is your bottleneck right now only if uploads stall. Use this snapshot to review, remind, and keep founder footage moving daily.</div>`;
 
   document.getElementById('dash-launch-preview').innerHTML = launch ? `<div style="background:linear-gradient(135deg,var(--magenta-t),var(--purple-t));border-radius:16px;padding:16px;"><div style="font-size:11px;color:var(--text2);margin-bottom:6px;">Primary launch focus</div><div style="font-size:22px;font-weight:900;">${launch.name}</div><div style="font-size:12px;color:var(--text2);margin-top:4px;">${launch.theme||''}</div><div style="font-size:12px;line-height:1.8;color:var(--text2);margin-top:12px;">${launch.notes||''}</div></div>` : '<div style="font-size:13px;color:var(--text2);">Add your modal collection in Launch HQ.</div>';
 
