@@ -272,6 +272,15 @@ html, body { min-height: 100vh; background: var(--cream); font-family: 'Segoe UI
 .content-sync-status.ok { display:block; color:var(--emerald); background:var(--emerald-t); border-color:rgba(26,140,90,.15); }
 .content-sync-status.warn { display:block; color:var(--gold); background:var(--gold-t); border-color:rgba(200,137,28,.15); }
 .content-sync-status.err { display:block; color:var(--magenta); background:var(--magenta-t); border-color:rgba(214,41,106,.15); }
+.playbook-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:14px; margin:0 0 18px; }
+.playbook-card { background:var(--white); border:1.5px solid var(--border); border-radius:14px; padding:16px; }
+.playbook-head { display:flex; justify-content:space-between; gap:10px; align-items:flex-start; }
+.playbook-title { font-size:14px; font-weight:800; color:var(--text); }
+.playbook-sub { font-size:11px; color:var(--text2); margin-top:4px; }
+.playbook-list { margin:12px 0 0; padding-left:18px; color:var(--text2); font-size:12px; line-height:1.55; }
+.playbook-list li + li { margin-top:5px; }
+.playbook-foot { display:flex; gap:8px; flex-wrap:wrap; margin-top:14px; }
+.playbook-badge { font-size:10px; font-weight:700; padding:4px 8px; border-radius:999px; background:var(--cream); color:var(--text2); }
 .batch-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:14px; margin:0 0 18px; }
 .batch-card { background:var(--white); border:1.5px solid var(--border); border-radius:14px; padding:16px; }
 .batch-title { font-size:14px; font-weight:800; color:var(--text); }
@@ -918,6 +927,7 @@ html, body { min-height: 100vh; background: var(--cream); font-family: 'Segoe UI
       </div>
     </div>
     <div class="content-sync-status" id="content-sync-status"></div>
+    <div class="playbook-grid" id="content-playbooks"></div>
     <div class="stat-grid" id="content-stats"></div>
     <div class="batch-grid" id="content-batches"></div>
     <div class="content-toolbar">
@@ -2311,16 +2321,45 @@ function contentQueueMatches(item, queue) {
   return true;
 }
 
+function defaultDeadlineISO() {
+  return new Date(Date.now() + 24*60*60*1000).toISOString().slice(0,10);
+}
+
+function defaultAudienceForLane(lane) {
+  if (lane === 'personal') return 'Founder-facing';
+  if (lane === 'both') return 'Both';
+  return 'Brand-facing';
+}
+
+function statusLabel(status) {
+  const labels = {
+    raw: 'Raw',
+    selected: 'Selected',
+    editing: 'Editing',
+    'ready-review': 'Ready for Dolly',
+    approved: 'Approved',
+    scheduled: 'Scheduled',
+    posted: 'Posted'
+  };
+  return labels[status] || status || 'Raw';
+}
+
 function buildDefaultInstructions(item) {
   const deadline = item.deadline ? fmtD(item.deadline) : 'within 24 hours';
-  const laneNote = item.lane === 'personal' ? 'Keep it founder-facing and emotionally strong.' : item.lane === 'both' ? 'Make one version founder-facing and one brand-facing if possible.' : 'Keep it premium, clean, and Serafina-forward.';
+  const laneNote = item.lane === 'personal'
+    ? 'Keep it founder-facing, emotionally strong, and real.'
+    : item.lane === 'both'
+      ? 'Make one founder-facing version and one brand-facing version if possible.'
+      : 'Keep it premium, clean, soft-luxe, and Serafina-forward.';
   return [
     `Deadline: ${deadline}`,
-    'Find the strongest hook in the first 3 seconds.',
-    'Use top-notch editing, clean pacing, and strong storytelling.',
-    'Make the reel feel intentional, premium, and easy to watch.',
+    'Step 1: pick only the strongest clips.',
+    'Step 2: build a strong first 3 seconds hook.',
+    'Step 3: edit with a clear story arc: hook -> texture/detail -> payoff -> CTA.',
+    'Use top-notch editing, clean pacing, tasteful text overlays, and premium storytelling.',
     laneNote,
-    item.adReady ? 'Also think about whether this can become a strong ad creative.' : ''
+    item.adReady ? 'Also think about whether this can become a strong ad creative and note the ad angle.' : 'If this unexpectedly feels ad-worthy, mark it ad-ready.',
+    'Upload the final creative back into this app and move it to Ready for Dolly.'
   ].filter(Boolean).join(' ');
 }
 
@@ -2338,13 +2377,53 @@ function suggestAdAngle(item) {
   return 'Soft luxury + problem-solution + aspirational lifestyle angle';
 }
 
+function buildRolePlaybook(role) {
+  if (role === 'Badri') {
+    return {
+      title: 'Badri Playbook',
+      sub: 'What PMax should see and do',
+      badge: 'Approved + ad-ready',
+      steps: [
+        'Open the approved ad-ready library first.',
+        'Look for creatives with a clear payoff in the first 2-3 seconds.',
+        'Recommend stronger hooks and sharper ad angles from what is already working.',
+        'Reuse one asset across organic and ads instead of asking for duplicate edits.',
+        'Focus on winners: texture, fit, comfort, aspiration, and transformation.'
+      ]
+    };
+  }
+  return {
+    title: 'Kriti Playbook',
+    sub: 'What your SMM should do every time a batch lands',
+    badge: '24-hour turnaround',
+    steps: [
+      'Open the newest batch and sort the best clips first.',
+      'Write a hook that earns attention in the first 3 seconds.',
+      'Edit with a strong story arc, not random montage energy.',
+      'Keep the style premium, sharp, feminine, and easy to watch.',
+      'Upload the final back here and move status to Ready for Dolly.'
+    ]
+  };
+}
+
+function buildRolePlaybookText(role) {
+  const playbook = buildRolePlaybook(role);
+  return [
+    playbook.title,
+    playbook.sub,
+    ...playbook.steps.map((step, idx) => `${idx + 1}. ${step}`),
+    '',
+    `Dashboard: ${location.origin}`
+  ].join('\n');
+}
+
 function generateContentBrief() {
   const item = {
     title: document.getElementById('c-title').value.trim() || 'this asset',
     lane: document.getElementById('c-lane').value,
     type: document.getElementById('c-type').value,
     adReady: document.getElementById('c-ad-ready').value === 'yes',
-    deadline: document.getElementById('c-deadline').value,
+    deadline: document.getElementById('c-deadline').value || defaultDeadlineISO(),
     folderName: document.getElementById('c-event').value.trim() || document.getElementById('c-title').value.trim()
   };
   if (!document.getElementById('c-hook').value.trim()) document.getElementById('c-hook').value = suggestHook(item);
@@ -2383,6 +2462,27 @@ function renderContent() {
     if (!acc[key].deadline && item.deadline) acc[key].deadline = item.deadline;
     return acc;
   }, {})).sort((a,b)=>String(b.latest||'').localeCompare(String(a.latest||'')));
+  document.getElementById('content-playbooks').innerHTML = ['Kriti','Badri'].map(role => {
+    const playbook = buildRolePlaybook(role);
+    const queueKey = role === 'Kriti' ? 'social' : 'ads';
+    return `
+      <div class="playbook-card">
+        <div class="playbook-head">
+          <div>
+            <div class="playbook-title">${playbook.title}</div>
+            <div class="playbook-sub">${playbook.sub}</div>
+          </div>
+          <span class="playbook-badge">${playbook.badge}</span>
+        </div>
+        <ol class="playbook-list">${playbook.steps.map(step=>`<li>${step}</li>`).join('')}</ol>
+        <div class="playbook-foot">
+          <button class="btn btn-ghost btn-sm" onclick="copyRolePlaybook('${role}')">Copy playbook</button>
+          <button class="btn btn-ghost btn-sm" onclick="sendRolePlaybookWhatsApp('${role}')">WhatsApp ${role}</button>
+          <button class="btn btn-ghost btn-sm" onclick="copyContentQueue('${queueKey}')">Copy ${role==='Kriti'?'queue':'library'}</button>
+        </div>
+      </div>
+    `;
+  }).join('');
   document.getElementById('content-stats').innerHTML = `
     <div class="stat-card sc-coral"><div class="stat-label">Total Assets</div><div class="stat-val">${items.length}</div></div>
     <div class="stat-card sc-saffron"><div class="stat-label">Ready for Dolly</div><div class="stat-val">${readyForDolly.length}</div></div>
@@ -2492,7 +2592,7 @@ function buildContentHandoff(item) {
     item.folderName ? `Batch: ${item.folderName}` : '',
     `Lane: ${contentLaneLabel(item.lane)}`,
     `Owner: ${item.owner || 'Me'}`,
-    `Status: ${item.status || 'raw'}`,
+    `Status: ${statusLabel(item.status)}`,
     item.deadline ? `Deadline: ${fmtD(item.deadline)}` : 'Deadline: within 24 hours',
     item.type ? `Type: ${item.type}` : '',
     item.event ? `Event: ${item.event}` : '',
@@ -2508,13 +2608,15 @@ function buildContentHandoff(item) {
 }
 
 function buildBatchHandoff(batchName, items) {
-  const lines = items.slice(0,10).map((item, idx) => `${idx+1}. ${item.title} · ${item.status}${item.link ? ` · ${item.link}` : ''}`);
+  const deadline = items.map(item => item.deadline).filter(Boolean).sort()[0] || defaultDeadlineISO();
+  const lines = items.slice(0,10).map((item, idx) => `${idx+1}. ${item.title} · ${statusLabel(item.status)}${item.link ? ` · ${item.link}` : ''}`);
   return [
     `New content batch uploaded: ${batchName}`,
-    'Deadline: within 24 hours',
+    `Deadline: ${fmtD(deadline)}`,
     'Please sort, select, edit, and add strong hooks.',
-    'Editing style should feel premium, sharp, and story-led.',
-    'Open dashboard and move statuses there.',
+    'Editing style should feel premium, sharp, feminine, and story-led.',
+    'Use this structure: hook -> texture/detail -> payoff -> CTA.',
+    'Upload finals back into the dashboard and move them to Ready for Dolly.',
     '',
     ...lines,
     '',
@@ -2539,13 +2641,23 @@ async function copyContentQueue(queue) {
   const items = load(K.content).map(normalizeContentItem).filter(item => contentQueueMatches(item, queue));
   const queueNames = {
     intake: 'Raw Intake Inbox',
-    social: 'Needs Social',
-    ads: 'Ad Pickup Queue',
+    social: 'Kriti Queue',
+    ads: 'Badri Library',
     founder: 'Founder Lane'
   };
   const header = queueNames[queue] || 'Content Queue';
-  const body = items.length ? items.map((item, idx) => `${idx + 1}. ${item.title} | ${item.status} | ${item.owner}${item.link ? ` | ${item.link}` : ''}`).join('\n') : 'Queue is empty.';
+  const body = items.length
+    ? items.map((item, idx) => `${idx + 1}. ${item.title} | ${statusLabel(item.status)} | ${item.owner}${item.deadline ? ` | due ${fmtD(item.deadline)}` : ''}${item.hook ? ` | hook: ${item.hook}` : ''}${item.adAngle ? ` | angle: ${item.adAngle}` : ''}${item.link ? ` | ${item.link}` : ''}`).join('\n')
+    : 'Queue is empty.';
   await copyTextValue(`${header}\n\n${body}`, `${header} copied`);
+}
+
+async function copyRolePlaybook(role) {
+  await copyTextValue(buildRolePlaybookText(role), `${role} playbook copied`);
+}
+
+function sendRolePlaybookWhatsApp(role) {
+  window.open(`https://wa.me/?text=${encodeURIComponent(buildRolePlaybookText(role))}`, '_blank');
 }
 
 async function copyBatchHandoff(batchName) {
@@ -2583,6 +2695,8 @@ function resetContentModal() {
   document.getElementById('c-lane').value='serafina';
   document.getElementById('c-owner').value='Kriti';
   document.getElementById('c-ad-ready').value='no';
+  document.getElementById('c-deadline').value = defaultDeadlineISO();
+  document.getElementById('c-audience').value = defaultAudienceForLane('serafina');
   const fileInput = document.getElementById('c-asset-file');
   if (fileInput) fileInput.value = '';
   setContentUploadStatus('Choose one or many files. Single upload fills this asset; bulk upload creates a whole intake batch automatically.');
@@ -2662,12 +2776,12 @@ async function bulkUploadContentAssets() {
   const owner = document.getElementById('c-owner').value;
   const event = document.getElementById('c-event').value;
   const date = document.getElementById('c-date').value || today();
-  const deadline = document.getElementById('c-deadline').value || new Date(Date.now() + 24*60*60*1000).toISOString().slice(0,10);
+  const deadline = document.getElementById('c-deadline').value || defaultDeadlineISO();
   const notes = document.getElementById('c-notes').value;
   const status = document.getElementById('c-status').value || 'raw';
   const typeValue = document.getElementById('c-type').value;
   const adReady = document.getElementById('c-ad-ready').value==='yes';
-  const audience = document.getElementById('c-audience').value;
+  const audience = document.getElementById('c-audience').value || defaultAudienceForLane(lane);
   const hook = document.getElementById('c-hook').value;
   const adAngle = document.getElementById('c-ad-angle').value;
   const instructions = document.getElementById('c-instructions').value;
@@ -2751,13 +2865,13 @@ function saveContent() {
     title:document.getElementById('c-title').value,
     event:document.getElementById('c-event').value,
     date:document.getElementById('c-date').value||existing?.date||today(),
-    deadline:document.getElementById('c-deadline').value || existing?.deadline || new Date(Date.now() + 24*60*60*1000).toISOString().slice(0,10),
+    deadline:document.getElementById('c-deadline').value || existing?.deadline || defaultDeadlineISO(),
     notes:document.getElementById('c-notes').value,
     status:document.getElementById('c-status').value,
     lane:document.getElementById('c-lane').value,
     owner:document.getElementById('c-owner').value,
     adReady:document.getElementById('c-ad-ready').value==='yes',
-    audience:document.getElementById('c-audience').value.trim(),
+    audience:document.getElementById('c-audience').value.trim() || existing?.audience || defaultAudienceForLane(document.getElementById('c-lane').value),
     hook:document.getElementById('c-hook').value.trim(),
     adAngle:document.getElementById('c-ad-angle').value.trim(),
     instructions:document.getElementById('c-instructions').value.trim() || buildDefaultInstructions({

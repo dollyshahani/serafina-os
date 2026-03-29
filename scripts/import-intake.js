@@ -43,6 +43,10 @@ function today() {
   return new Date().toISOString().slice(0, 10);
 }
 
+function tomorrow() {
+  return new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+}
+
 function inferType(fileName = '') {
   const name = fileName.toLowerCase();
   if (/\.(jpg|jpeg|png|webp|gif|heic|heif)$/i.test(name)) return 'photo';
@@ -61,6 +65,30 @@ function titleFromFilename(name = '') {
 function primaryFolderName(relativeFilePath = '') {
   const segments = relativeFilePath.split(path.sep).filter(Boolean);
   return segments.length > 1 ? segments[0] : 'Ungrouped';
+}
+
+function defaultAudience(lane) {
+  if (lane === 'personal') return 'Founder-facing';
+  if (lane === 'both') return 'Both';
+  return 'Brand-facing';
+}
+
+function buildImportedInstructions(lane, folderLabel) {
+  const laneNote = lane === 'personal'
+    ? 'Keep it founder-facing, emotionally strong, and real.'
+    : lane === 'both'
+      ? 'Make one founder-facing version and one brand-facing version if possible.'
+      : 'Keep it premium, clean, soft-luxe, and Serafina-forward.';
+  return [
+    'Deadline: within 24 hours.',
+    `Batch: ${folderLabel}.`,
+    'Pick only the strongest clips.',
+    'Build a first-3-seconds hook.',
+    'Edit with a clear story arc: hook -> detail -> payoff -> CTA.',
+    'Use top-notch editing, tasteful text overlays, and premium storytelling.',
+    laneNote,
+    'Upload finals back into the app and move status to Ready for Dolly.'
+  ].join(' ');
 }
 
 async function ensureBucket(supabaseUrl, serviceKey, bucket) {
@@ -214,6 +242,7 @@ async function main() {
   }
 
   const imported = [];
+  const skipped = [];
   const pendingMoves = [];
   for (const [folderName, rule] of Object.entries(folderRules)) {
     const folderPath = path.join(intakeDir, folderName);
@@ -226,20 +255,35 @@ async function main() {
         continue;
       }
       const folderLabel = primaryFolderName(relativeFilePath);
-      const uploaded = await uploadFile(supabaseUrl, serviceKey, bucket, rule.lane, filePath, fileName);
+      let uploaded;
+      try {
+        uploaded = await uploadFile(supabaseUrl, serviceKey, bucket, rule.lane, filePath, fileName);
+      } catch (err) {
+        if (/413|Payload too large/i.test(err.message)) {
+          skipped.push({ fileName: `${folderName}/${relativeFilePath}`, reason: 'payload too large' });
+          if (!jsonOutput) console.log(`Skipped ${folderName}/${relativeFilePath} (payload too large)`);
+          continue;
+        }
+        throw err;
+      }
       const item = {
         id: uid(),
         type: inferType(fileName),
         title: titleFromFilename(fileName) || folderLabel || 'Untitled asset',
         folderName: folderLabel,
         importPath: `${folderName}/${relativeFilePath}`,
-        event: '',
+        event: folderLabel,
         date: today(),
+        deadline: tomorrow(),
         notes: `Imported from local intake folder: ${folderName}/${relativeFilePath}`,
         status: 'raw',
         lane: rule.lane,
         owner: rule.owner,
         adReady: false,
+        audience: defaultAudience(rule.lane),
+        hook: '',
+        adAngle: '',
+        instructions: buildImportedInstructions(rule.lane, folderLabel),
         source: rule.sourceLabel,
         link: uploaded.publicUrl,
         img: inferType(fileName) === 'photo' ? uploaded.publicUrl : null,
@@ -269,6 +313,8 @@ async function main() {
     workspace,
     bucket,
     count: imported.length,
+    skippedCount: skipped.length,
+    skipped,
     files: imported
   };
   const reportPath = path.join(intakeDir, 'imported', `import-report-${Date.now()}.json`);
