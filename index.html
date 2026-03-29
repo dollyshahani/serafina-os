@@ -796,7 +796,7 @@ body.portal-mode .kriti-portal-shell { display:block; }
       <span class="nav-dot" style="background:var(--magenta)"></span> Brainstorm ✦
     </button>
     <button class="nav-item" data-page="obsession">
-      <span class="nav-dot" style="background:var(--coral)"></span> Personal Brand OS
+      <span class="nav-dot" style="background:var(--coral)"></span> Dolly Daily
     </button>
     <button class="nav-item" data-page="drops">
       <span class="nav-dot" style="background:var(--purple)"></span> Launch HQ
@@ -1070,8 +1070,8 @@ body.portal-mode .kriti-portal-shell { display:block; }
   <!-- ── OBSESSION BOARD ── -->
   <div id="page-obsession" class="page">
     <div class="page-top">
-      <div><div class="greeting">✦ founder growth engine</div><div class="page-title">Personal Brand OS</div><div class="page-sub">Weight loss, discipline, manifestation, Serafina, and digital products in one founder lane</div></div>
-      <button class="btn btn-coral" onclick="openModal('modal-obs')" style="background:var(--coral);color:white;">+ Add Founder Note</button>
+      <div><div class="greeting">✦ dolly daily</div><div class="page-title">Dolly Daily</div><div class="page-sub">Your daily reel engine, story system, and founder content workflow</div></div>
+      <button class="btn btn-coral" onclick="openModal('modal-obs')" style="background:var(--coral);color:white;">+ Add Dolly Note</button>
     </div>
     <div class="obs-filter-bar" id="obs-filters">
       <button class="obs-filter active" data-tag="all" onclick="obsFilter(this,'all')">All</button>
@@ -1675,7 +1675,7 @@ body.portal-mode .kriti-portal-shell { display:block; }
 <!-- OBSESSION MODAL -->
 <div class="overlay" id="modal-obs">
   <div class="modal">
-    <div class="modal-head"><div class="modal-title">Add to Personal Brand OS</div><button class="modal-x" onclick="closeModal('modal-obs')">×</button></div>
+    <div class="modal-head"><div class="modal-title">Add to Dolly Daily</div><button class="modal-x" onclick="closeModal('modal-obs')">×</button></div>
     <input type="hidden" id="obs-id">
     <div class="frow c2">
       <div class="fgrp"><label>Type</label>
@@ -2085,6 +2085,45 @@ async function copyDailyReelBrief() {
     `Repurpose: ${brief.repurpose}`
   ].join('\n');
   await copyTextValue(text, 'Daily reel brief copied');
+}
+
+function buildDollyDailyPrompt(brief) {
+  return [
+    "I'm filming a 30-second Instagram reel today.",
+    '',
+    `My story/thing that happened today: ${brief.title}.`,
+    '',
+    'My audience: Women 25-35 who want to build a dream business + location freedom + manifest the life. They should feel "I want that life."',
+    '',
+    'Write me:',
+    `1. HOOK (1 sentence, face to camera, bold/vulnerable) around: ${brief.hook}`,
+    `2. B-ROLL DIRECTION around this mood: ${brief.mood}`,
+    `3. INSIGHT (1-2 sentences, the truth/lesson) using this angle: ${brief.angle}`,
+    '4. CTA (1 sentence, drives follow)',
+    '',
+    'Keep total under 80 words. Make the hook uncomfortable to say — that is how you know it is good.'
+  ].join('\n');
+}
+
+function buildHiggsfieldPrompt(brief) {
+  const map = {
+    'Weight loss': 'Woman rebuilding herself through quiet discipline, soft cinematic morning light, luxury wellness energy, warm tones, intimate closeups, aspirational but real',
+    'Discipline': 'Female founder in a refined morning routine, laptop, coffee, city light, soft luxe realism, cinematic details, high self-respect energy',
+    'Founder journey': 'Female founder building a premium brand alone, reviewing samples and working on laptop, warm cinematic light, documentary but elegant',
+    'Manifestation': 'Woman journaling and visualizing in soft golden light, dreamy but grounded, aspirational lifestyle, intimate cinematic details',
+    'Founder x Serafina': 'Founder with premium athleisure details, fabric closeups, elegant lifestyle, quiet luxury, Indian confidence, cinematic softness'
+  };
+  return map[brief.pillar] || 'Female founder in a cinematic, soft-luxury lifestyle scene, intimate details, warm light, aspirational realism';
+}
+
+async function copyDollyDailyPrompt() {
+  const brief = buildDailyReelBrief(load(K.content).map(normalizeContentItem), load(K_OBS).map(normalizeBrandEntry));
+  await copyTextValue(buildDollyDailyPrompt(brief), 'Claude reel prompt copied');
+}
+
+async function copyHiggsfieldPrompt() {
+  const brief = buildDailyReelBrief(load(K.content).map(normalizeContentItem), load(K_OBS).map(normalizeBrandEntry));
+  await copyTextValue(buildHiggsfieldPrompt(brief), 'Higgsfield prompt copied');
 }
 
 function renderDash() {
@@ -4841,32 +4880,84 @@ const OBS_COLORS = { idea:'var(--saffron)', script:'var(--purple)', proof:'var(-
 function renderObs(tag) {
   const all = load(K_OBS).map(normalizeBrandEntry).filter(o => tag==='all' || o.tag===tag);
   const grid = document.getElementById('obs-grid');
+  const content = load(K.content).map(normalizeContentItem);
+  const brief = buildDailyReelBrief(content, all);
   document.getElementById('pb-pillars').innerHTML = `
     <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;">
-      <div style="background:var(--purple-t);border-radius:12px;padding:12px;"><div style="font-size:11px;color:var(--purple);">Pillar 01</div><div style="font-size:13px;font-weight:800;">Weight loss</div></div>
-      <div style="background:var(--saffron-t);border-radius:12px;padding:12px;"><div style="font-size:11px;color:var(--gold);">Pillar 02</div><div style="font-size:13px;font-weight:800;">Discipline</div></div>
-      <div style="background:var(--teal-t);border-radius:12px;padding:12px;"><div style="font-size:11px;color:var(--teal);">Pillar 03</div><div style="font-size:13px;font-weight:800;">Manifestation</div></div>
-      <div style="background:var(--coral-t);border-radius:12px;padding:12px;"><div style="font-size:11px;color:var(--coral);">Pillar 04</div><div style="font-size:13px;font-weight:800;">Founder x Serafina</div></div>
+      <div style="background:var(--purple-t);border-radius:12px;padding:12px;"><div style="font-size:11px;color:var(--purple);">Pillar 01</div><div style="font-size:13px;font-weight:800;">The Body</div><div style="font-size:11px;color:var(--text2);margin-top:4px;">Weight loss, beauty, standards</div></div>
+      <div style="background:var(--saffron-t);border-radius:12px;padding:12px;"><div style="font-size:11px;color:var(--gold);">Pillar 02</div><div style="font-size:13px;font-weight:800;">The Build</div><div style="font-size:11px;color:var(--text2);margin-top:4px;">Founder life, Serafina, building in public</div></div>
+      <div style="background:var(--teal-t);border-radius:12px;padding:12px;"><div style="font-size:11px;color:var(--teal);">Pillar 03</div><div style="font-size:13px;font-weight:800;">The Mind</div><div style="font-size:11px;color:var(--text2);margin-top:4px;">Manifestation, self-concept, identity</div></div>
+      <div style="background:var(--coral-t);border-radius:12px;padding:12px;"><div style="font-size:11px;color:var(--coral);">Pillar 04</div><div style="font-size:13px;font-weight:800;">The AI Angle</div><div style="font-size:11px;color:var(--text2);margin-top:4px;">How you use AI to build and create</div></div>
     </div>`;
   document.getElementById('pb-offers').innerHTML = `
     <div style="display:flex;flex-direction:column;gap:10px;">
       <div style="background:var(--cream);border:1px solid var(--border);border-radius:12px;padding:12px;">
-        <div style="font-size:11px;color:var(--text2);margin-bottom:4px;">Live offer</div>
+        <div style="font-size:11px;color:var(--text2);margin-bottom:4px;">Current offer</div>
         <div style="font-size:13px;font-weight:800;">Manifestation Dashboard</div>
         <a href="${MANIFESTATION_URL}" target="_blank" style="font-size:12px;color:var(--indigo);font-weight:700;">Open product ↗</a>
       </div>
       <div style="background:linear-gradient(135deg,#FAF5EE,#F5EFE6);border:1px solid #D4A853;border-radius:12px;padding:12px;">
-        <div style="font-size:11px;color:#9A6808;margin-bottom:4px;">✦ Coming soon · Free</div>
-        <div style="font-size:13px;font-weight:800;">Manifest &amp; Move</div>
-        <div style="font-size:11px;color:#666;margin-top:2px;margin-bottom:6px;">Daily rituals, stories &amp; SATS for the woman becoming her</div>
-        <a href="http://localhost:4445" target="_blank" style="font-size:12px;color:#9A6808;font-weight:700;">Preview app ↗</a>
+        <div style="font-size:11px;color:#9A6808;margin-bottom:4px;">Today’s promotion angle</div>
+        <div style="font-size:13px;font-weight:800;">Build trust first, then point to the product</div>
+        <div style="font-size:11px;color:#666;margin-top:2px;margin-bottom:6px;">Your content should sell the woman you are becoming, then softly bridge to the dashboard.</div>
+        <button class="btn btn-ghost btn-sm" onclick="copyDollyDailyPrompt()">Copy Claude prompt</button>
       </div>
     </div>`;
-  if (!all.length) {
-    grid.innerHTML = `<div style="text-align:center;padding:48px;color:var(--text2);"><div style="font-size:36px;margin-bottom:12px;">🧠</div><div style="font-weight:700;">Nothing here yet</div><div style="font-size:12px;margin-top:4px;">Add founder hooks, manifestation notes, and digital product prompts.</div></div>`;
-    return;
-  }
-  grid.innerHTML = all.map(o => {
+  grid.innerHTML = `
+    <div class="reel-brief" style="break-inside:avoid; display:block;">
+      <div class="reel-brief-top">
+        <div>
+          <span class="reel-pill">Dolly Daily</span>
+          <div class="reel-title">${brief.title}</div>
+          <div class="reel-sub">${brief.hook}</div>
+          <div class="reel-sub"><strong style="color:var(--text);">Angle:</strong> ${brief.angle}</div>
+        </div>
+        <div class="reel-actions">
+          <button class="btn btn-ghost btn-sm" onclick="copyDailyReelBrief()">Copy brief</button>
+          <button class="btn btn-ghost btn-sm" onclick="copyDollyDailyPrompt()">Copy Claude prompt</button>
+          <button class="btn btn-ghost btn-sm" onclick="copyHiggsfieldPrompt()">Copy Higgsfield prompt</button>
+          <button class="btn btn-ghost btn-sm" onclick="navigate('content')">Open footage</button>
+        </div>
+      </div>
+      <div class="reel-grid">
+        <div class="reel-card">
+          <div class="reel-card-title">Daily Reel Structure</div>
+          <div class="reel-shot-list">
+            <div class="reel-shot-item"><strong>0–3s Hook:</strong> face to camera, bold and slightly uncomfortable.</div>
+            <div class="reel-shot-item"><strong>3–15s B-roll:</strong> use cinematic founder/soft-luxury visuals.</div>
+            <div class="reel-shot-item"><strong>15–25s Insight:</strong> say the truth or lesson directly.</div>
+            <div class="reel-shot-item"><strong>25–30s CTA:</strong> follow for tomorrow’s update.</div>
+          </div>
+        </div>
+        <div class="reel-card">
+          <div class="reel-card-title">Shot List</div>
+          <div class="reel-shot-list">${brief.shots.map(shot => `<div class="reel-shot-item">${shot}</div>`).join('')}</div>
+        </div>
+      </div>
+      <div class="reel-grid" style="margin-top:12px;">
+        <div class="reel-card">
+          <div class="reel-card-title">Production Stack</div>
+          <div class="reel-shot-list">
+            <div class="reel-shot-item"><strong>Claude:</strong> script + caption in 5 min.</div>
+            <div class="reel-shot-item"><strong>iPhone:</strong> face-to-camera and real life shots.</div>
+            <div class="reel-shot-item"><strong>Higgsfield:</strong> cinematic B-roll prompt for missing life shots.</div>
+            <div class="reel-shot-item"><strong>Videoleap:</strong> reuse one saved edit template.</div>
+            <div class="reel-shot-item"><strong>Instagram:</strong> add trending audio and post.</div>
+          </div>
+        </div>
+        <div class="reel-card">
+          <div class="reel-card-title">Automation Notes</div>
+          <div class="reel-shot-list">
+            <div class="reel-shot-item"><strong>Source today:</strong> ${brief.sourceDrop}</div>
+            <div class="reel-shot-item"><strong>Mood:</strong> ${brief.mood}</div>
+            <div class="reel-shot-item"><strong>Caption direction:</strong> ${brief.caption}</div>
+            <div class="reel-shot-item"><strong>Repurpose:</strong> ${brief.repurpose}</div>
+            <div class="reel-shot-item"><strong>CTA rule:</strong> never ask for emoji comments, always ask for a follow or save.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    ${!all.length ? `<div style="text-align:center;padding:48px;color:var(--text2);"><div style="font-size:36px;margin-bottom:12px;">🧠</div><div style="font-weight:700;">Nothing here yet</div><div style="font-size:12px;margin-top:4px;">Add founder hooks, manifestation notes, and digital product prompts.</div></div>` : all.map(o => {
     const bg = OBS_COLORS[o.type]||'var(--text2)';
     const imgSrc = o.img && o.img.includes('drive.google.com') ? o.img.replace('/view','/uc?export=view&') : o.img;
     return `
@@ -4882,7 +4973,8 @@ function renderObs(tag) {
         <button onclick="deleteObs('${o.id}')" style="background:none;border:none;cursor:pointer;font-size:10px;color:var(--text2);margin-top:6px;padding:0;">remove ×</button>
       </div>
     </div>`;
-  }).join('');
+  }).join('')}
+  `;
 }
 
 function obsFilter(el, tag) {
