@@ -736,6 +736,9 @@ body.portal-mode .kriti-portal-shell { display:block; }
 .reel-shot-slot img { width:100%; height:140px; object-fit:cover; display:block; background:var(--cream); }
 .reel-shot-caption { font-size:10px; font-weight:800; letter-spacing:1px; text-transform:uppercase; color:var(--text2); padding:8px 10px; border-top:1px solid var(--border); background:white; }
 .reel-upload-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; }
+.reel-upload-grid > div { min-width:0; }
+.reel-upload-grid input[type=file] { width:100%; max-width:100%; font-size:12px; display:block; }
+#modal-reel .modal-btns { position: sticky; bottom: -30px; background: linear-gradient(180deg, rgba(255,255,255,0), var(--white) 22px); padding-top: 16px; z-index: 2; }
 
 /* ── TIME CAPSULE ── */
 .capsule-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:20px; }
