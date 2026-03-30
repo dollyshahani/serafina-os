@@ -2180,6 +2180,23 @@ body.portal-mode .kriti-portal-shell { display:block; }
   </div>
 </div>
 
+<div class="overlay" id="modal-higgsfield">
+  <div class="modal">
+    <div class="modal-head"><div class="modal-title">Generate in Higgsfield</div><button class="modal-x" onclick="closeModal('modal-higgsfield')">×</button></div>
+    <input type="hidden" id="hf-ref-id">
+    <div class="frow c2">
+      <div class="fgrp"><label>Creator / reel</label><input id="hf-ref-name" placeholder="Reference name" readonly /></div>
+      <div class="fgrp"><label>Duration (seconds)</label><input id="hf-duration" type="number" min="3" max="10" step="1" value="5" /></div>
+    </div>
+    <div class="frow"><div class="fgrp"><label>Source image URL</label><input id="hf-image-url" placeholder="Paste a public image URL from Drive, Supabase, Shopify, or anywhere public" /></div></div>
+    <div class="frow"><div class="fgrp"><label>Motion prompt</label><textarea id="hf-prompt" placeholder="Cinematic motion prompt for Higgsfield"></textarea></div></div>
+    <div class="modal-btns">
+      <button class="btn btn-ghost" type="button" onclick="closeModal('modal-higgsfield')">Cancel</button>
+      <button class="btn btn-saffron" type="button" onclick="submitHiggsfieldJob()">Generate video</button>
+    </div>
+  </div>
+</div>
+
 <!-- CAPSULE MODAL -->
 <div class="overlay" id="modal-capsule">
   <div class="modal">
@@ -2236,6 +2253,7 @@ const K_BRIEF = 'sf3_brief';
 const K_DROPS = 'sf3_drops';
 const K_OBS = 'sf3_obs';
 const K_REELS = 'sf3_reels';
+const K_HIGGS = 'sf3_higgs_jobs';
 const K_SHOPIFY_SNAPSHOT = 'sf3_shopify_snapshot';
 const load  = k => { try { return JSON.parse(localStorage.getItem(k))||[]; } catch(e){ return []; }};
 const save  = (k,v) => localStorage.setItem(k, JSON.stringify(v));
@@ -2246,7 +2264,7 @@ const fmtD  = d => { if(!d) return '—'; const dt=new Date(d); return dt.toLoca
 const CLOUD_SETTINGS_KEY = 'sf3_cloud_settings';
 const MANIFESTATION_URL = 'https://dollydash-knzskech.manus.space/';
 const LIVE_APP_ORIGIN = 'https://serafina-os.vercel.app';
-let runtimeConfig = { loaded:false, features:{ cloudSync:false, contentStorage:false, localIntake:false, managedShopify:false, vercelCron:false } };
+let runtimeConfig = { loaded:false, features:{ cloudSync:false, contentStorage:false, localIntake:false, managedShopify:false, vercelCron:false, reelVision:false, higgsfieldVideo:false } };
 let liveCommerceSummary = null;
 let liveCommerceLoading = false;
 const SEEDED_BRIEF_SIGNATURE = { salesYesterday:28600, cashOutWeek:42000, adSpend:8500, adRevenue:36200, cvr:2.4 };
@@ -2430,6 +2448,24 @@ function normalizeReelRef(item) {
     executionSystem: item.executionSystem || '',
     motionText: item.motionText || '',
     createdAt: item.createdAt || today()
+  };
+}
+
+function normalizeHiggsJob(item) {
+  return {
+    id: item.id || uid(),
+    refId: item.refId || '',
+    refName: item.refName || 'Reference',
+    imageUrl: item.imageUrl || '',
+    prompt: item.prompt || '',
+    duration: Number(item.duration || 5) || 5,
+    requestId: item.requestId || '',
+    status: item.status || 'draft',
+    outputUrl: item.outputUrl || '',
+    provider: item.provider || 'Higgsfield',
+    model: item.model || '',
+    createdAt: item.createdAt || today(),
+    updatedAt: item.updatedAt || today()
   };
 }
 
@@ -2728,6 +2764,17 @@ function buildHiggsfieldPrompt(brief) {
     'Founder x Serafina': 'Founder with premium athleisure details, fabric closeups, elegant lifestyle, quiet luxury, Indian confidence, cinematic softness'
   };
   return map[brief.pillar] || 'Female founder in a cinematic, soft-luxury lifestyle scene, intimate details, warm light, aspirational realism';
+}
+
+function buildReelHiggsfieldPrompt(ref) {
+  return [
+    ref.paletteNotes || 'Warm premium cinematic palette',
+    ref.cameraLanguage || 'intimate camera movement',
+    ref.editStyle || 'story-led visual rhythm',
+    ref.motionText ? `Emotional tone: ${ref.motionText}` : '',
+    ref.goal ? `Goal: ${ref.goal}` : '',
+    'Smooth cinematic motion, elegant pace, realistic luxury mood, social-first composition'
+  ].filter(Boolean).join(', ');
 }
 
 async function copyDollyDailyPrompt() {
@@ -4468,7 +4515,7 @@ async function loadRuntimeConfig(force=false) {
     const data = await resp.json();
     runtimeConfig = { loaded:true, ...(data||{}) };
   } catch (e) {
-    runtimeConfig = { loaded:true, features:{ cloudSync:false, contentStorage:false, localIntake:false, managedShopify:false, vercelCron:false, reelVision:false } };
+    runtimeConfig = { loaded:true, features:{ cloudSync:false, contentStorage:false, localIntake:false, managedShopify:false, vercelCron:false, reelVision:false, higgsfieldVideo:false } };
   }
   return runtimeConfig;
 }
@@ -6045,13 +6092,36 @@ function buildReelBreakdownDraft(input) {
 
 function renderReelLab() {
   const refs = load(K_REELS).map(normalizeReelRef).sort((a,b)=>String(b.createdAt).localeCompare(String(a.createdAt)));
+  const jobs = load(K_HIGGS).map(normalizeHiggsJob).sort((a,b)=>String(b.updatedAt).localeCompare(String(a.updatedAt)));
   document.getElementById('reel-lab-stats').innerHTML = `
     <div class="stat-card sc-saffron"><div class="stat-label">Saved</div><div class="stat-val">${refs.length}</div><div class="stat-sub">reels + creator accounts</div></div>
     <div class="stat-card sc-coral"><div class="stat-label">Story-led</div><div class="stat-val">${refs.filter(r=>/story|emotional|confession/i.test([r.why,r.editStyle,r.hookPattern].join(' '))).length}</div><div class="stat-sub">strong narrative references</div></div>
     <div class="stat-card sc-teal"><div class="stat-label">Make My Version</div><div class="stat-val">${refs.filter(r=>r.dollyVersion).length}</div><div class="stat-sub">usable remake plans</div></div>
     <div class="stat-card sc-magenta"><div class="stat-label">Storyboard Ready</div><div class="stat-val">${refs.length}</div><div class="stat-sub">send any idea to War Room</div></div>
   `;
-  document.getElementById('reel-lab-grid').innerHTML = refs.map(ref => `
+  document.getElementById('reel-lab-grid').innerHTML = `
+    ${jobs.length ? `
+      <div class="playbook-card" style="grid-column:1/-1;">
+        <div class="playbook-title">Higgsfield Studio</div>
+        <div class="playbook-sub" style="margin-top:6px;">Generate cinematic inserts from your source stills, then pull the finished clips back into your editing flow.</div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;margin-top:14px;">
+          ${jobs.map(job => `
+            <div class="reel-ref-card" style="padding:14px;">
+              <div class="reel-ref-title">${escapeHtml(job.refName)}</div>
+              <div class="reel-ref-sub">${escapeHtml(job.status)} · ${job.duration}s${job.model ? ` · ${escapeHtml(job.model)}` : ''}</div>
+              <div class="reel-ref-section"><div class="reel-ref-label">Prompt</div><div class="reel-ref-text">${escapeHtml(job.prompt)}</div></div>
+              ${job.outputUrl ? `<div class="reel-ref-section"><div class="reel-ref-label">Output</div><div class="reel-ref-text"><a href="${job.outputUrl}" target="_blank" style="color:var(--indigo);font-weight:700;">Open generated clip ↗</a></div></div>` : ''}
+              <div class="reel-ref-actions">
+                ${job.requestId && !job.outputUrl ? `<button class="btn btn-ghost btn-sm" onclick="checkHiggsfieldJob('${job.id}')">Check status</button>` : ''}
+                ${job.outputUrl ? `<button class="btn btn-ghost btn-sm" onclick="copyTextValue('${job.outputUrl.replace(/'/g,"\\'")}','Output URL copied')">Copy output URL</button>` : ''}
+                <button class="btn btn-ghost btn-sm" onclick="deleteHiggsfieldJob('${job.id}')">Delete</button>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    ` : ''}
+    ${refs.map(ref => `
     <div class="reel-ref-card">
       <div class="reel-ref-title">${ref.creator}</div>
       <div class="reel-ref-sub">${ref.sourceType === 'account' ? 'creator account' : 'reel reference'} · ${ref.pillar} · saved ${fmtD(ref.createdAt)}${ref.link ? ` · <a href="${ref.link}" target="_blank" style="color:var(--indigo);font-weight:700;">open ↗</a>` : ''}</div>
@@ -6088,12 +6158,14 @@ function renderReelLab() {
         <button class="btn btn-ghost btn-sm" onclick="copyVideoleapChecklist('${ref.id}')">Copy Videoleap</button>
         <button class="btn btn-ghost btn-sm" onclick="copyReelShotList('${ref.id}')">Copy shot list</button>
         <button class="btn btn-ghost btn-sm" onclick="analyzeReelRefWithAI('${ref.id}')">AI analyze frames</button>
+        <button class="btn btn-ghost btn-sm" onclick="openHiggsfieldModal('${ref.id}')">Generate in Higgsfield</button>
         <button class="btn btn-ghost btn-sm" onclick="createDollyStoryboard('${ref.id}')">Turn into storyboard</button>
         <button class="btn btn-ghost btn-sm" onclick="sendReelToWarRoom('${ref.id}')">Send analysis to War Room</button>
         <button class="btn btn-ghost btn-sm" onclick="deleteReelRef('${ref.id}')">Delete</button>
       </div>
     </div>
-  `).join('') || `<div class="playbook-card" style="grid-column:1/-1;"><div class="playbook-title">No reel references yet</div><div class="playbook-sub" style="margin-top:8px;">Paste reels you love here. This becomes your storytelling library and breakdown tool.</div></div>`;
+  `).join('') || `<div class="playbook-card" style="grid-column:1/-1;"><div class="playbook-title">No reel references yet</div><div class="playbook-sub" style="margin-top:8px;">Paste reels you love here. This becomes your storytelling library and breakdown tool.</div></div>`}
+  `;
 }
 
 function readFileAsDataURL(inputId) {
@@ -6300,6 +6372,102 @@ async function runReelAnalysis(ref) {
   const data = await resp.json();
   if (!resp.ok) throw new Error(data?.error || 'AI analysis failed');
   return data;
+}
+
+function openHiggsfieldModal(id) {
+  const ref = normalizeReelRef(load(K_REELS).find(x=>x.id===id) || {});
+  if (!ref.id) return;
+  document.getElementById('hf-ref-id').value = ref.id;
+  document.getElementById('hf-ref-name').value = ref.creator || 'Reference';
+  document.getElementById('hf-image-url').value = '';
+  document.getElementById('hf-duration').value = '5';
+  document.getElementById('hf-prompt').value = buildReelHiggsfieldPrompt(ref);
+  openModal('modal-higgsfield');
+}
+
+async function submitHiggsfieldJob() {
+  const cfg = await loadRuntimeConfig(true);
+  if (!cfg.features?.higgsfieldVideo) {
+    alert('Add HIGGSFIELD_API_KEY and HIGGSFIELD_API_SECRET in Vercel first.');
+    return;
+  }
+  const refId = document.getElementById('hf-ref-id').value;
+  const ref = normalizeReelRef(load(K_REELS).find(x=>x.id===refId) || {});
+  const imageUrl = document.getElementById('hf-image-url').value.trim();
+  const prompt = document.getElementById('hf-prompt').value.trim();
+  const duration = Number(document.getElementById('hf-duration').value || 5) || 5;
+  if (!imageUrl) {
+    alert('Paste a public source image URL first.');
+    return;
+  }
+  if (!prompt) {
+    alert('Add a motion prompt first.');
+    return;
+  }
+  const resp = await fetch('/api/reels/analyze', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      action: 'higgsfield-generate',
+      job: { imageUrl, prompt, duration }
+    })
+  });
+  const data = await resp.json();
+  if (!resp.ok) {
+    alert(data?.error || 'Higgsfield generation failed');
+    return;
+  }
+  const jobs = load(K_HIGGS).map(normalizeHiggsJob);
+  jobs.unshift(normalizeHiggsJob({
+    refId,
+    refName: ref.creator || 'Reference',
+    imageUrl,
+    prompt,
+    duration,
+    requestId: data.requestId,
+    status: data.status || 'queued',
+    model: data.model || '',
+    updatedAt: new Date().toISOString()
+  }));
+  save(K_HIGGS, jobs);
+  closeModal('modal-higgsfield');
+  if (currentPage === 'reels') renderReelLab();
+  alert('Sent to Higgsfield. Check status in the Higgsfield Studio block.');
+}
+
+async function checkHiggsfieldJob(id) {
+  const jobs = load(K_HIGGS).map(normalizeHiggsJob);
+  const idx = jobs.findIndex(x => x.id === id);
+  if (idx < 0) return;
+  const job = jobs[idx];
+  if (!job.requestId) {
+    alert('This job has no Higgsfield request ID.');
+    return;
+  }
+  const resp = await fetch('/api/reels/analyze', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ action: 'higgsfield-status', requestId: job.requestId })
+  });
+  const data = await resp.json();
+  if (!resp.ok) {
+    alert(data?.error || 'Failed to check Higgsfield status');
+    return;
+  }
+  jobs[idx] = normalizeHiggsJob({
+    ...job,
+    status: data.status || job.status,
+    outputUrl: data.outputUrl || job.outputUrl,
+    updatedAt: new Date().toISOString()
+  });
+  save(K_HIGGS, jobs);
+  if (currentPage === 'reels') renderReelLab();
+  alert(data.outputUrl ? 'Higgsfield clip is ready.' : `Status: ${data.status || 'unknown'}`);
+}
+
+function deleteHiggsfieldJob(id) {
+  save(K_HIGGS, load(K_HIGGS).filter(x => x.id !== id));
+  if (currentPage === 'reels') renderReelLab();
 }
 
 async function analyzeReelRefWithAI(id, opts = {}) {

@@ -11,7 +11,8 @@ module.exports = async function handler(req, res) {
       managedShopify: Boolean(getEnv('SHOPIFY_STORE') && getEnv('SHOPIFY_STOREFRONT_TOKEN')),
       shopifyAdmin: Boolean(getEnv('SHOPIFY_STORE') && getEnv('SHOPIFY_ADMIN_TOKEN')),
       vercelCron: false,
-      reelVision: Boolean(getEnv('OPENAI_API_KEY'))
+      reelVision: Boolean(getEnv('OPENAI_API_KEY')),
+      higgsfieldVideo: Boolean(getEnv('HIGGSFIELD_API_KEY') && getEnv('HIGGSFIELD_API_SECRET'))
     }
   });
 };

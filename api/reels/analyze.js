@@ -79,15 +79,110 @@ function extractText(responseJson) {
   return parts.join('\n').trim();
 }
 
+function findFirstUrl(input) {
+  if (!input) return '';
+  if (typeof input === 'string') {
+    return /^https?:\/\//i.test(input) ? input : '';
+  }
+  if (Array.isArray(input)) {
+    for (const item of input) {
+      const hit = findFirstUrl(item);
+      if (hit) return hit;
+    }
+    return '';
+  }
+  if (typeof input === 'object') {
+    for (const value of Object.values(input)) {
+      const hit = findFirstUrl(value);
+      if (hit) return hit;
+    }
+  }
+  return '';
+}
+
 module.exports = async function handler(req, res) {
   if (req.method !== 'POST') return sendJson(res, 405, { error: 'Method not allowed' });
 
-  const apiKey = getEnv('OPENAI_API_KEY');
-  const model = getEnv('OPENAI_REEL_MODEL', 'gpt-4.1');
-  if (!apiKey) return sendJson(res, 500, { error: 'OPENAI_API_KEY is not configured' });
-
   try {
     const body = await readJson(req);
+    const action = body?.action || 'analyze';
+
+    if (action === 'higgsfield-generate') {
+      const apiKey = getEnv('HIGGSFIELD_API_KEY');
+      const apiSecret = getEnv('HIGGSFIELD_API_SECRET');
+      const model = getEnv('HIGGSFIELD_MODEL', 'higgsfield-ai/dop/standard');
+      if (!apiKey || !apiSecret) {
+        return sendJson(res, 500, { error: 'HIGGSFIELD_API_KEY or HIGGSFIELD_API_SECRET is not configured' });
+      }
+      const job = body?.job || {};
+      if (!job.imageUrl) return sendJson(res, 400, { error: 'A source image URL is required' });
+      if (!job.prompt) return sendJson(res, 400, { error: 'A Higgsfield motion prompt is required' });
+
+      const generateResp = await fetch(`https://platform.higgsfield.ai/${model}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+          Authorization: `Key ${apiKey}:${apiSecret}`
+        },
+        body: JSON.stringify({
+          image_url: job.imageUrl,
+          prompt: job.prompt,
+          duration: Number(job.duration || 5) || 5
+        })
+      });
+
+      const generateData = await generateResp.json();
+      if (!generateResp.ok) {
+        return sendJson(res, generateResp.status, {
+          error: generateData?.error?.message || generateData?.message || `Higgsfield request failed (${generateResp.status})`
+        });
+      }
+
+      return sendJson(res, 200, {
+        ok: true,
+        requestId: generateData?.request_id || generateData?.id || '',
+        status: generateData?.status || 'queued',
+        model,
+        raw: generateData
+      });
+    }
+
+    if (action === 'higgsfield-status') {
+      const apiKey = getEnv('HIGGSFIELD_API_KEY');
+      const apiSecret = getEnv('HIGGSFIELD_API_SECRET');
+      if (!apiKey || !apiSecret) {
+        return sendJson(res, 500, { error: 'HIGGSFIELD_API_KEY or HIGGSFIELD_API_SECRET is not configured' });
+      }
+      const requestId = body?.requestId || '';
+      if (!requestId) return sendJson(res, 400, { error: 'requestId is required' });
+
+      const statusResp = await fetch(`https://platform.higgsfield.ai/requests/${requestId}/status`, {
+        method: 'GET',
+        headers: {
+          Accept: 'application/json',
+          Authorization: `Key ${apiKey}:${apiSecret}`
+        }
+      });
+      const statusData = await statusResp.json();
+      if (!statusResp.ok) {
+        return sendJson(res, statusResp.status, {
+          error: statusData?.error?.message || statusData?.message || `Higgsfield status failed (${statusResp.status})`
+        });
+      }
+      return sendJson(res, 200, {
+        ok: true,
+        requestId,
+        status: statusData?.status || 'unknown',
+        outputUrl: findFirstUrl(statusData),
+        raw: statusData
+      });
+    }
+
+    const apiKey = getEnv('OPENAI_API_KEY');
+    const model = getEnv('OPENAI_REEL_MODEL', 'gpt-4.1');
+    if (!apiKey) return sendJson(res, 500, { error: 'OPENAI_API_KEY is not configured' });
+
     const ref = body?.reference || {};
     const images = [
       ref.openingShotImg && { label: 'Opening frame', url: ref.openingShotImg },
