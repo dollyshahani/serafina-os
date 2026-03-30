@@ -862,6 +862,117 @@ body.portal-mode .kriti-portal-shell { display:block; }
     bottom: 14px;
   }
 }
+
+/* ─── DOLLY DAILY ─── */
+.dd-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:20px;border-bottom:1.5px solid var(--border);padding-bottom:12px;}
+.dd-tab{padding:8px 18px;border-radius:20px;border:1.5px solid var(--border);background:var(--white);font-size:12px;font-weight:600;cursor:pointer;transition:all 0.12s;color:var(--text2);}
+.dd-tab:hover{background:var(--cream);color:var(--text);}
+.dd-tab.active{background:var(--text);color:var(--white);border-color:var(--text);}
+.dd-sub-page{display:none;}
+.dd-sub-page.active{display:block;}
+.dd-top-streak{background:rgba(244,160,28,.12);border:1.5px solid rgba(244,160,28,.25);border-radius:20px;padding:5px 14px;font-size:12px;font-weight:700;color:var(--saffron);}
+/* Calendar cards */
+.dd-cal-card{background:var(--white);border:1.5px solid var(--border);border-radius:14px;margin-bottom:12px;overflow:hidden;transition:box-shadow 0.12s;}
+.dd-cal-card:hover{box-shadow:0 4px 16px var(--shadow);}
+.dd-cal-card.today-card{border-color:var(--saffron);border-width:2px;}
+.dd-cal-card.posted-card{border-left:4px solid var(--emerald);}
+.dd-cal-card-main{display:flex;align-items:flex-start;gap:14px;padding:16px 18px;}
+.dd-cal-day-num{font-size:32px;font-weight:900;line-height:1;min-width:36px;text-align:center;}
+.dd-cal-content{flex:1;}
+.dd-cal-top{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px;}
+.dd-cal-idea{font-size:14px;font-weight:700;color:var(--text);line-height:1.4;margin-bottom:6px;}
+.dd-cal-hook-preview{font-size:12px;color:var(--saffron);font-style:italic;margin-bottom:4px;}
+.dd-cal-shot-preview{font-size:11px;color:var(--text2);margin-bottom:10px;line-height:1.4;}
+.dd-cal-actions{display:flex;gap:8px;flex-wrap:wrap;}
+.dd-cal-expanded{border-top:1.5px solid var(--border);background:var(--cream);padding:18px 20px;}
+/* Pillar badges */
+.dd-pillar-badge{display:inline-block;font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:3px 10px;border-radius:20px;}
+.dd-pil-build{background:rgba(224,90,43,.1);color:var(--coral);}
+.dd-pil-mind{background:rgba(124,58,237,.1);color:var(--purple);}
+.dd-pil-serafina{background:rgba(214,41,106,.1);color:var(--magenta);}
+.dd-pil-travel{background:rgba(13,140,140,.1);color:var(--teal);}
+.dd-pil-ai{background:rgba(44,62,140,.1);color:var(--indigo);}
+.dd-pil-body{background:rgba(26,140,90,.1);color:var(--emerald);}
+.dd-posted-badge{font-size:10px;font-weight:700;padding:3px 10px;border-radius:20px;background:rgba(26,140,90,.1);color:var(--emerald);}
+.dd-today-badge{font-size:10px;font-weight:700;padding:3px 10px;border-radius:20px;background:rgba(244,160,28,.15);color:var(--saffron);}
+/* Suggestion card */
+.dd-suggestion-card{background:linear-gradient(135deg,rgba(244,160,28,.08),rgba(244,160,28,.02));border:1.5px solid rgba(244,160,28,.3);border-radius:14px;padding:20px;margin-bottom:18px;position:relative;overflow:hidden;}
+.dd-suggestion-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--saffron),var(--magenta),var(--teal));}
+.dd-sug-day{font-size:10px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--saffron);margin-bottom:8px;}
+.dd-sug-idea{font-size:18px;font-weight:700;color:var(--text);line-height:1.35;margin-bottom:8px;}
+.dd-audio-reminder{background:rgba(124,58,237,.06);border:1.5px solid rgba(124,58,237,.15);border-radius:12px;padding:14px 16px;margin-bottom:16px;display:flex;align-items:center;gap:12px;font-size:13px;color:var(--text);line-height:1.5;}
+.dd-audio-reminder strong{color:var(--purple);}
+/* Pillar selector */
+.dd-pillar-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px;}
+.dd-pillar-btn{background:var(--cream);border:1.5px solid var(--border);border-radius:10px;padding:10px 8px;font-size:11px;font-weight:600;color:var(--text2);cursor:pointer;text-align:center;transition:all 0.15s;line-height:1.3;}
+.dd-pillar-btn:hover{color:var(--text);border-color:var(--saffron);}
+.dd-pillar-btn.selected{color:var(--saffron);border-color:var(--saffron);background:rgba(244,160,28,.08);}
+.dd-p-icon{font-size:18px;display:block;margin-bottom:3px;}
+.dd-generate-btn{width:100%;padding:14px;border-radius:10px;font-size:14px;font-weight:800;letter-spacing:.5px;cursor:pointer;transition:opacity .2s;border:none;background:var(--saffron);color:white;margin-top:4px;}
+.dd-generate-btn:hover{opacity:.9;}
+/* Visual ref */
+.dd-visual-ref{display:inline-flex;align-items:center;gap:8px;background:rgba(214,41,106,.07);border:1px solid rgba(214,41,106,.2);border-radius:20px;padding:5px 14px;font-size:11px;font-weight:500;color:var(--magenta);margin-bottom:14px;}
+/* Hook split */
+.dd-hook-split{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.dd-hook-block{background:var(--cream);border:1.5px solid var(--border);border-radius:8px;padding:12px 14px;}
+.dd-hook-label{font-size:9px;font-weight:800;letter-spacing:2px;text-transform:uppercase;margin-bottom:8px;}
+.dd-hook-label.saffron{color:var(--saffron);}
+.dd-hook-label.teal{color:var(--teal);}
+.dd-hook-text{font-size:14px;font-weight:600;color:var(--text);line-height:1.5;}
+/* Shot list */
+.dd-shot-list{display:flex;flex-direction:column;gap:10px;}
+.dd-shot-item{display:flex;gap:10px;align-items:flex-start;}
+.dd-shot-time{font-size:10px;font-weight:800;color:var(--saffron);white-space:nowrap;min-width:42px;padding-top:4px;}
+.dd-shot-body{flex:1;}
+.dd-shot-type{display:inline-block;font-size:9px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;padding:2px 8px;border-radius:20px;margin-bottom:5px;}
+.dd-shot-type.aroll{background:rgba(13,140,140,.12);color:var(--teal);}
+.dd-shot-type.broll{background:rgba(200,137,28,.15);color:var(--gold);}
+.dd-shot-desc{font-size:13px;color:var(--text);line-height:1.45;}
+.dd-shot-overlay{font-size:11px;font-weight:700;color:var(--saffron);font-style:italic;margin-top:4px;white-space:pre-line;}
+/* Output */
+.dd-output-text{font-size:14px;color:var(--text);line-height:1.6;white-space:pre-line;}
+.dd-caption-box{background:var(--cream);border:1.5px solid var(--border);border-radius:8px;padding:14px;font-size:13px;line-height:1.8;color:var(--text);white-space:pre-line;}
+/* Checklist */
+.dd-check-item{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--border);cursor:pointer;}
+.dd-check-item:last-child{border-bottom:none;}
+.dd-check-box{width:22px;height:22px;border-radius:50%;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:11px;transition:all .2s;}
+.dd-check-item.done .dd-check-box{background:var(--emerald);border-color:var(--emerald);color:white;}
+.dd-check-item.done .dd-check-label{text-decoration:line-through;color:var(--text2);}
+.dd-check-label{font-size:14px;color:var(--text);font-weight:500;}
+.dd-check-sub{font-size:11px;color:var(--text2);margin-top:2px;}
+.dd-check-time{margin-left:auto;font-size:10px;color:var(--text2);white-space:nowrap;}
+/* Streak */
+.dd-streak-hero{background:linear-gradient(135deg,var(--text),#2c1a40);border-radius:16px;padding:28px;margin-bottom:20px;text-align:center;}
+.dd-streak-num{font-size:80px;font-weight:900;line-height:1;color:var(--saffron);}
+.dd-streak-label{font-size:11px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:rgba(255,255,255,.5);margin-top:4px;}
+.dd-streak-badge-pill{display:inline-block;background:rgba(244,160,28,.2);border:1px solid rgba(244,160,28,.3);border-radius:20px;padding:6px 18px;font-size:12px;font-weight:700;color:var(--saffron);margin-top:14px;}
+.dd-stats-row{display:flex;gap:12px;margin-bottom:20px;}
+.dd-stat-card{flex:1;background:var(--white);border:1.5px solid var(--border);border-radius:10px;padding:14px;text-align:center;}
+.dd-stat-num{font-size:28px;font-weight:900;color:var(--text);}
+.dd-stat-label{font-size:10px;color:var(--text2);letter-spacing:1px;text-transform:uppercase;margin-top:2px;}
+/* 40-day grid */
+.dd-grid-40{display:grid;grid-template-columns:repeat(8,1fr);gap:6px;margin-bottom:20px;}
+.dd-grid-day{aspect-ratio:1;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;}
+.dd-grid-day.posted{background:var(--emerald);color:white;}
+.dd-grid-day.today-d{border:2px solid var(--saffron);background:rgba(244,160,28,.1);color:var(--saffron);}
+.dd-grid-day.skipped{background:rgba(224,90,43,.12);color:var(--coral);border:1px solid rgba(224,90,43,.2);}
+.dd-grid-day.empty{background:var(--cream);border:1.5px solid var(--border);color:var(--text2);}
+.dd-milestone-item{display:flex;align-items:center;gap:14px;padding:12px 16px;background:var(--white);border:1.5px solid var(--border);border-radius:10px;margin-bottom:8px;}
+/* Prompt library */
+.dd-search{width:100%;background:var(--white);border:1.5px solid var(--border);border-radius:10px;padding:11px 16px;font-size:13px;color:var(--text);outline:none;margin-bottom:14px;transition:border-color .15s;font-family:inherit;}
+.dd-search:focus{border-color:var(--saffron);}
+.dd-filter-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px;}
+.dd-filter-tab{padding:5px 12px;border-radius:20px;border:1.5px solid var(--border);font-size:11px;cursor:pointer;transition:all .12s;color:var(--text2);background:var(--white);font-weight:600;}
+.dd-filter-tab.active{background:var(--text);color:white;border-color:var(--text);}
+.dd-prompt-card{background:var(--white);border:1.5px solid var(--border);border-radius:10px;padding:14px 16px;margin-bottom:8px;display:flex;align-items:flex-start;justify-content:space-between;gap:12px;}
+.dd-prompt-text{font-size:13px;font-style:italic;color:var(--text);line-height:1.5;flex:1;}
+@media(max-width:600px){
+  .dd-pillar-grid{grid-template-columns:repeat(2,1fr);}
+  .dd-hook-split{grid-template-columns:1fr;}
+  .dd-grid-40{grid-template-columns:repeat(6,1fr);}
+  .dd-streak-num{font-size:60px;}
+  .dd-cal-card-main{flex-direction:column;}
+}
 </style>
 </head>
 <body>
@@ -1202,25 +1313,156 @@ body.portal-mode .kriti-portal-shell { display:block; }
     <div class="drop-grid" id="drop-grid"></div>
   </div>
 
-  <!-- ── OBSESSION BOARD ── -->
+  <!-- ── DOLLY DAILY (FOUNDER OS) ── -->
   <div id="page-obsession" class="page">
     <div class="page-top">
-      <div><div class="greeting">✦ dolly daily</div><div class="page-title">Dolly Daily</div><div class="page-sub">Your daily reel engine, story system, and founder content workflow</div></div>
-      <button class="btn btn-coral" onclick="openModal('modal-obs')" style="background:var(--coral);color:white;">+ Add Dolly Note</button>
+      <div>
+        <div class="greeting">✦ dolly daily</div>
+        <div class="page-title">Dolly Daily</div>
+        <div class="page-sub">Your personal brand engine — 40-day calendar, script generator, streak tracker</div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <span class="dd-top-streak" id="dd-top-streak">🔥 0 days</span>
+        <button class="btn btn-coral" onclick="openModal('modal-obs')" style="background:var(--coral);color:white;">+ Add Note</button>
+      </div>
     </div>
-    <div class="obs-filter-bar" id="obs-filters">
-      <button class="obs-filter active" data-tag="all" onclick="obsFilter(this,'all')">All</button>
-      <button class="obs-filter" data-tag="weight-loss" onclick="obsFilter(this,'weight-loss')">⚡ Weight Loss</button>
-      <button class="obs-filter" data-tag="discipline" onclick="obsFilter(this,'discipline')">📓 Discipline</button>
-      <button class="obs-filter" data-tag="manifestation" onclick="obsFilter(this,'manifestation')">✨ Manifestation</button>
-      <button class="obs-filter" data-tag="serafina" onclick="obsFilter(this,'serafina')">🪡 Serafina</button>
-      <button class="obs-filter" data-tag="digital-product" onclick="obsFilter(this,'digital-product')">💻 Digital Product</button>
+
+    <div class="dd-tabs">
+      <button class="dd-tab active" data-ddpage="calendar" onclick="ddShowPage('calendar',this)">📅 40-Day Calendar</button>
+      <button class="dd-tab" data-ddpage="today" onclick="ddShowPage('today',this)">✦ Today</button>
+      <button class="dd-tab" data-ddpage="streak" onclick="ddShowPage('streak',this)">🔥 Streak</button>
+      <button class="dd-tab" data-ddpage="library" onclick="ddShowPage('library',this)">✨ Prompts</button>
+      <button class="dd-tab" data-ddpage="notes" onclick="ddShowPage('notes',this)">📌 Notes</button>
     </div>
-    <div class="g2" style="margin-bottom:18px;">
-      <div class="panel"><div class="panel-head"><span class="panel-title-sm">Founder Pillars</span></div><div id="pb-pillars"></div></div>
-      <div class="panel"><div class="panel-head"><span class="panel-title-sm">Current Offers</span></div><div id="pb-offers"></div></div>
+
+    <!-- CALENDAR -->
+    <div class="dd-sub-page active" id="dd-page-calendar">
+      <div id="dd-calendar-list"></div>
     </div>
-    <div class="obs-masonry" id="obs-grid"></div>
+
+    <!-- TODAY -->
+    <div class="dd-sub-page" id="dd-page-today">
+      <div class="dd-audio-reminder" id="dd-audio-reminder" style="display:none">
+        <div style="font-size:22px">🎵</div>
+        <div>It's Sunday — <strong>open Edits app</strong> and screenshot your top 10 trending sounds. Label by mood: energetic / emotional / ambient / fun.</div>
+      </div>
+      <div class="dd-suggestion-card">
+        <div class="dd-sug-day" id="dd-sug-day">DAY 1 · TODAY'S IDEA</div>
+        <div class="dd-sug-idea" id="dd-sug-idea">Loading your content idea...</div>
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-top:10px">
+          <span class="dd-pillar-badge" id="dd-sug-pillar"></span>
+          <button class="btn btn-ghost btn-sm" onclick="ddUseSuggestion()">Use this idea →</button>
+        </div>
+      </div>
+      <div class="panel" style="margin-bottom:14px">
+        <div class="fgrp">
+          <label>What happened today?</label>
+          <textarea id="dd-idea-input" rows="3" placeholder="One sentence. What happened, what you realised, what you're building." oninput="ddCurrentCalendarDay=null" style="width:100%;padding:10px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;resize:none;outline:none;font-family:inherit;background:var(--cream);color:var(--text);transition:border-color .15s;" onfocus="this.style.borderColor='var(--saffron)'" onblur="this.style.borderColor='var(--border)'"></textarea>
+        </div>
+      </div>
+      <div class="panel" style="margin-bottom:14px">
+        <div class="panel-head"><span class="panel-title-sm">Pick your pillar</span></div>
+        <div class="dd-pillar-grid">
+          <button class="dd-pillar-btn" data-pillar="build" onclick="ddSelectPillar(this)"><span class="dd-p-icon">🏗️</span>The Build</button>
+          <button class="dd-pillar-btn" data-pillar="mind" onclick="ddSelectPillar(this)"><span class="dd-p-icon">✨</span>The Mind</button>
+          <button class="dd-pillar-btn" data-pillar="serafina" onclick="ddSelectPillar(this)"><span class="dd-p-icon">🩷</span>Serafina</button>
+          <button class="dd-pillar-btn" data-pillar="travel" onclick="ddSelectPillar(this)"><span class="dd-p-icon">🌍</span>Travel</button>
+          <button class="dd-pillar-btn" data-pillar="ai" onclick="ddSelectPillar(this)"><span class="dd-p-icon">🤖</span>AI Angle</button>
+          <button class="dd-pillar-btn" data-pillar="body" onclick="ddSelectPillar(this)"><span class="dd-p-icon">💪</span>The Body</button>
+        </div>
+      </div>
+      <button class="dd-generate-btn" onclick="ddGenerateReel()">✦ Generate My Reel →</button>
+      <div id="dd-output-section" style="display:none;margin-top:20px">
+        <div class="section-divider"><span>Your Reel — Ready to Film</span></div>
+        <div id="dd-visual-ref-display" class="dd-visual-ref" style="display:none">🎬 <span id="dd-visual-ref-text"></span></div>
+        <div class="panel" style="margin-bottom:12px">
+          <div class="panel-head"><span class="panel-title-sm">Hook</span><button class="btn btn-ghost btn-sm" onclick="ddCopyText('dd-spoken-hook-text',this)">Copy spoken</button></div>
+          <div class="dd-hook-split">
+            <div class="dd-hook-block"><div class="dd-hook-label saffron">📱 Text overlay</div><div class="dd-hook-text" id="dd-text-hook-display"></div></div>
+            <div class="dd-hook-block"><div class="dd-hook-label teal">🎙 Spoken</div><div class="dd-hook-text" id="dd-spoken-hook-text"></div></div>
+          </div>
+        </div>
+        <div class="panel" style="margin-bottom:12px">
+          <div class="panel-head"><span class="panel-title-sm">🎥 Shot List</span></div>
+          <div class="dd-shot-list" id="dd-shot-list"></div>
+        </div>
+        <div class="panel" style="margin-bottom:12px">
+          <div class="panel-head"><span class="panel-title-sm">💡 Insight</span><button class="btn btn-ghost btn-sm" onclick="ddCopyText('dd-insight-text',this)">Copy</button></div>
+          <div class="dd-output-text" id="dd-insight-text"></div>
+        </div>
+        <div class="panel" style="margin-bottom:12px">
+          <div class="panel-head"><span class="panel-title-sm">📣 CTA</span><button class="btn btn-ghost btn-sm" onclick="ddCopyText('dd-cta-text',this)">Copy</button></div>
+          <div class="dd-output-text" id="dd-cta-text"></div>
+        </div>
+        <div class="panel" style="margin-bottom:12px">
+          <div class="panel-head"><span class="panel-title-sm">✨ Higgsfield Prompt</span><button class="btn btn-ghost btn-sm" onclick="ddCopyText('dd-higgsfield-text',this)">Copy</button></div>
+          <div class="dd-caption-box" id="dd-higgsfield-text"></div>
+        </div>
+        <div class="panel" style="margin-bottom:16px">
+          <div class="panel-head"><span class="panel-title-sm">📝 Full Caption</span><button class="btn btn-ghost btn-sm" onclick="ddCopyText('dd-caption-text',this)">Copy</button></div>
+          <div class="dd-caption-box" id="dd-caption-text"></div>
+        </div>
+        <div class="section-divider"><span>5-Step Checklist</span></div>
+        <div class="panel" style="padding:8px 18px;margin-bottom:16px">
+          <div class="dd-check-item" onclick="this.classList.toggle('done')"><div class="dd-check-box">✓</div><div><div class="dd-check-label">Script ready</div><div class="dd-check-sub">Review shot list, insight, CTA above</div></div><div class="dd-check-time">5 min</div></div>
+          <div class="dd-check-item" onclick="this.classList.toggle('done')"><div class="dd-check-box">✓</div><div><div class="dd-check-label">A-Roll filmed</div><div class="dd-check-sub">iPhone, window light, eye level, 2 takes</div></div><div class="dd-check-time">10 min</div></div>
+          <div class="dd-check-item" onclick="this.classList.toggle('done')"><div class="dd-check-box">✓</div><div><div class="dd-check-label">B-Roll from Higgsfield</div><div class="dd-check-sub">Use the Higgsfield prompt above</div></div><div class="dd-check-time">10 min</div></div>
+          <div class="dd-check-item" onclick="this.classList.toggle('done')"><div class="dd-check-box">✓</div><div><div class="dd-check-label">Edited in Videoleap</div><div class="dd-check-sub">Apply "Dolly Daily" template, auto-captions on</div></div><div class="dd-check-time">10 min</div></div>
+          <div class="dd-check-item" onclick="this.classList.toggle('done')"><div class="dd-check-box">✓</div><div><div class="dd-check-label">Posted via Edits</div><div class="dd-check-sub">Trending audio + caption + tag @serafina.collective</div></div><div class="dd-check-time">5 min</div></div>
+        </div>
+        <button id="dd-post-btn" onclick="ddMarkPosted()" style="width:100%;padding:14px;border-radius:10px;font-size:14px;font-weight:800;cursor:pointer;border:none;background:var(--teal);color:white;letter-spacing:.5px;transition:all .2s;">✦ Posted — Mark Today Complete</button>
+      </div>
+    </div>
+
+    <!-- STREAK -->
+    <div class="dd-sub-page" id="dd-page-streak">
+      <div class="dd-streak-hero">
+        <div class="dd-streak-num" id="dd-streak-big">0</div>
+        <div class="dd-streak-label">Day Streak</div>
+        <div class="dd-streak-badge-pill" id="dd-streak-badge">Just getting started ✦</div>
+      </div>
+      <div class="dd-stats-row">
+        <div class="dd-stat-card"><div class="dd-stat-num" id="dd-stat-total">0</div><div class="dd-stat-label">Total Posts</div></div>
+        <div class="dd-stat-card"><div class="dd-stat-num" id="dd-stat-left">40</div><div class="dd-stat-label">Days Left</div></div>
+        <div class="dd-stat-card"><div class="dd-stat-num" id="dd-stat-pct">0%</div><div class="dd-stat-label">Complete</div></div>
+      </div>
+      <div class="section-divider"><span>40-Day Grid</span></div>
+      <div class="dd-grid-40" id="dd-grid-40"></div>
+      <div class="section-divider"><span>Milestones</span></div>
+      <div id="dd-milestones-list"></div>
+    </div>
+
+    <!-- LIBRARY -->
+    <div class="dd-sub-page" id="dd-page-library">
+      <input class="dd-search" id="dd-lib-search" placeholder="Search Higgsfield prompts..." oninput="ddRenderPrompts()">
+      <div class="dd-filter-tabs">
+        <button class="dd-filter-tab active" data-ddfilter="all" onclick="ddSetFilter('all',this)">All (30)</button>
+        <button class="dd-filter-tab" data-ddfilter="build" onclick="ddSetFilter('build',this)">🏗️ Build</button>
+        <button class="dd-filter-tab" data-ddfilter="mind" onclick="ddSetFilter('mind',this)">✨ Mind</button>
+        <button class="dd-filter-tab" data-ddfilter="serafina" onclick="ddSetFilter('serafina',this)">🩷 Serafina</button>
+        <button class="dd-filter-tab" data-ddfilter="travel" onclick="ddSetFilter('travel',this)">🌍 Travel</button>
+        <button class="dd-filter-tab" data-ddfilter="ai" onclick="ddSetFilter('ai',this)">🤖 AI</button>
+        <button class="dd-filter-tab" data-ddfilter="body" onclick="ddSetFilter('body',this)">💪 Body</button>
+      </div>
+      <div id="dd-prompts-list"></div>
+    </div>
+
+    <!-- NOTES (existing board) -->
+    <div class="dd-sub-page" id="dd-page-notes">
+      <div class="obs-filter-bar" id="obs-filters">
+        <button class="obs-filter active" data-tag="all" onclick="obsFilter(this,'all')">All</button>
+        <button class="obs-filter" data-tag="weight-loss" onclick="obsFilter(this,'weight-loss')">⚡ Weight Loss</button>
+        <button class="obs-filter" data-tag="discipline" onclick="obsFilter(this,'discipline')">📓 Discipline</button>
+        <button class="obs-filter" data-tag="manifestation" onclick="obsFilter(this,'manifestation')">✨ Manifestation</button>
+        <button class="obs-filter" data-tag="serafina" onclick="obsFilter(this,'serafina')">🪡 Serafina</button>
+        <button class="obs-filter" data-tag="digital-product" onclick="obsFilter(this,'digital-product')">💻 Digital Product</button>
+      </div>
+      <div class="g2" style="margin-bottom:18px;">
+        <div class="panel"><div class="panel-head"><span class="panel-title-sm">Founder Pillars</span></div><div id="pb-pillars"></div></div>
+        <div class="panel"><div class="panel-head"><span class="panel-title-sm">Current Offers</span></div><div id="pb-offers"></div></div>
+      </div>
+      <div class="obs-masonry" id="obs-grid"></div>
+    </div>
   </div>
 
   <div id="page-reels" class="page">
@@ -2333,7 +2575,7 @@ function renderPage(p) {
   if (p==='customers')   renderCustomers();
   if (p==='products')    renderSellThrough();
   if (p==='drops')       renderDrops();
-  if (p==='obsession')   renderObs('all');
+  if (p==='obsession')   { renderObs('all'); ddInit(); }
   if (p==='universe')    renderUniverse();
   if (p==='capsule')     renderCapsule();
 }
@@ -6758,6 +7000,424 @@ function seedStrategicContent() {
   save(K.tasks, tasks);
 
   localStorage.setItem('sf3_strategy_seeded', '1');
+}
+
+/* ══════════════════════════════════════════════════
+   DOLLY DAILY — CONTENT OS EMBEDDED IN SERAFINA OS
+══════════════════════════════════════════════════ */
+const ddLS={get:k=>{try{return JSON.parse(localStorage.getItem('dd_'+k))}catch(e){return null}},set:(k,v)=>localStorage.setItem('dd_'+k,JSON.stringify(v))};
+function ddTodayStr(){return new Date().toISOString().slice(0,10);}
+function ddToast(msg){let t=document.getElementById('_ddtoast');if(!t){t=document.createElement('div');t.id='_ddtoast';t.style.cssText='position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--saffron);color:white;padding:10px 24px;border-radius:20px;font-size:13px;font-weight:700;opacity:0;transition:all .3s;pointer-events:none;z-index:9999;';document.body.appendChild(t);}t.textContent=msg;t.style.opacity='1';t.style.transform='translateX(-50%) translateY(0)';clearTimeout(t._t);t._t=setTimeout(()=>{t.style.opacity='0';t.style.transform='translateX(-50%) translateY(20px)';},2800);}
+
+const DD_CALENDAR=[
+  {idea:"I started over. Here's why I archived everything.",pillar:"build"},
+  {idea:"Engineer → MBA → NYC → Makeup → Founder. The story nobody knows.",pillar:"build"},
+  {idea:"I built an app while running an athleisure brand. Here's what that looks like.",pillar:"ai"},
+  {idea:"My morning ritual I actually do every single day.",pillar:"mind"},
+  {idea:"What I wear when I'm building an empire at home.",pillar:"serafina"},
+  {idea:"The Bali trip I'm manifesting while filing vendor invoices.",pillar:"travel"},
+  {idea:"Week 1 done. Here's what nobody tells you about starting over.",pillar:"build"},
+  {idea:"The exhibition that almost ended Serafina — and the 5 things I learned.",pillar:"build"},
+  {idea:"I use AI to run my entire business. Here's the exact stack.",pillar:"ai"},
+  {idea:"My manifestation practice — the exact method I use every night.",pillar:"mind"},
+  {idea:"Why Indian women's bodies deserve better activewear.",pillar:"serafina"},
+  {idea:"The revenue number I'm trying to hit by December. Real talk.",pillar:"build"},
+  {idea:"What a founder's Saturday actually looks like vs what it looks like on Instagram.",pillar:"build"},
+  {idea:"The one mindset shift that changed how I build everything.",pillar:"mind"},
+  {idea:"She said our leggings are the only ones that don't gap at the waist.",pillar:"serafina"},
+  {idea:"What I'm learning about building a brand people actually trust.",pillar:"build"},
+  {idea:"The SATS technique I do before every big pitch or decision.",pillar:"mind"},
+  {idea:"The 3 AI tools I couldn't run Serafina without.",pillar:"ai"},
+  {idea:"The fitness goal I set when I started Serafina — honest update.",pillar:"body"},
+  {idea:"What sold out at our last pop-up (and what flopped badly).",pillar:"serafina"},
+  {idea:"3 weeks in. Here's the honest, unfiltered update.",pillar:"build"},
+  {idea:"What location freedom actually means to me. It's not what you think.",pillar:"travel"},
+  {idea:"The hardest thing about building in public nobody warned me about.",pillar:"build"},
+  {idea:"She built it. You're watching someone do what you're dreaming about.",pillar:"mind"},
+  {idea:"How I plan my entire week in 30 minutes running two brands.",pillar:"ai"},
+  {idea:"The journal prompt that completely changed how I approach my business.",pillar:"mind"},
+  {idea:"Serafina is 40 days old. Here's everything the numbers actually say.",pillar:"build"},
+  {idea:"What I want to be doing one year from today. No filter.",pillar:"travel"},
+  {idea:"The woman this account is for. I want to look you in the eye and say this.",pillar:"build"},
+  {idea:"30 days done. Here's everything that happened — wins, failures, all of it.",pillar:"build"},
+  {idea:"I wrote a letter to my future self. One year from now. Here's what it said.",pillar:"mind"},
+  {idea:"The visualization story I read every single night before I sleep.",pillar:"mind"},
+  {idea:"I built a Wins tracker because founders forget their progress. Here's why that matters.",pillar:"build"},
+  {idea:"I'm an engineer who didn't believe in affirmations. Here's the science that changed my mind.",pillar:"mind"},
+  {idea:"I'm manifesting 4 things at the same time. Here's the system.",pillar:"mind"},
+  {idea:"Serafina OS just flagged inventory pressure. 4 units left. Here's what happens now.",pillar:"serafina"},
+  {idea:"I built a 'Universe' view for Serafina — every product, show, customer connected. What I saw.",pillar:"ai"},
+  {idea:"The next Serafina drop. First look at what's coming and how I plan a launch.",pillar:"serafina"},
+  {idea:"3 things every customer said at the pop-up that changed our next collection.",pillar:"build"},
+  {idea:"40 days. Two apps. Two brands. One founder. The complete system.",pillar:"ai"},
+];
+
+const DD_PILLAR_LABELS={
+  build:{label:"The Build",icon:"🏗️",color:"var(--coral)"},
+  mind:{label:"The Mind",icon:"✨",color:"var(--purple)"},
+  serafina:{label:"Serafina",icon:"🩷",color:"var(--magenta)"},
+  travel:{label:"Travel",icon:"🌍",color:"var(--teal)"},
+  ai:{label:"AI Angle",icon:"🤖",color:"var(--indigo)"},
+  body:{label:"The Body",icon:"💪",color:"var(--emerald)"},
+};
+
+const DD_MILESTONES=[
+  {days:3,icon:"🔥",name:"On Fire"},
+  {days:7,icon:"⚡",name:"Unstoppable"},
+  {days:14,icon:"🌙",name:"Deep Practice"},
+  {days:21,icon:"✦",name:"She Knows"},
+  {days:30,icon:"👑",name:"Month 1 Done"},
+  {days:40,icon:"💎",name:"40-Day Diamond"},
+];
+
+const DD_HOOKS={
+  build:[idea=>`I almost gave up on Serafina yesterday. Here's what stopped me.`,idea=>`Nobody told me that building a brand means becoming a completely different person first.`,idea=>`Honest founder update: ${idea}`,idea=>`The thing about building in public is that you have to be okay with people watching you figure it out.`],
+  mind:[idea=>`I did SATS every night for 30 days. My business is not the same.`,idea=>`The manifestation practice that I actually do — not the Instagram version.`,idea=>`Before I make any big business decision, I do this one thing.`,idea=>`Your reality is a reflection of what you believe you deserve. Let me show you mine.`],
+  serafina:[idea=>`I created Serafina because I was exhausted of leggings that didn't fit my actual body.`,idea=>`Indian women have been wearing the wrong size their whole lives. Here's why.`,idea=>`She wore our leggings to her 9-to-5 and didn't want to take them off. That's the goal.`,idea=>`This is what athleisure built for Indian bodies actually looks like.`],
+  travel:[idea=>`I'm building Serafina from my living room. But this is the life I'm creating.`,idea=>`Location freedom isn't passive income on a beach. Here's what it actually is.`,idea=>`I'm manifesting Bali while I pack orders at midnight. Both things are true.`,idea=>`I want to run my business from anywhere in the world. Here's how I'm building toward that.`],
+  ai:[idea=>`I run two brands with AI and spend less time working than I did at my corporate job.`,idea=>`Most Indian founders aren't using AI like this yet. Here's what I do differently.`,idea=>`I built a full manifestation app using AI. No coding background. Here's how.`,idea=>`My AI stack for running Serafina — the tools that actually move the needle.`],
+  body:[idea=>`I started Serafina because I wanted to feel good in my body while building something big.`,idea=>`The body goal I set when I launched Serafina — honest update on where I am.`,idea=>`You can build an empire and take care of your body at the same time. Here's my system.`,idea=>`My morning movement ritual — 20 minutes that change the entire day.`],
+};
+const DD_INSIGHTS={
+  build:["The founder journey isn't about showing up perfect. It's about showing up, learning, and getting better every single time.","Systems beat hustle every time. If you're exhausted, it's because you're missing a system somewhere.","The business you want is on the other side of the person you haven't become yet.","Build in public. The people who watch you figure it out become your most loyal customers."],
+  mind:["The version of you who already has everything you want — she's not waiting for permission. She's just living.","Manifestation isn't wishful thinking. It's aligning your daily actions with the identity of who you're becoming.","The SATS practice works because you fall asleep in the state of the wish fulfilled. Your subconscious doesn't know the difference.","What you believe about yourself in the dark is what builds in the light."],
+  serafina:["Indian women deserve activewear that was designed for them — not just imported from somewhere else and sold here.","Comfort and confidence aren't separate things. When your clothes fit your actual body, everything changes.","The best product feedback I ever got was a woman saying she forgot she was wearing leggings. That's the goal.","We're not just selling athleisure. We're selling the feeling of being at home in your own body."],
+  travel:["Location freedom is a skill, not a lottery ticket. You build the business first, then the life follows.","I'm not waiting until I'm successful to start living well. I'm building both at the same time.","The trip isn't the reward for the work. The trip is part of the work — it's what reminds you why you're building.","Every woman I know who has freedom built it. It didn't happen to them."],
+  ai:["AI doesn't replace your creativity. It removes the parts that were stealing your time so you can actually create.","The founders who learn AI tools now will be 10 years ahead of everyone else in 3 years.","I'm an engineer by training. AI still changed how I work completely. The barrier is lower than you think.","You don't need a team. You need the right tools and a clear vision."],
+  body:["Your body is the first thing you're building. If you don't take care of it, everything else suffers.","Movement isn't punishment. It's the signal you send yourself that says — I'm worth showing up for.","The business goal and the body goal feed each other. Don't separate them.","Strong body, clear mind, open business. That's the whole system."],
+};
+const DD_HASHTAGS={
+  build:"#indianfounder #buildinpublic #womenentrepreneurs #founderlife #startupindia #femalefounder #serafinacollective",
+  mind:"#manifestation #lawofattraction #nevillegoddard #SATS #manifestingfounder #mindset #abundancemindset",
+  serafina:"#serafinacollective #indianathleisure #premiumathleisure #tummytuckerleggings #indianwomen #activewearindia",
+  travel:"#locationfreedom #remotework #digitalnomad #travelfounder #manifesttravel #abundancelife #dreamlife",
+  ai:"#AItools #artificialintelligence #aiforentrepreneurs #techfounder #indiantech #automation #buildwithAI",
+  body:"#fitnessjourney #indianfitness #bodytransformation #womeninfitness #healthylifestyle #movementismedicine",
+};
+const DD_DAY_SCRIPTS=[
+  {d:1,pillar:"build",ref:"Wong Kar Wai — amber light, slow zoom, hold on her face",textHook:"I deleted 4 years of content.",spokenHook:"I archived my entire Instagram last week. 4 years. Gone. Here's the one reason that made it the smartest decision of my life.",shots:[{t:"0–3s",type:"A-Roll",desc:"Face to camera, tight crop. Window light left. One beat of silence — then speak.",overlay:"I deleted 4 years of content."},{t:"3–8s",type:"B-Roll",desc:"Higgsfield: phone screen slowly going dark, amber light, slow zoom. Deliberate, not sad.",overlay:null},{t:"8–16s",type:"A-Roll",desc:"Explain it: ghost followers kill reach. Algorithm shows content to your followers first — if they're fake, reach dies before it starts.",overlay:"ghost followers = dead reach"},{t:"16–22s",type:"B-Roll",desc:"Higgsfield: woman's hand opening a fresh blank notebook. New beginning. No nostalgia.",overlay:"new account. clean slate."},{t:"22–27s",type:"A-Roll",desc:"'Your old account carries who you used to be. My new one is who I'm becoming.' Calm, direct.",overlay:null},{t:"27–30s",type:"A-Roll",desc:"Point at camera. 'Follow for Day 2 of this.'",overlay:"follow for Day 2 →"}],insight:"Ghost followers are a permanent anchor. The algorithm shows your content to your existing followers first — if most of them are fake, your reach dies before it starts. Starting over isn't failure. It's the move.",cta:"Follow for Day 2 — I'm documenting every decision of this rebuild in real time.",higgsfield:"Extreme close-up of a woman's hand placing a phone face-down on a marble surface, warm amber light, cinematic shallow depth of field, In the Mood for Love color grade",tags:"#indianfounder #buildinpublic #instagramstrategy #founderlife #startover #serafinacollective #womenentrepreneurs"},
+  {d:2,pillar:"build",ref:"NAS Daily — rapid text reveals, one word per cut, information density",textHook:"Engineer. MBA. NYC. Makeup. Now this.",spokenHook:"I have 4 completely different lives. And every single one of them led me exactly here.",shots:[{t:"0–3s",type:"A-Roll",desc:"Face. One word per beat as you say them. Fast. Each word lands.",overlay:"Engineer. MBA. NYC. Makeup. Now this."},{t:"3–10s",type:"B-Roll",desc:"Higgsfield: fast-cut sequence — textbooks → city skyline → makeup brushes → premium fabric. Each 1.5s.",overlay:"BITS PILANI → DELOITTE NYC → MAKEUP ARTIST → SERAFINA"},{t:"10–18s",type:"A-Roll",desc:"'The thread connecting all of it: I've always been building something. The form changed. The obsession didn't.'",overlay:null},{t:"18–24s",type:"B-Roll",desc:"Higgsfield: Serafina leggings being folded with care, warm hands, golden light. The final form.",overlay:"the final form."},{t:"24–27s",type:"A-Roll",desc:"'None of it was wasted. All of it was preparation.'",overlay:null},{t:"27–30s",type:"A-Roll",desc:"'Follow if your path doesn't make sense to anyone else yet.'",overlay:"follow →"}],insight:"The non-linear path IS the path. Engineer → MBA → NYC → Makeup → Founder isn't a confusing resume — it's a complete founder profile: technical rigour, business sense, aesthetic eye, product obsession.",cta:"Follow if your path doesn't make sense to anyone else yet — it will.",higgsfield:"Fast-cut editorial montage: engineering textbook, NYC skyline at dusk, makeup brushes on marble, premium athleisure fabric — warm cinematic tones, nostalgic color grade",tags:"#founderorigin #indianfounder #womenentrepreneurs #nonlinearpath #buildinpublic #serafinacollective #startupindia"},
+  {d:3,pillar:"ai",ref:"Alex Hormozi — direct eye contact, zero-fluff, text-heavy, value-first",textHook:"I built an app. Zero coding experience.",spokenHook:"I built a full manifestation app while running an athleisure brand. Using AI. In the same week. Here's exactly how.",shots:[{t:"0–3s",type:"A-Roll",desc:"Face. Direct, almost confrontational confidence. No smile. State it.",overlay:"I built an app. Zero coding experience."},{t:"3–9s",type:"B-Roll",desc:"Higgsfield: laptop screen showing Claude/AI interface, hands typing fast, warm home office light.",overlay:"Claude → Manifest & Move app"},{t:"9–17s",type:"A-Roll",desc:"Walk through it: 'I described what I wanted. Claude wrote the code. I tested it. We iterated. Done.' Brisk pace.",overlay:"describe → generate → test → ship"},{t:"17–23s",type:"B-Roll",desc:"Higgsfield: phone showing dark-themed app with gold accents. move.serafinacollective.com live.",overlay:"live at move.serafinacollective.com"},{t:"23–27s",type:"A-Roll",desc:"'The barrier to building things with AI is lower than you think. You don't need a team. You need to know what you want.'",overlay:null},{t:"27–30s",type:"A-Roll",desc:"'Follow — I'm showing you the exact stack I use every week.'",overlay:"follow for the stack →"}],insight:"AI doesn't replace your creativity. It removes the parts that were stealing your time so you can actually create. You don't need to code. You need to know exactly what you want.",cta:"Follow — I'm showing you the exact AI stack I use to run two brands from my living room.",higgsfield:"Woman's hands typing on a MacBook in a warmly lit home office at night, AI chat interface glowing on screen, shallow depth of field, focused cinematic energy, amber tones",tags:"#aitools #builtwithAI #claudeai #indianfounder #buildinpublic #manifestandmove #techfounder #automation"},
+  {d:4,pillar:"mind",ref:"Sabyasachi — rich textures, unhurried, every frame is a painting",textHook:"6am. Before the world wakes up.",spokenHook:"I do 4 things every morning before I look at my phone. On days I skip even one, the whole day feels off. Here they are.",shots:[{t:"0–3s",type:"A-Roll",desc:"Face. Soft. Morning light only — no ring light. Whisper-calm energy.",overlay:"6am. Before the world wakes up."},{t:"3–10s",type:"B-Roll",desc:"Higgsfield: slow rich shots — hands around a warm chai cup, sunlight through curtains, journal opening to blank page.",overlay:null},{t:"10–18s",type:"A-Roll",desc:"List all 4: SATS scene replay → gratitude → set one intention → no phone for 30 mins.",overlay:"SATS → gratitude → intention → no phone"},{t:"18–24s",type:"B-Roll",desc:"Higgsfield: pen writing in journal, warm golden light, steam from chai nearby.",overlay:"the Manifest & Move ritual"},{t:"24–27s",type:"A-Roll",desc:"'The morning is the only part of the day I fully control. I protect it like my business depends on it — because it does.'",overlay:null},{t:"27–30s",type:"A-Roll",desc:"'Follow — I made a free app for exactly this ritual. Link in bio.'",overlay:"free app → link in bio"}],insight:"The version of you who has everything you want doesn't rush her mornings. She protects them. The ritual isn't spiritual bypassing — it's nervous system regulation before you enter the chaos of building.",cta:"Follow — I built a free app for exactly this morning ritual. It's in the bio.",higgsfield:"Extreme close-up of hands cradling a ceramic chai cup, morning steam rising, golden hour light through sheer curtains, rich Sabyasachi-inspired textures, slow motion, cinematic warmth",tags:"#morningritual #manifestation #SATS #nevillegoddard #lawofattraction #manifestingfounder #morningroutine #mindset"},
+  {d:5,pillar:"serafina",ref:"Slow fashion editorial — neutral palette, real body, unfussy luxury",textHook:"This is what athleisure for Indian bodies looks like.",spokenHook:"I wear Serafina when I'm packing orders at midnight, on calls, running errands. Here's what it actually looks like on a real body.",shots:[{t:"0–3s",type:"A-Roll",desc:"Full shot — you, in Serafina. Natural light. Confident, not posed. Walk toward camera.",overlay:"This is what athleisure for Indian bodies looks like."},{t:"3–10s",type:"B-Roll",desc:"Higgsfield: slow pan waist to ankle — leggings sitting flush. Fabric close-up. No waist gap visible.",overlay:"no waist gap. no see-through. no readjusting."},{t:"10–17s",type:"A-Roll",desc:"'I made this because every legging I tried was made for a body that wasn't mine. Literally.'",overlay:null},{t:"17–23s",type:"B-Roll",desc:"Higgsfield: woman moving naturally — sitting, bending, walking. Leggings moving with her.",overlay:"designed for how you actually move"},{t:"23–27s",type:"A-Roll",desc:"'The goal is to forget you're wearing them. We're almost there.'",overlay:null},{t:"27–30s",type:"A-Roll",desc:"'Link in bio. Tummy Tucker Leggings. Judge them on your own body.'",overlay:"shop → serafinacollective.com"}],insight:"Indian women have been squeezing into Western sizing standards their whole lives. Serafina exists because the market was full of athleisure designed for a different body. That gap is exactly where the brand lives.",cta:"Shop the Tummy Tucker Leggings — link in bio. DM me if you want sizing help.",higgsfield:"Slow editorial pan of premium black athleisure leggings on a real woman, warm home lighting, fabric texture close-up, authentic and luxurious simultaneously, no studio feel",tags:"#serafinacollective #indianathleisure #tummytuckerleggings #athleisureindia #indianwomen #premiumathleisure #slowfashion"},
+  {d:6,pillar:"travel",ref:"Wong Kar Wai — longing, soft focus on what isn't here yet",textHook:"I'm manifesting Bali. From my invoice spreadsheet.",spokenHook:"I know exactly where I'm going. I just haven't booked the flight yet. Here's how I hold two realities at the same time.",shots:[{t:"0–3s",type:"A-Roll",desc:"Face. Small knowing smile. Like you know something they don't.",overlay:"I'm manifesting Bali. From my invoice spreadsheet."},{t:"3–9s",type:"B-Roll",desc:"Higgsfield: rice terraces, rooftop pool overlooking jungle, woman working from a café with ceiling fans.",overlay:"the life I'm building toward"},{t:"9–16s",type:"A-Roll",desc:"'I file vendor invoices and I visualize Bali — not as a vacation but as my office. Both things are true at the same time.'",overlay:null},{t:"16–22s",type:"B-Roll",desc:"Higgsfield: cut back — hands on laptop in a Bangalore living room, then Bali again. The honest contrast.",overlay:"both realities. both real."},{t:"22–27s",type:"A-Roll",desc:"'Manifestation is holding the vision while doing the actual work. Not instead of it.'",overlay:null},{t:"27–30s",type:"A-Roll",desc:"'Follow — I'm documenting how I build the business and the dream simultaneously.'",overlay:"follow the build →"}],insight:"Manifestation isn't escapism from the work. It's the energy you bring to the work. You file the invoices. You also hold the vision. Both at the same time. That's not delusion — that's strategy.",cta:"Follow — I'm showing what it looks like to build the business and the dream at the same time.",higgsfield:"Woman working on a laptop at a Bali rice terrace café, golden hour light, slow ceiling fan, slow motion, dreamy cinematic quality, Wong Kar Wai warm amber grade",tags:"#locationfreedom #manifestation #manifestingfounder #bali #digitalnomad #womenfounder #dreamlife #lawofattraction #serafinacollective"},
+  {d:7,pillar:"build",ref:"Raw documentary — no gloss, talking to a trusted friend",textHook:"Week 1 done. Real numbers.",spokenHook:"I'm one week in. Here's what actually happened — the numbers, the mistakes, and the one thing nobody tells you when you start over.",shots:[{t:"0–3s",type:"A-Roll",desc:"Face. Relaxed. Maybe slightly tired but present. Honest energy.",overlay:"Week 1. Real numbers."},{t:"3–9s",type:"B-Roll",desc:"Higgsfield: notebook with tallies, cold coffee, laptop — working late. Warm but real.",overlay:null},{t:"9–18s",type:"A-Roll",desc:"Share the actual week: posts published, any follower movement, one mistake you're fixing. No spin.",overlay:"7 posts. 1 mistake. 1 fix."},{t:"18–24s",type:"B-Roll",desc:"Higgsfield: woman closing laptop, stretching — end of work day. Satisfied but not perfect.",overlay:"consistency > perfection"},{t:"24–27s",type:"A-Roll",desc:"'The metric for month 1 is posts published, not views. I hit my number.'",overlay:null},{t:"27–30s",type:"A-Roll",desc:"'See you in week 2. Follow so you don't miss it.'",overlay:"week 2 starts tomorrow →"}],insight:"Month 1, the metric is posts published — not views, not followers, not likes. Views follow consistency. Consistency doesn't follow views. Get the order right.",cta:"Follow — weekly founder updates, every week, no spin.",higgsfield:"Close-up of a woman's handwritten tracking notebook with weekly notes, warm evening ambient light, cozy working-late aesthetic, cinematic shallow focus",tags:"#buildinpublic #weeklyupdate #founderlife #womenentrepreneurs #indianfounder #startupjourney #consistency #serafinacollective"},
+  {d:8,pillar:"build",ref:"NAS Daily meets Codie Sanchez — lesson extracted from chaos, information dense",textHook:"The exhibition almost ended Serafina.",spokenHook:"Day 23. Second exhibition. I was not ready. Here are the 5 things I learned that I wish someone had told me first.",shots:[{t:"0–3s",type:"A-Roll",desc:"Face. Direct. No warmup. 'Day 23. Second exhibition. I was not ready.' Let that sit.",overlay:"The exhibition almost ended Serafina."},{t:"3–8s",type:"B-Roll",desc:"Higgsfield: exhibition setup energy — folding tables, product displays, early crowd. Real event.",overlay:null},{t:"8–20s",type:"A-Roll",desc:"5 lessons rapid-fire, count on fingers. Fast pace. Hormozi density.",overlay:"stock · signage · pricing · backup · collect numbers"},{t:"20–25s",type:"B-Roll",desc:"Higgsfield: sold-out product sign, empty display rack — the win inside the chaos.",overlay:"she bought 3 pairs."},{t:"25–28s",type:"A-Roll",desc:"'Exhibitions aren't for selling. They're for understanding your customer face-to-face. That data is worth more than the day's revenue.'",overlay:null},{t:"28–30s",type:"A-Roll",desc:"'Save this before your next pop-up.'",overlay:"save this →"}],insight:"Exhibitions aren't for selling. They're for understanding your customer — what they touch first, what makes them hesitate, what they put down and come back to. That data is irreplaceable.",cta:"Save this for when your pop-up goes sideways. It will. This is how you recover.",higgsfield:"Woman confidently arranging premium clothing displays at an indoor pop-up event, warm fairy lights, customers browsing in background, documentary style, golden hour warmth",tags:"#popupmarket #exhibitiontips #indianfounder #buildinpublic #serafinacollective #womenentrepreneurs #founderlessons #startupindia"},
+  {d:9,pillar:"ai",ref:"Alex Hormozi — value stack, numbered list, unapologetically informative",textHook:"My AI stack. No gatekeeping.",spokenHook:"I run two brands using AI and I spend less time working than I did in my corporate job. Here's the exact stack.",shots:[{t:"0–3s",type:"A-Roll",desc:"Face. 'No gatekeeping. Here's every AI tool I use to run Serafina.' Direct.",overlay:"My AI stack. No gatekeeping."},{t:"3–12s",type:"B-Roll",desc:"Higgsfield: laptop showing different interfaces — Claude, Higgsfield, content calendar. Clean home office.",overlay:"Claude → Higgsfield → Content OS → Shopify"},{t:"12–20s",type:"A-Roll",desc:"Each tool's role: Claude for strategy/copy, Higgsfield for B-roll, Shopify AI for inventory. Fast, clear.",overlay:"Claude: strategy + copy\nHighsfield: AI B-roll\nShopify: inventory AI"},{t:"20–25s",type:"B-Roll",desc:"Higgsfield: phone showing a finished reel ready to post, professional quality from simple inputs.",overlay:"40 minutes. one reel. done."},{t:"25–28s",type:"A-Roll",desc:"'The goal isn't more tools. It's to remove every step that doesn't require you.'",overlay:null},{t:"28–30s",type:"A-Roll",desc:"'Follow — I'm breaking down each tool in detail this week.'",overlay:"follow for the breakdown →"}],insight:"The founders who learn AI tools now will be 10 years ahead in 3 years. You don't need a team. You need a stack and a clear vision of what you're building.",cta:"Follow — I'm breaking down each tool in detail over the next few days.",higgsfield:"Woman's workspace with MacBook showing AI interfaces and content tools, warm home office ambient light, productive energy, cinematic shallow depth of field, amber tones",tags:"#aitools #claudeai #higgsfield #indianfounder #techfounder #automateeverything #buildinpublic #serafinacollective"},
+  {d:10,pillar:"mind",ref:"Sabyasachi — every frame is a ritual, slow and intentional",textHook:"I do SATS every night before I sleep.",spokenHook:"I've been doing SATS for 6 months. My business in that time: exhibition, app launch, new account, real revenue. Here's the exact practice.",shots:[{t:"0–3s",type:"A-Roll",desc:"Face. Calm. Almost conspiratorial — like you're sharing something sacred.",overlay:"I do SATS every night before I sleep."},{t:"3–9s",type:"B-Roll",desc:"Higgsfield: dark bedroom, woman lying in bed, soft side light only. Peaceful, cinematic sleep edge.",overlay:"State Akin To Sleep"},{t:"9–18s",type:"A-Roll",desc:"Explain SATS: hypnagogic state, the scene, why it works neurologically. Calm, unrushed confidence.",overlay:"scene → feeling → sleep"},{t:"18–24s",type:"B-Roll",desc:"Higgsfield: phone showing Manifest & Move app ritual screen, dark aesthetic, gold accents.",overlay:"the Manifest & Move ritual"},{t:"24–27s",type:"A-Roll",desc:"'You fall asleep in the end state. Your subconscious doesn't know the difference between imagined and real.'",overlay:null},{t:"27–30s",type:"A-Roll",desc:"'Free app in bio — the SATS practice is built in.'",overlay:"free app → link in bio"}],insight:"SATS works because the hypnagogic state — right at the edge of sleep — is when your subconscious is most receptive. You enter the feeling of the wish fulfilled. Your nervous system responds as if it's real.",cta:"Free app in bio — the SATS ritual is built in. Use it tonight.",higgsfield:"Woman lying in a dimly lit room, soft side light, eyes closed peacefully, cinematic close-up on face, dreamy slow motion, manifestation ritual aesthetic, Sabyasachi intimacy",tags:"#SATS #nevillegoddard #manifestation #lawofattraction #sleepmanifesting #manifestingfounder #mindset #abundancemindset #manifestandmove"},
+  {d:11,pillar:"serafina",ref:"Indian editorial — Sabyasachi meets Codie's directness, real bodies, cultural pride",textHook:"Indian bodies deserve better than imported sizing.",spokenHook:"Every legging I tried before I made Serafina gapped at the waist. Not because my body was wrong. Because the sizing was.",shots:[{t:"0–3s",type:"A-Roll",desc:"Face. Slightly indignant — the energy of someone who's already solved a problem others haven't noticed.",overlay:"Indian bodies deserve better than imported sizing."},{t:"3–9s",type:"B-Roll",desc:"Higgsfield: two leggings side by side — generic with visible waist gap, Serafina sitting flush. Close-up.",overlay:"theirs vs ours."},{t:"9–17s",type:"A-Roll",desc:"'Indian women have hips. Different waist-to-hip ratios. Western activewear was designed for a different body. That's not a flaw in you. It's a gap in the market.'",overlay:"we have different proportions.\nthat's not a flaw."},{t:"17–23s",type:"B-Roll",desc:"Higgsfield: confident Indian woman walking in sleek black leggings, slow cinematic motion. Pride in movement.",overlay:"designed for you."},{t:"23–27s",type:"A-Roll",desc:"'Serafina exists because I was tired of adjusting, pulling, and hiding. You shouldn't have to.'",overlay:null},{t:"27–30s",type:"A-Roll",desc:"'Link in bio. Tummy Tucker Leggings. On your body, not a model's.'",overlay:"shop now →"}],insight:"Indian women have been told their bodies are the problem. They're not — the sizing is. Serafina is designed for Indian proportions: higher waist rise, sculpting support, no see-through on real skin tones.",cta:"Shop the Tummy Tucker Leggings — link in bio. DM me if the fit isn't perfect.",higgsfield:"Confident Indian woman in premium black leggings walking through a sunlit corridor, slow motion, cinematic warm grade, proud and effortless energy, no studio feel",tags:"#serafinacollective #indianathleisure #indianwomen #tummytuckerleggings #bodypositive #athleisureindia #premiumathleisure"},
+  {d:12,pillar:"build",ref:"Codie Sanchez — real numbers, no flinching, business talk for women",textHook:"₹1 crore by December 2026.",spokenHook:"₹2.5 lakh to ₹1 crore by December 2026. That's the goal. Here's exactly how I'm planning to get there.",shots:[{t:"0–3s",type:"A-Roll",desc:"Face. Serious. No smile. This is a business reel, not a vibe reel.",overlay:"₹1 crore by December 2026."},{t:"3–8s",type:"B-Roll",desc:"Higgsfield: notebook with numbers written in it, pen in hand. Honest and working.",overlay:null},{t:"8–18s",type:"A-Roll",desc:"Break it down: current → target → 3 channels: exhibitions, online, digital products → monthly runrate needed.",overlay:"exhibitions + online + digital products"},{t:"18–24s",type:"B-Roll",desc:"Higgsfield: products being packed beautifully — orders going out. The machine starting to work.",overlay:"every order is a step."},{t:"24–27s",type:"A-Roll",desc:"'I'm sharing the number publicly because accountability makes it real. If I miss it, you'll see that too.'",overlay:null},{t:"27–30s",type:"A-Roll",desc:"'Follow — I'm updating the number every month.'",overlay:"monthly update →"}],insight:"The goal isn't the number. The goal is the system that produces the number. ₹1 Cr by December means knowing exactly which 3 channels produce it and what each one needs from you every month.",cta:"Follow — I'm updating the revenue number publicly every month. No spin.",higgsfield:"Close-up of a woman's hands writing revenue targets in a leather-bound notebook, warm desk lamp light, business planning aesthetic, cinematic focus",tags:"#revenuetransparency #buildinpublic #indianfounder #womenentrepreneurs #serafinacollective #startupindia #businessgoals"},
+  {d:13,pillar:"build",ref:"Raw vs curated split — documentary honesty, the Instagram lie exposed",textHook:"Founder Saturday. Real version.",spokenHook:"Instagram Saturday vs actual Saturday as a founder. Let me show you what building in public actually looks like.",shots:[{t:"0–3s",type:"A-Roll",desc:"Face. Slightly dishevelled. Saturday energy.",overlay:"Founder Saturday. Real version."},{t:"3–10s",type:"B-Roll",desc:"Higgsfield: fast cuts — cold coffee, laptop, packing orders, phone call while walking.",overlay:"packaging → emails → calls → content → repeat"},{t:"10–17s",type:"A-Roll",desc:"'There's no boundary between work and life when you're building something. That's not romantic. It's just true.'",overlay:null},{t:"17–23s",type:"B-Roll",desc:"Higgsfield: the Instagram version — woman at a beautiful café, golden hour, perfect coffee.",overlay:"vs what it looks like on Instagram"},{t:"23–27s",type:"A-Roll",desc:"'Both are real. The Instagram version is what I'm building toward. The Saturday version is what gets me there.'",overlay:null},{t:"27–30s",type:"A-Roll",desc:"'Follow for the real version — not the curated one.'",overlay:"follow the real version →"}],insight:"The founders who show both — the messy Saturday and the aspirational vision — build the deepest trust. Real content converts better than perfect content. Always.",cta:"Follow for the real version — every week, what's actually happening.",higgsfield:"Woman working at a kitchen table with multiple tasks in progress — laptop, packaging tape, cold coffee — natural weekend home lighting, real and warm",tags:"#founderlife #realfounder #buildinpublic #behindthescenes #womenentrepreneurs #indianfounder #saturdaygrind #serafinacollective"},
+  {d:14,pillar:"mind",ref:"Hormozi directness meets manifestation — the one idea that changes everything",textHook:"The mindset shift that changed how I build.",spokenHook:"One thing changed everything about how I run Serafina. It's so simple I almost didn't take it seriously.",shots:[{t:"0–3s",type:"A-Roll",desc:"Face. Pause. Like you're deciding whether to share this. Then do.",overlay:"The mindset shift that changed how I build."},{t:"3–8s",type:"B-Roll",desc:"Higgsfield: woman writing in journal, morning light, deliberate and present.",overlay:null},{t:"8–18s",type:"A-Roll",desc:"The shift: 'I stopped asking what I need to DO and started asking who I need to BE.'",overlay:"be → do → have\n(not have → do → be)"},{t:"18–24s",type:"B-Roll",desc:"Higgsfield: confident woman closing laptop, standing, leaving for the day.",overlay:null},{t:"24–27s",type:"A-Roll",desc:"'Every time I'm stuck, I ask: what would the founder I'm becoming do right now? Then I do that.'",overlay:null},{t:"27–30s",type:"A-Roll",desc:"'Save this for when you're stuck. You'll need it.'",overlay:"save this →"}],insight:"Identity-based building: the version of you who has the business you want isn't doing different actions — she's being a different person. Get the identity right first. The actions become obvious.",cta:"Save this for when you're stuck. It works.",higgsfield:"Woman standing at a window looking out with quiet certainty, morning light on her face, cinematic stillness, the weight of a decision already made — warm tones",tags:"#mindset #identityshift #manifestation #founderpsychology #womenentrepreneurs #buildinpublic #lawofattraction #nevillegoddard #serafinacollective"},
+  {d:15,pillar:"serafina",ref:"Social proof documentary — let her words do the work",textHook:"'I forgot I was wearing them.'",spokenHook:"The best product feedback I've ever received. In 10 words. And it's the exact reason Serafina exists.",shots:[{t:"0–3s",type:"A-Roll",desc:"Face. Genuine smile. This one feels good to share.",overlay:"'I forgot I was wearing them.'"},{t:"3–8s",type:"B-Roll",desc:"Higgsfield: woman in sleek leggings moving through her day naturally — working, walking.",overlay:null},{t:"8–15s",type:"A-Roll",desc:"Read or paraphrase the feedback. Real words, real context.",overlay:"wore them to her 9-to-5.\ndidn't want to take them off."},{t:"15–22s",type:"B-Roll",desc:"Higgsfield: product detail — waistband, fabric, fit. Close-up luxury feel.",overlay:"no waist gap. no see-through. no adjusting."},{t:"22–27s",type:"A-Roll",desc:"'That's the goal. You forget you're wearing them because they fit your actual body — not a size chart.'",overlay:null},{t:"27–30s",type:"A-Roll",desc:"'Link in bio. Try them. DM me your size if you're unsure.'",overlay:"shop → serafinacollective.com"}],insight:"The best product feedback isn't 'I love it.' It's 'I forgot I was wearing it.' That's the standard: invisible comfort on real bodies. That's what Serafina is built for.",cta:"Try the Tummy Tucker Leggings — link in bio. DM me if you need sizing help.",higgsfield:"Indian woman in premium black leggings moving confidently through a modern workspace, slow cinematic motion, natural window light, real and aspirational simultaneously",tags:"#serafinacollective #customerlove #tummytuckerleggings #indianathleisure #premiumathleisure #socialproof #womenentrepreneurs"},
+  {d:16,pillar:"build",ref:"NAS Daily — single insight, beautifully packaged, educational",textHook:"How brands build trust. Nobody teaches this.",spokenHook:"You don't build brand trust through ads. Here are the 3 things that actually make people trust a brand they've never heard of.",shots:[{t:"0–3s",type:"A-Roll",desc:"Face. Teaching mode. Clear and confident.",overlay:"How brands build trust. Nobody teaches this."},{t:"3–8s",type:"B-Roll",desc:"Higgsfield: brand elements — packaging, fabric detail, careful presentation.",overlay:null},{t:"8–18s",type:"A-Roll",desc:"3 things: 1. Consistency, 2. Transparency, 3. Specificity. Count them on fingers.",overlay:"consistency · transparency · specificity"},{t:"18–24s",type:"B-Roll",desc:"Higgsfield: candid moment — women laughing while wearing athleisure, natural.",overlay:"people trust people first."},{t:"24–27s",type:"A-Roll",desc:"'Most brands skip 2 of these 3. That's why they stay invisible.'",overlay:null},{t:"27–30s",type:"A-Roll",desc:"'Save this if you're building a brand.'",overlay:"save this →"}],insight:"Brand trust is built through: showing up consistently so people remember you, sharing the real story so people believe you, and being specific enough that the right person feels seen.",cta:"Save this if you're building a brand — these 3 things are the whole game.",higgsfield:"Careful hands wrapping a premium product in tissue paper, warm editorial light, deliberate and artful, brand-building aesthetic, cinematic close-up on hands",tags:"#brandbuilding #buildinpublic #indianfounder #womenentrepreneurs #serafinacollective #brandstrategy #founderlessons"},
+  {d:17,pillar:"mind",ref:"Sabyasachi ritual aesthetic — the private practice made visible",textHook:"I do SATS before every pitch.",spokenHook:"Before any big pitch, investor meeting, or decision — I do this one thing. It's not what you think.",shots:[{t:"0–3s",type:"A-Roll",desc:"Face. Calm confidence. 'Before I pitch anything, I do this first.'",overlay:"I do SATS before every pitch."},{t:"3–8s",type:"B-Roll",desc:"Higgsfield: woman sitting still in a quiet room, eyes closed, hands relaxed.",overlay:"State Akin To Sleep"},{t:"8–17s",type:"A-Roll",desc:"Walk through: 'I close my eyes. I go to the state just before sleep. I replay the scene of it going well — not the pitch. The moment after.'",overlay:"replay the end scene."},{t:"17–23s",type:"B-Roll",desc:"Higgsfield: woman walking into a meeting confidently, slow motion, warm light.",overlay:"she already knows how it ends."},{t:"23–27s",type:"A-Roll",desc:"'I've done this before every major decision for 6 months. I'm yet to walk into a room not ready.'",overlay:null},{t:"27–30s",type:"A-Roll",desc:"'Free app in bio — the SATS practice is built in.'",overlay:"free app → link in bio"}],insight:"SATS before a high-stakes moment isn't about the outcome — it's about entering the room in the emotional state of someone who already knows it goes well. That energy is palpable. It changes the room.",cta:"Free app in bio — the SATS ritual is there. Use it before your next big moment.",higgsfield:"Woman walking into a bright warmly lit meeting room with quiet confidence, slow motion, cinematic, the energy of someone who already knows the outcome, warm tones",tags:"#SATS #nevillegoddard #manifestation #mindset #founderpsychology #lawofattraction #womenentrepreneurs #manifestingfounder"},
+  {d:18,pillar:"ai",ref:"Hormozi information-dense — tool breakdown, no padding",textHook:"3 AI tools. Can't run Serafina without them.",spokenHook:"I've tried 15 AI tools. 3 actually moved the needle for running Serafina. Here they are — no fluff.",shots:[{t:"0–3s",type:"A-Roll",desc:"Face. 'I tried 15 AI tools. 3 actually matter. Here they are.' Fast entry.",overlay:"3 AI tools. Can't run Serafina without them."},{t:"3–12s",type:"B-Roll",desc:"Higgsfield: each tool briefly — Claude chat window, Higgsfield video output, Shopify analytics.",overlay:"1. Claude · 2. Higgsfield · 3. Shopify AI"},{t:"12–20s",type:"A-Roll",desc:"For each: Claude writes strategy/captions in 5 min. Higgsfield generates B-roll. Shopify AI forecasts inventory.",overlay:"Claude: strategy + copy\nHighsfield: AI B-roll\nShopify AI: inventory"},{t:"20–25s",type:"B-Roll",desc:"Higgsfield: finished reel playing on phone — the output of all 3 tools.",overlay:"idea → reel → posted. 40 minutes."},{t:"25–28s",type:"A-Roll",desc:"'Remove every step that doesn't require you. Everything else, automate.'",overlay:null},{t:"28–30s",type:"A-Roll",desc:"'Follow — more tool deep-dives coming.'",overlay:"follow for the deep dives →"}],insight:"The right 3 AI tools eliminate what doesn't need you — strategy documentation, B-roll content, inventory forecasting. What's left is what only you can do: vision, voice, relationships.",cta:"Follow — I'm doing a deep dive on each tool this week.",higgsfield:"Clean laptop screen showing an AI interface in a warm home office, woman's hands at keyboard, amber light, productive and modern, cinematic shallow depth of field",tags:"#aitools #claudeai #higgsfield #shopify #indianfounder #techfounder #automateeverything #buildinpublic #serafinacollective"},
+  {d:19,pillar:"body",ref:"Real and aspirational at once — the honest fitness update nobody does",textHook:"Fitness goal. Honest update.",spokenHook:"When I started Serafina, I set a body goal alongside the business goal. Here's where I am. No filter.",shots:[{t:"0–3s",type:"A-Roll",desc:"Face. Vulnerable. 'I set a fitness goal the same day I launched Serafina. Here's the honest update.'",overlay:"Fitness goal. Honest update."},{t:"3–8s",type:"B-Roll",desc:"Higgsfield: morning run, athletic woman at sunrise, movement and momentum.",overlay:null},{t:"8–17s",type:"A-Roll",desc:"Share where you actually are — honest, not perfect. What's working, what isn't.",overlay:"what I said I'd do · what I actually did"},{t:"17–23s",type:"B-Roll",desc:"Higgsfield: woman doing simple morning movement — stretching, light workout at home.",overlay:"20 minutes. every morning."},{t:"23–27s",type:"A-Roll",desc:"'The business and the body feed each other. When I move, I think better. When I think better, I build better.'",overlay:null},{t:"27–30s",type:"A-Roll",desc:"'Follow if you're building both at the same time.'",overlay:"follow →"}],insight:"The body goal and the business goal aren't competing. Movement is the signal you send yourself that you're worth showing up for. That belief transfers directly into how you show up for the business.",cta:"Follow if you're trying to build the business and the body at the same time — I'm figuring it out too.",higgsfield:"Woman doing a quiet morning stretch by a large window, soft natural light, premium athleisure, peaceful and real, cinematic warm tones — the ritual, not the performance",tags:"#fitnessjourney #founderfit #morningmovement #womenentrepreneurs #indianfounder #athleisureindia #serafinacollective #bodygoals"},
+  {d:20,pillar:"serafina",ref:"Codie Sanchez — business transparency, what actually happened",textHook:"What sold out. What flopped. Real data.",spokenHook:"Our last pop-up. What sold out, what didn't move, and what I'm changing. Real numbers from the floor.",shots:[{t:"0–3s",type:"A-Roll",desc:"Face. Business mode. 'Our last pop-up. Real numbers. No spin.'",overlay:"Sold out vs flopped. Real data."},{t:"3–8s",type:"B-Roll",desc:"Higgsfield: exhibition floor — products displayed, customers touching fabric.",overlay:null},{t:"8–18s",type:"A-Roll",desc:"'Sold out: linen shirts — gone in 2 hours. What flopped: [item] — nobody touched it. Here's what I learned about why.'",overlay:"sold out: linen shirts ✓\nflopped: [item] ✗"},{t:"18–24s",type:"B-Roll",desc:"Higgsfield: empty rack where linen shirts were.",overlay:"sold out before lunch."},{t:"24–27s",type:"A-Roll",desc:"'Customer insight from exhibitions is worth more than any market research. She told me exactly what she wants with her wallet.'",overlay:null},{t:"27–30s",type:"A-Roll",desc:"'Save this — the lesson applies to any product business.'",overlay:"save this →"}],insight:"Exhibition customers vote with their hands — what they touch first, how long they hold it, whether they put it down and come back. No market research captures that. You have to be in the room.",cta:"Save this if you're thinking about doing your first pop-up. This is the real intel.",higgsfield:"Woman selling and discussing premium clothing at an indoor pop-up market, warm ambient lighting, customers in conversation, real event documentary energy",tags:"#popupmarket #serafinacollective #indianfounder #productbusiness #womenentrepreneurs #buildinpublic #linenshirts #founderlessons"},
+  {d:21,pillar:"build",ref:"Documentary milestone — 3 weeks honest, the real mid-point",textHook:"3 weeks in. The honest update.",spokenHook:"21 days. Here's what's working, what I got wrong, and the one thing I'd change if I started again.",shots:[{t:"0–3s",type:"A-Roll",desc:"Face. Reflective. '21 days. Here's the real update.'",overlay:"3 weeks. Honest update."},{t:"3–8s",type:"B-Roll",desc:"Higgsfield: montage feel — filming, packing, notebook, phone calls.",overlay:null},{t:"8–20s",type:"A-Roll",desc:"What worked, what didn't, what you'd do differently from Day 1.",overlay:"what worked · what didn't · what I'd change"},{t:"20–25s",type:"B-Roll",desc:"Higgsfield: woman looking at analytics on phone, learning.",overlay:"the data doesn't lie."},{t:"25–28s",type:"A-Roll",desc:"'9 days left in month 1. The goal is still the same: 30 posts published.'",overlay:"9 days left."},{t:"28–30s",type:"A-Roll",desc:"'Follow — the month 1 final report drops on Day 30.'",overlay:"final report → Day 30"}],insight:"The 21-day mark is where most people stop. Not because it's hard — because it stopped being new. The people who reach day 30 decided consistency was the point, not inspiration.",cta:"Follow — the month 1 final report drops on Day 30. You'll want to see the numbers.",higgsfield:"Woman at a desk reviewing content analytics on phone and laptop simultaneously, focused mid-process energy, warm ambient light, real working aesthetic",tags:"#buildinpublic #3weekupdate #indianfounder #founderlife #womenentrepreneurs #consistency #serafinacollective #30daychallenge"},
+  {d:22,pillar:"travel",ref:"Wong Kar Wai — the longing for what isn't here yet, made beautiful",textHook:"Location freedom. Not what Instagram says.",spokenHook:"Everyone shows you the Bali laptop photo. Nobody tells you what location freedom actually requires. I'm going to.",shots:[{t:"0–3s",type:"A-Roll",desc:"Face. Slightly subversive smile.",overlay:"Location freedom. Not what Instagram says."},{t:"3–9s",type:"B-Roll",desc:"Higgsfield: stunning rooftop pool, laptop, sunset. The Instagram version.",overlay:"this is the Instagram version."},{t:"9–18s",type:"A-Roll",desc:"'Location freedom isn't passive income on a beach. It's a business that runs without you being in one place. That takes years.'",overlay:"it takes years to build.\nyear 1 looks like this ↓"},{t:"18–24s",type:"B-Roll",desc:"Higgsfield: woman working from a cozy home setup — real, warm, purposeful.",overlay:"Bangalore → everywhere. eventually."},{t:"24–27s",type:"A-Roll",desc:"'I'm building the system first. The location freedom follows. That's the actual order.'",overlay:null},{t:"27–30s",type:"A-Roll",desc:"'Follow — I'm documenting the build that makes it possible.'",overlay:"follow the build →"}],insight:"Location freedom is a system, not a lifestyle. You build a business that works without your physical presence first. Then you go wherever you want. System first. Freedom second. The sequence matters.",cta:"Follow — I'm building the system that makes location freedom possible. You'll see how.",higgsfield:"Woman working from a sunlit home desk in linen, warm afternoon light through windows, a sense of purpose and building — aspirational but completely real",tags:"#locationfreedom #digitalnomad #remotework #indianfounder #womenentrepreneurs #serafinacollective #manifesttravel #buildinpublic"},
+  {d:23,pillar:"build",ref:"Confessional — Codie meets vulnerability",textHook:"The hardest part of building in public. Nobody warned me.",spokenHook:"I've been building in public for 23 days. Here's the one thing nobody warned me about — and it's not what you think.",shots:[{t:"0–3s",type:"A-Roll",desc:"Face. Honest. A little exposed.",overlay:"The hardest part. Nobody warned me."},{t:"3–8s",type:"B-Roll",desc:"Higgsfield: woman at desk, staring at phone — reading comments or silence.",overlay:null},{t:"8–18s",type:"A-Roll",desc:"'The hardest part isn't being criticized. It's not knowing if silence means you're failing or just not discovered yet.'",overlay:"silence ≠ failure"},{t:"18–24s",type:"B-Roll",desc:"Higgsfield: woman pressing post, closing phone face-down, going back to work.",overlay:"post. don't watch. repeat."},{t:"24–27s",type:"A-Roll",desc:"'You have to be okay with making content for 3 people and treating it like it was for 3 million. Every. Single. Time.'",overlay:null},{t:"27–30s",type:"A-Roll",desc:"'Save this for when the silence gets loud.'",overlay:"save this →"}],insight:"Building in public requires indifference to the indifference. The algorithm is neutral. Most days you'll get silence. The founders who make it are the ones who post for the work, not the reception.",cta:"Save this for when the silence gets loud. It will. This is what you do.",higgsfield:"Woman pressing 'post' on her phone then placing it face-down calmly, returning to work — warm ambient light, the discipline of not watching, cinematic stillness",tags:"#buildinpublic #foundertruth #indianfounder #contentcreator #womenentrepreneurs #instagramgrowth #consistency #founderlife"},
+  {d:24,pillar:"mind",ref:"Sabyasachi — address the viewer directly, intimate and still",textHook:"You're watching someone do what you're dreaming about.",spokenHook:"I want to say something directly to whoever needs to hear this right now.",shots:[{t:"0–3s",type:"A-Roll",desc:"Face. Completely still. Looking directly into lens. Long beat of silence before speaking.",overlay:"You're watching someone do what you're dreaming about."},{t:"3–8s",type:"B-Roll",desc:"Higgsfield: cinematic beauty shot — woman at desk, light on her face, building something.",overlay:null},{t:"8–18s",type:"A-Roll",desc:"'If you're watching me build this and thinking — I want to do something like that — that thought isn't a daydream. It's a signal.'",overlay:"that thought is a signal."},{t:"18–24s",type:"B-Roll",desc:"Higgsfield: woman opening a fresh notebook, picking up a pen.",overlay:"the first step is always the same."},{t:"24–27s",type:"A-Roll",desc:"'The only difference between watching and doing is the first decision. Not the last. The first.'",overlay:null},{t:"27–30s",type:"A-Roll",desc:"'What is your first decision? Follow. Then make the thing.'",overlay:"start. →"}],insight:"Watching is the step before doing. Most people get stuck there because they're waiting to feel ready. You don't feel ready first. You decide first. The feeling follows the action.",cta:"What's the first decision you need to make? Drop it below. I'll reply to every one.",higgsfield:"Woman's face bathed in warm golden light, looking straight ahead with quiet determination, cinematic close-up, the energy of someone who has decided — Sabyasachi portrait quality",tags:"#manifestation #mindset #womenentrepreneurs #founderinspiration #lawofattraction #buildinpublic #indianfounder #serafinacollective"},
+  {d:25,pillar:"ai",ref:"Hormozi system-reveal — pure value, steal this, no padding",textHook:"30-minute week plan. Steal this.",spokenHook:"I run two brands. I plan my entire week in 30 minutes every Sunday. Here is the exact system.",shots:[{t:"0–3s",type:"A-Roll",desc:"Face. Efficient energy. 'Two brands. 30-minute Sunday plan. Here it is exactly.'",overlay:"30-minute week plan. Steal this."},{t:"3–9s",type:"B-Roll",desc:"Higgsfield: Sunday morning setup — coffee, open notebook, laptop. Planning session aesthetic.",overlay:"Sunday. 30 minutes."},{t:"9–18s",type:"A-Roll",desc:"Walk through: 1. Review last week 5 min, 2. Content ideas 10 min, 3. Claude generates scripts 5 min, 4. Schedule non-negotiables 5 min, 5. One hard call 5 min.",overlay:"review → ideas → scripts → schedule → hard thing"},{t:"18–24s",type:"B-Roll",desc:"Higgsfield: organized desk with multiple notebooks and screen — the system at work.",overlay:"week sorted. before Sunday ends."},{t:"24–27s",type:"A-Roll",desc:"'Sunday planning doesn't tell you everything. It removes decision fatigue from Monday to Friday.'",overlay:null},{t:"27–30s",type:"A-Roll",desc:"'Save this. Use it this Sunday.'",overlay:"save this →"}],insight:"Decision fatigue is the silent killer of founder productivity. Sunday planning removes 80% of daily decisions before the week starts. You still adapt — but from clarity, not chaos.",cta:"Save this. Use it this Sunday. Tell me in the comments if you try it.",higgsfield:"Organized Sunday morning planning scene — leather notebook, pen, coffee, laptop, natural window light, warm and purposeful, the calm before a productive week",tags:"#weeklyplanning #founderproductivity #aitools #buildinpublic #womenentrepreneurs #indianfounder #sundayroutine #serafinacollective"},
+  {d:26,pillar:"mind",ref:"Sabyasachi meets NAS — the journal prompt that works, proven and sacred",textHook:"The journal prompt that changed my business.",spokenHook:"I've done hundreds of journal prompts. This one question changed how I make every decision in the business.",shots:[{t:"0–3s",type:"A-Roll",desc:"Face. 'One question. Changed everything. Here it is.'",overlay:"The journal prompt that changed my business."},{t:"3–8s",type:"B-Roll",desc:"Higgsfield: hand writing in a journal, gold pen on cream paper, morning light.",overlay:null},{t:"8–17s",type:"A-Roll",desc:"Reveal: 'What would I do today if I knew I couldn't fail and nobody was watching?' Then explain why.",overlay:"'What would I do if I\ncouldn't fail and nobody\nwas watching?'"},{t:"17–23s",type:"B-Roll",desc:"Higgsfield: woman writing the answer — the process of finding what you actually want.",overlay:"write the honest answer."},{t:"23–27s",type:"A-Roll",desc:"'Whatever you write — that's the thing you actually want. Everything else is fear. The question separates them.'",overlay:null},{t:"27–30s",type:"A-Roll",desc:"'Save this. Do it tonight before you sleep.'",overlay:"save + do it tonight →"}],insight:"The question removes both failure fear and performance fear simultaneously. What's left is the raw desire — what you actually want before the noise of other people's opinions and your own self-doubt.",cta:"Write your answer in the comments. Or save this and do it tonight.",higgsfield:"Extreme close-up of pen writing in a leather journal, warm morning light, cream paper — sacred and private",tags:"#journalprompt #manifestation #mindset #founderpsychology #lawofattraction #womenentrepreneurs #morningrituals #manifestandmove"},
+  {d:27,pillar:"build",ref:"Codie Sanchez — real numbers, real lessons, pure transparency",textHook:"Serafina is 40 days old. Real numbers.",spokenHook:"Serafina Collective is 40 days old as an active brand. Here's every number I'm willing to share — revenue, reach, learnings.",shots:[{t:"0–3s",type:"A-Roll",desc:"Face. Direct. 'Serafina is 40 days old. Here are the real numbers. No spin.'",overlay:"Serafina. 40 days. Real numbers."},{t:"3–8s",type:"B-Roll",desc:"Higgsfield: notebook with brand metrics visible — orders, followers, revenue notes.",overlay:null},{t:"8–20s",type:"A-Roll",desc:"Share: revenue to date, total orders, top product, one thing that surprised you, one thing that flopped.",overlay:"revenue · orders · followers · learnings"},{t:"20–25s",type:"B-Roll",desc:"Higgsfield: Serafina products packaged beautifully, going out the door.",overlay:"every order is a vote."},{t:"25–28s",type:"A-Roll",desc:"'₹1 Cr by December 2026 is still the goal. This is what month 1.5 looks like.'",overlay:"₹1Cr goal · month 1.5"},{t:"28–30s",type:"A-Roll",desc:"'Follow — monthly number drops at the end of each month.'",overlay:"monthly update →"}],insight:"Sharing real numbers publicly creates accountability, attracts the right customers, and builds a community invested in the outcome. The visibility isn't a risk — it's the strategy.",cta:"Follow — I share the real numbers every month. No spin. You'll see exactly how ₹1 Cr happens.",higgsfield:"Woman reviewing business numbers on laptop and notebook side by side, warm evening desk light, focused and quietly proud, evidence of something real being built",tags:"#revenuetransparency #serafinacollective #buildinpublic #indianfounder #womenentrepreneurs #startupindia #brandgrowth #founderlife"},
+  {d:28,pillar:"travel",ref:"Wong Kar Wai — the dream stated plainly, no apology, no disclaimer",textHook:"One year from today.",spokenHook:"I want to tell you exactly what I want my life to look like in one year. Out loud. No disclaimers.",shots:[{t:"0–3s",type:"A-Roll",desc:"Face. Soft smile. Permission-giving energy.",overlay:"One year from today."},{t:"3–9s",type:"B-Roll",desc:"Higgsfield: multiple beauty shots of the dream — Bali rooftop, laptop, Serafina packages going out, morning ritual. Slow, lingering.",overlay:"the life I'm building"},{t:"9–18s",type:"A-Roll",desc:"State it all plainly: Serafina at ₹1 Cr, Manifest & Move with 1K users, working from anywhere 2 months a year, a team of 3, body goal met.",overlay:"Serafina ₹1Cr · M&M 1K users · Bali 2 months"},{t:"18–24s",type:"B-Roll",desc:"Higgsfield: slow shots of the dream life — woman at peace, at work she loves, in a place she chose.",overlay:"I can see it already."},{t:"24–27s",type:"A-Roll",desc:"'Stating it out loud is the first act of manifesting it. You can't build what you won't name.'",overlay:null},{t:"27–30s",type:"A-Roll",desc:"'What do you want one year from today? Drop it below.'",overlay:"drop yours below ↓"}],insight:"Naming what you want — specifically, out loud, without apology — is the first and most underrated step. Most people don't get what they want because they won't say what it is clearly enough to aim at it.",cta:"What do you want one year from today? Drop it in the comments. Say it out loud.",higgsfield:"Woman sitting peacefully at a Bali-style outdoor workspace, laptop open, lush greenery, golden light, slow cinematic motion — the dream made visible and completely real",tags:"#dreamlife #manifestation #locationfreedom #serafinacollective #manifestandmove #indianfounder #womenentrepreneurs #oneyearfromnow"},
+  {d:29,pillar:"build",ref:"NAS Daily directness meets Sabyasachi intimacy — the sincere address",textHook:"This account is for one woman.",spokenHook:"I want to look you in the eye and tell you exactly who I built this for. Because if it's you, I want you to know I see you.",shots:[{t:"0–3s",type:"A-Roll",desc:"Face. Completely still. Most intimate energy of the 30 days.",overlay:"This account is for one woman."},{t:"3–8s",type:"B-Roll",desc:"Higgsfield: various women — working, building, moving, creating.",overlay:null},{t:"8–20s",type:"A-Roll",desc:"Describe her: 'You're building something nobody fully understands yet. You have a dream that sounds too big when you say it out loud.'",overlay:"you're building something\nnobody understands yet."},{t:"20–25s",type:"B-Roll",desc:"Higgsfield: single woman, face close-up, looking ahead with quiet determination.",overlay:"I see you."},{t:"25–28s",type:"A-Roll",desc:"'You belong here. Keep going. Day 30 is tomorrow.'",overlay:null},{t:"28–30s",type:"A-Roll",desc:"'Follow for the Day 30 final report.'",overlay:"Day 30 tomorrow →"}],insight:"The most powerful thing a brand can do is make one person feel completely seen. Not a demographic. One woman. If she feels like you built it for her, she becomes your most loyal advocate.",cta:"If this is you — follow. Day 30 is tomorrow. The full month 1 report drops.",higgsfield:"Close-up of a woman's face, warm side light, direct and sincere gaze, the energy of being completely seen — cinematic portrait, Sabyasachi intimacy, no looking away",tags:"#forthiswoman #indianfounder #womenentrepreneurs #buildinpublic #serafinacollective #founderlife #day29 #communitybuilding"},
+  {d:30,pillar:"build",ref:"NAS Daily pacing + Codie transparency + Wong Kar Wai emotion — the earned finale",textHook:"30 days. Every single one.",spokenHook:"30 days done. Every post published. Here's the full report — what changed, what the numbers say, and what happens in month 2.",shots:[{t:"0–3s",type:"A-Roll",desc:"Face. Big energy. Pride without arrogance. 'Day 30. We made it.'",overlay:"30 days. Every single one."},{t:"3–10s",type:"B-Roll",desc:"Higgsfield: montage of the month — filming setup, exhibitions, products, notebooks, phone calls.",overlay:"30 posts. 30 days. done."},{t:"10–20s",type:"A-Roll",desc:"Full scorecard: total posts, follower growth, Serafina revenue this month, biggest win, biggest mistake.",overlay:"posts · followers · revenue · learning"},{t:"20–25s",type:"B-Roll",desc:"Higgsfield: woman standing at a window, city in front of her. Month 2 energy.",overlay:"month 2 starts tomorrow."},{t:"25–28s",type:"A-Roll",desc:"'Month 1 taught me: consistency is the strategy. Not content quality, not trending audio — just showing up every day. The rest follows.'",overlay:"consistency was the whole strategy."},{t:"28–30s",type:"A-Roll",desc:"'Follow for month 2. This is where it gets real.'",overlay:"month 2. follow. →"}],insight:"The goal of month 1 was never views or followers. It was proof of concept — that you can show up every day, that you have 30 days of ideas, that your voice is consistent. You have that proof now.",cta:"Follow for month 2 — this is where the algorithm starts compounding. You'll want to see it.",higgsfield:"Woman standing at a large window overlooking a city at golden hour, confident and forward-looking, the energy of someone who just finished something hard and earned — cinematic, emotional",tags:"#30daychallenge #buildinpublic #indianfounder #womenentrepreneurs #serafinacollective #month1done #founderlife #contentcreator #day30"},
+  {d:31,pillar:"mind",ref:"Wong Kar Wai — handwritten intimacy, time collapse, letter to an unseen self",textHook:"I wrote a letter to myself. One year from now.",spokenHook:"Manifest & Move has a feature called Future Self. You write a letter to the person you'll be in one year. I wrote mine last night. I want to show you what came out.",shots:[{t:"0–3s",type:"A-Roll",desc:"Face. Soft. Like you're holding something private.",overlay:"I wrote a letter to myself. One year from now."},{t:"3–9s",type:"B-Roll",desc:"Higgsfield: close-up of a hand writing in a journal by warm lamp light, slow and deliberate.",overlay:null},{t:"9–18s",type:"A-Roll",desc:"Read excerpts from your future self letter — the business, the body, the location, the feeling.",overlay:"dear me, one year from today —"},{t:"18–24s",type:"B-Roll",desc:"Higgsfield: phone showing the Manifest & Move 'Future Self' page — dark aesthetic, gold accents.",overlay:"Future Self · Manifest & Move app"},{t:"24–27s",type:"A-Roll",desc:"'The act of writing it makes it real. Your mind starts working toward what it can see clearly.'",overlay:null},{t:"27–30s",type:"A-Roll",desc:"'Free app in bio. The Future Self feature is there. Write yours tonight.'",overlay:"free app → link in bio"}],insight:"Writing to your future self collapses time. Your brain can't fully distinguish between a vividly imagined future and a memory. When you write it in detail — the feelings, the specific wins — you're giving your subconscious a destination.",cta:"Free app in bio — write your Future Self letter tonight. It will change how you show up tomorrow.",higgsfield:"Close-up of a woman's hand writing slowly in a leather journal by warm lamp light, late night, intimate and private, Wong Kar Wai amber tones, shallow focus on the pen",tags:"#futureself #manifestation #lawofattraction #journaling #manifestingfounder #nevillegoddard #manifestandmove #indianfounder #serafinacollective"},
+  {d:32,pillar:"mind",ref:"Sabyasachi — lush, sensory, the fantasy made completely tactile",textHook:"I read this story every night before I sleep.",spokenHook:"Inside Manifest & Move I wrote immersive visualization stories — 500-word scenes of the exact life I'm building. I read one every night. Here's what happens when you do this daily.",shots:[{t:"0–3s",type:"A-Roll",desc:"Face. Dreamy energy. Like you just woke up from something beautiful.",overlay:"I read this story every night before I sleep."},{t:"3–10s",type:"B-Roll",desc:"Higgsfield: the dream life made tactile — Bali morning, coffee, woman in linen at a desk overlooking greenery, slow motion.",overlay:"step into her life."},{t:"10–18s",type:"A-Roll",desc:"Explain Stories feature: 'I wrote 10 visualization stories — one for each goal category. You read them like you're already there.'",overlay:"500 words. her life. your future."},{t:"18–24s",type:"B-Roll",desc:"Higgsfield: phone showing a 'Stories' page in M&M — rich dark UI, text of a story visible.",overlay:"Stories · Manifest & Move"},{t:"24–27s",type:"A-Roll",desc:"'Visualization isn't daydreaming. It's rehearsal. Every night I rehearse the life I'm building.'",overlay:null},{t:"27–30s",type:"A-Roll",desc:"'Free app in bio — all 10 stories are there.'",overlay:"free app → link in bio"}],insight:"Visualization works because your brain rehearses the outcome. Reading a richly detailed scene of your future life — in first person, present tense — activates the same neural pathways as the experience itself.",cta:"Free app in bio — all 10 immersive stories are there. Read one tonight before you sleep.",higgsfield:"Lush cinematic shot of a woman reading from a phone in a dimly lit beautiful room, warm side light, the glow of the screen on her face, peaceful and intentional, Sabyasachi richness",tags:"#visualization #manifestation #lawofattraction #nevillegoddard #SATS #manifestingfounder #manifestandmove #indianfounder #mindset"},
+  {d:33,pillar:"build",ref:"NAS Daily — celebrate every W, information dense, the underrated practice",textHook:"Founders forget their wins. It's killing their momentum.",spokenHook:"I built a Wins tracker into Manifest & Move because I realized I was forgetting every good thing that happened. Here's why that forgetting is more dangerous than you think.",shots:[{t:"0–3s",type:"A-Roll",desc:"Face. Direct. 'You are forgetting your wins. Actively. And it's hurting the business.'",overlay:"Founders forget their wins. It's killing their momentum."},{t:"3–8s",type:"B-Roll",desc:"Higgsfield: woman at desk looking discouraged — the feeling of thinking nothing is working.",overlay:null},{t:"8–17s",type:"A-Roll",desc:"Explain the negativity bias: our brains register losses 3x stronger than wins.",overlay:"your brain is biased toward loss.\n3:1 ratio."},{t:"17–23s",type:"B-Roll",desc:"Higgsfield: phone showing the Wins page in M&M — list of wins, gold checkmarks.",overlay:"Wins · Manifest & Move"},{t:"23–27s",type:"A-Roll",desc:"'I log every win — big and small. A DM from a customer. A great fitting session. A reel that got shared. It adds up.'",overlay:null},{t:"27–30s",type:"A-Roll",desc:"'Save this. Then go write down 3 wins from this week that you forgot to count.'",overlay:"save → write 3 wins ↓"}],insight:"The negativity bias means you register setbacks 3x more strongly than wins. Without deliberate tracking, founders operate from a distorted picture — one where nothing is working. The Wins log corrects that distortion daily.",cta:"Save this. Then write 3 wins from this week you forgot to count. Go.",higgsfield:"Woman smiling while looking at her phone, logging something with quiet satisfaction, warm home light, the feeling of being further along than you thought — cinematic",tags:"#winstrackers #founderlife #buildinpublic #manifestation #mindset #manifestandmove #indianfounder #womenentrepreneurs #serafinacollective"},
+  {d:34,pillar:"mind",ref:"Alex Hormozi meets Sabyasachi — the mechanism explained, then made beautiful",textHook:"I'm an engineer. I didn't believe in affirmations.",spokenHook:"I have a BITS Pilani engineering degree. Affirmations sounded like nonsense to me. Here's the neuroscience that changed my mind completely.",shots:[{t:"0–3s",type:"A-Roll",desc:"Face. Slight smirk. 'I have an engineering degree. Affirmations sounded like nonsense.' Pause. 'Then I looked at the neuroscience.'",overlay:"I'm an engineer. I didn't believe in affirmations."},{t:"3–8s",type:"B-Roll",desc:"Higgsfield: brain imagery aesthetic — neural connections lighting up, warm amber, scientific yet beautiful.",overlay:null},{t:"8–18s",type:"A-Roll",desc:"The mechanism: reticular activating system, confirmation bias working for you, language as a neural programming tool.",overlay:"RAS · confirmation bias · identity language"},{t:"18–24s",type:"B-Roll",desc:"Higgsfield: woman speaking affirmations to herself in a mirror, confident and calm. M&M affirmations screen visible.",overlay:"Affirmations · Manifest & Move"},{t:"24–27s",type:"A-Roll",desc:"'I say mine every morning in the app. After 3 months, I stopped arguing with them. The engineer in me had to admit the data was real.'",overlay:null},{t:"27–30s",type:"A-Roll",desc:"'Free app in bio. Affirmations built in — sorted by your goal.'",overlay:"free app → link in bio"}],insight:"Affirmations work through your Reticular Activating System — the brain's filter that decides what information reaches your conscious mind. When you repeat an identity statement, your RAS starts filtering in evidence that confirms it.",cta:"Free app in bio — affirmations organized by your goal category. Use them this week.",higgsfield:"Woman speaking quietly to herself in front of a mirror, calm and intentional, warm morning light, the energy of someone reprogramming — cinematic close-up, Sabyasachi warmth",tags:"#affirmations #neuroscience #manifestation #lawofattraction #mindset #manifestingfounder #manifestandmove #indianfounder #RAS"},
+  {d:35,pillar:"mind",ref:"Sabyasachi — 4 pillars as 4 textures, layered and complete",textHook:"I'm manifesting 4 things at once.",spokenHook:"Most manifestation content picks one thing. Manifest & Move is built for all four simultaneously. Here's why that's actually more powerful.",shots:[{t:"0–3s",type:"A-Roll",desc:"Face. Energy of someone who knows something important.",overlay:"I'm manifesting 4 things at once."},{t:"3–10s",type:"B-Roll",desc:"Higgsfield: 4 rich visual beats — thriving business desk, wealth aesthetic, loving partnership, strong healthy body. Each 2s.",overlay:"dream business · financial freedom · soulmate love · dream body"},{t:"10–18s",type:"A-Roll",desc:"'The four goals compound each other. A healthy body gives you energy for the business. Financial freedom enables the relationship.'",overlay:"they compound.\nnot compete."},{t:"18–24s",type:"B-Roll",desc:"Higgsfield: M&M app goal picker screen — all 4 goals selected with gold highlights.",overlay:"Goals · Manifest & Move"},{t:"24–27s",type:"A-Roll",desc:"'I built the app to hold all four. Not one at a time. All four, simultaneously, with practices for each.'",overlay:null},{t:"27–30s",type:"A-Roll",desc:"'Free app in bio. Pick all 4. See what happens.'",overlay:"free app → link in bio"}],insight:"The 4 goals — business, money, love, body — are not in competition. When you work on one, you build the identity of someone who creates results, and that identity spills into all four simultaneously.",cta:"Free app in bio — pick all 4 goals and see what the daily practice looks like when everything is in motion.",higgsfield:"Split editorial sequence: woman thriving at a business, then surrounded by abundance, then in a loving moment, then moving powerfully — warm cinematic tones, Sabyasachi richness",tags:"#manifestation #manifestall4 #lawofattraction #nevillegoddard #manifestingfounder #manifestandmove #indianfounder #womenentrepreneurs #wholeness"},
+  {d:36,pillar:"serafina",ref:"Codie Sanchez — the unsexy product business reality, no flinching",textHook:"4 units left. Reorder 3 weeks out.",spokenHook:"Serafina OS flagged inventory pressure on my best-selling SKU this morning. 4 units remaining. Supplier reorder takes 3 weeks. Here's exactly what I do now.",shots:[{t:"0–3s",type:"A-Roll",desc:"Face. Clear-headed urgency. Not panic — problem solving.",overlay:"4 units left. Reorder 3 weeks out."},{t:"3–8s",type:"B-Roll",desc:"Higgsfield: Serafina OS dashboard on laptop — inventory tracker, red pressure flag visible.",overlay:"Serafina OS · Inventory Pressure"},{t:"8–18s",type:"A-Roll",desc:"Walk through the decision tree: waitlist customers → DM existing buyers → pre-order option → expedite supplier.",overlay:"waitlist → pre-order → expedite → communicate"},{t:"18–24s",type:"B-Roll",desc:"Higgsfield: woman confidently on the phone with a supplier, notes in hand, solving mode.",overlay:"problem + system = resolved."},{t:"24–27s",type:"A-Roll",desc:"'Running out of stock on your best product is a good problem. It means people want it. The system is what keeps it from becoming a crisis.'",overlay:null},{t:"27–30s",type:"A-Roll",desc:"'Save this — every product founder will face this moment.'",overlay:"save this →"}],insight:"Inventory pressure on your best SKU isn't a crisis — it's signal. It tells you what to double down on, what to communicate to customers, and what to fix in your supply chain.",cta:"Save this for when your best product nearly runs out. The playbook works.",higgsfield:"Woman confidently working on a laptop showing inventory data, products visible on a nearby shelf, warm professional home office light, problem-solving energy, cinematic",tags:"#inventorymanagement #serafinacollective #productbusiness #indianfounder #buildinpublic #womenentrepreneurs #founderlife #productfounder #ecommerceindia"},
+  {d:37,pillar:"ai",ref:"Alex Hormozi systems clarity — when you see how it all connects, everything changes",textHook:"Every product. Every show. Every customer. Connected.",spokenHook:"I built a view inside Serafina OS called the Universe — it maps every product, exhibition, customer, and idea and shows how they connect. I looked at it this morning. It changed what I'm building next.",shots:[{t:"0–3s",type:"A-Roll",desc:"Face. Wide-eyed clarity. 'I saw something in my data this morning. It changed everything.'",overlay:"Every product. Every show. Every customer. Connected."},{t:"3–9s",type:"B-Roll",desc:"Higgsfield: Serafina OS Universe view on a large screen — network of connected nodes, products, exhibitions, customers, ideas all linked.",overlay:"Serafina Universe · everything connected"},{t:"9–18s",type:"A-Roll",desc:"Explain the insight: which customer first appeared at which exhibition, bought which product, and came back online.",overlay:"discovery → exhibition → product → repeat"},{t:"18–24s",type:"B-Roll",desc:"Higgsfield: woman pointing at screen with quiet excitement, zooming into a specific connection.",overlay:"this is the pattern."},{t:"24–27s",type:"A-Roll",desc:"'The woman who buys at exhibitions almost always comes back online within 2 weeks. That changes how I run every exhibition from now on.'",overlay:null},{t:"27–30s",type:"A-Roll",desc:"'Build the systems first. The patterns only become visible when you do.'",overlay:"build systems → see patterns →"}],insight:"Data doesn't just tell you what happened. It shows you the pattern underneath what happened. The exhibition → online conversion timeline is Serafina's most valuable insight — and it was invisible until the data was connected.",cta:"Follow — I'm building every decision for month 3 on what the Universe view showed me this morning.",higgsfield:"Woman at a large laptop screen showing a connected network visualization of business data, excited and focused, warm home office light, the feeling of seeing clearly for the first time",tags:"#datadriven #serafinacollective #buildinpublic #indianfounder #womenentrepreneurs #systemsthinking #ecommerce #businessintelligence #founderlife"},
+  {d:38,pillar:"serafina",ref:"Slow fashion editorial — the anticipation of a drop, pre-launch fever",textHook:"The next Serafina drop. First look.",spokenHook:"I'm planning the next Serafina collection. Inside Serafina OS I have a Drops module where I map the full launch timeline. Here's what's coming — and how I build anticipation before the first product ships.",shots:[{t:"0–3s",type:"A-Roll",desc:"Face. Quiet excitement. Slight mystery.",overlay:"The next Serafina drop. First look."},{t:"3–9s",type:"B-Roll",desc:"Higgsfield: premium fabric swatches on a marble surface, hands touching textures, slow editorial.",overlay:"the fabric before the form."},{t:"9–17s",type:"A-Roll",desc:"Walk through the Drops module in Serafina OS: launch timeline, pre-launch teaser plan, waitlist strategy.",overlay:"tease → waitlist → launch → follow-up"},{t:"17–23s",type:"B-Roll",desc:"Higgsfield: Serafina OS Drops page on screen — timeline laid out, launch date marked.",overlay:"Drops · Serafina OS"},{t:"23–27s",type:"A-Roll",desc:"'The product launch isn't an event. It's a sequence. The anticipation is half the sale.'",overlay:null},{t:"27–30s",type:"A-Roll",desc:"'Follow — the first drop teaser drops next week.'",overlay:"drop announcement → next week"}],insight:"The launch sequence matters as much as the product. Building a waitlist before the drop creates social proof, urgency, and a warm audience on day one. The product that sells out on launch day didn't get lucky — it was planned.",cta:"Follow — the Serafina drop teaser is coming next week. You'll want to see it.",higgsfield:"Luxurious slow pan across premium fabric swatches and clothing samples on a clean marble surface, golden hour light, the texture and quality undeniable — pre-launch editorial",tags:"#productdrop #serafinacollective #indianathleisure #premiumathleisure #newcollection #buildinpublic #indianfounder #fashionlaunch #womenentrepreneurs"},
+  {d:39,pillar:"build",ref:"NAS Daily documentary — the data from the floor, patterns only she can see",textHook:"3 things every customer said at the pop-up.",spokenHook:"I track every exhibition inside Serafina OS — every customer comment, every product that moved, every moment. After 3 shows, here are the 3 things every customer said that are changing our next collection.",shots:[{t:"0–3s",type:"A-Roll",desc:"Face. Energized. Like you've just decoded something.",overlay:"3 things every customer said at the pop-up."},{t:"3–8s",type:"B-Roll",desc:"Higgsfield: exhibition floor — customers touching fabric, asking questions, trying things on.",overlay:null},{t:"8–18s",type:"A-Roll",desc:"The 3 things: 1. 'Does this come in more colours?' 2. 'What's the fabric — it feels different.' 3. 'I want to get one for my sister.'",overlay:"more colours · the fabric · gift it"},{t:"18–24s",type:"B-Roll",desc:"Higgsfield: Serafina OS Exhibitions page — customer notes, tags, revenue logged.",overlay:"Exhibitions · Serafina OS"},{t:"24–27s",type:"A-Roll",desc:"'These aren't just comments. They're a product roadmap. New colours. A fabric story. A gifting channel. All from 3 exhibitions.'",overlay:null},{t:"27–30s",type:"A-Roll",desc:"'Save this — your customers are telling you exactly what to build next.'",overlay:"save this →"}],insight:"Your customers are your product roadmap. Three exhibitions gave Serafina three clear signals: expand the colour range, lead with the fabric story in marketing, and build a gifting option. That's a 6-month product strategy from conversations.",cta:"Save this — whatever business you're building, the customer floor is your best strategy session.",higgsfield:"Close-up of a woman attentively listening to a customer at a pop-up, leaning in, warm exhibition lighting, genuine connection — the founder learning from the room",tags:"#customerinsight #serafinacollective #popupmarket #indianfounder #productdevelopment #buildinpublic #womenentrepreneurs #founderlessons #exhibitiontips"},
+  {d:40,pillar:"ai",ref:"Hormozi precision + Sabyasachi richness — the culmination, the whole system visible",textHook:"Two apps. Two brands. One founder. The system.",spokenHook:"40 days. I run Serafina Collective and Manifest & Move simultaneously, from my living room, mostly alone. Here's the complete system — both apps, how they connect, and what I'm building next.",shots:[{t:"0–3s",type:"A-Roll",desc:"Face. Grounded. Full. 'Day 40. I want to show you the complete picture.'",overlay:"Two apps. Two brands. One founder. The system."},{t:"3–10s",type:"B-Roll",desc:"Higgsfield: side-by-side — Serafina OS dashboard on one screen, Manifest & Move on another. Both alive.",overlay:"Serafina OS · Manifest & Move"},{t:"10–20s",type:"A-Roll",desc:"Walk through how they connect: M&M sets the morning intention and SATS practice → Serafina OS tracks what gets built.",overlay:"inner practice → outer build\nboth apps. one founder."},{t:"20–25s",type:"B-Roll",desc:"Higgsfield: woman moving between two windows on her laptop — rituals app on left, inventory dashboard on right.",overlay:"this is what building two things looks like."},{t:"25–28s",type:"A-Roll",desc:"'The manifestation practice gives me the identity. The business tools give me the traction. You need both.'",overlay:null},{t:"28–30s",type:"A-Roll",desc:"'Follow for month 3. This is where it starts compounding.'",overlay:"month 3. compound. →"}],insight:"The inner practice (M&M: SATS, affirmations, future self, wins) and the outer system (Serafina OS: inventory, exhibitions, customers, drops) are two halves of the same founder operating system. Most people have one. Both together is the edge.",cta:"Follow for month 3 — 40 days of foundation. Now we build on it.",higgsfield:"Woman at a sunlit desk with two beautiful screens open — a dark elegant app on one, a bright business dashboard on the other — the complete founder operating system, warm and powerful",tags:"#founderoperatingsystem #serafinacollective #manifestandmove #buildinpublic #indianfounder #womenentrepreneurs #aitools #day40 #twobrands #manifestingfounder"},
+];
+
+const DD_ALL_PROMPTS=[
+  {text:"Female founder working on laptop in a sunlit café, Bali aesthetic, warm cinematic tones, shallow depth of field",pillar:"build"},
+  {text:"Woman reviewing clothing samples in a bright minimalist studio, premium athleisure brand, golden hour light",pillar:"build"},
+  {text:"Close up hands writing in leather journal, business planning, morning light, luxury aesthetic",pillar:"build"},
+  {text:"Aerial drone shot of woman walking through outdoor market, confident stride, linen outfit, warm tones",pillar:"build"},
+  {text:"Woman unpacking premium packaging boxes in a clean white workspace, brand building aesthetic",pillar:"build"},
+  {text:"Woman meditating on rooftop at sunrise, city skyline, golden light, peaceful, cinematic slow motion",pillar:"mind"},
+  {text:"Hands holding open manifestation journal with affirmations, morning ritual, warm sunlight, coffee nearby",pillar:"mind"},
+  {text:"Woman doing morning breathwork on a terrace overlooking tropical landscape, slow motion, cinematic",pillar:"mind"},
+  {text:"Close up of vision board with luxury lifestyle images, business goals, travel photos, warm aesthetic",pillar:"mind"},
+  {text:"Woman in silk robe journaling at a hotel window, city view below, morning fog, aspirational lifestyle",pillar:"mind"},
+  {text:"Premium pink athleisure flatlay on white marble, morning light, minimal luxury aesthetic",pillar:"serafina"},
+  {text:"Woman in sleek black leggings doing yoga on a rooftop at sunrise, cinematic slow motion",pillar:"serafina"},
+  {text:"Close up of premium activewear fabric texture, warm studio light, luxury feel, shallow focus",pillar:"serafina"},
+  {text:"Confident Indian woman in athleisure walking through a modern gym, slow motion, cinematic warm grade",pillar:"serafina"},
+  {text:"Athleisure flatlay with leather journal, coffee, and phone — morning routine aesthetic, warm tones",pillar:"serafina"},
+  {text:"Woman with laptop open at a rooftop infinity pool, tropical destination, golden hour, working remotely",pillar:"travel"},
+  {text:"Female entrepreneur walking through cobblestone streets in a European city, linen outfit, confident stride",pillar:"travel"},
+  {text:"Business class airplane window, clouds below, woman reviewing notebook, aspirational travel aesthetic",pillar:"travel"},
+  {text:"Woman at outdoor café in Santorini, working on phone, white walls, blue accents, warm cinematic",pillar:"travel"},
+  {text:"Aerial view of woman sitting on beach with laptop open, feet near sand, remote work lifestyle",pillar:"travel"},
+  {text:"Close up of woman's hands typing on MacBook, warm ambient coffee shop light, focused energy",pillar:"ai"},
+  {text:"Dual monitors with AI dashboard and analytics, home office with warm evening light, professional setup",pillar:"ai"},
+  {text:"Time lapse of design work being completed on screen, hands moving, creative focus, warm tones",pillar:"ai"},
+  {text:"Woman on video call looking confident and prepared, bright home office, plants in background",pillar:"ai"},
+  {text:"Flatlay of phone, laptop, notebook, coffee — productive morning work setup, warm aesthetic",pillar:"ai"},
+  {text:"Woman in athletic wear running on a misty path at sunrise, slow motion, cinematic, powerful energy",pillar:"body"},
+  {text:"Morning skincare routine in a beautifully lit bathroom, luxury aesthetic, warm tones, self-care ritual",pillar:"body"},
+  {text:"Woman doing pilates or yoga in a clean minimalist studio, natural light, slow motion, focused",pillar:"body"},
+  {text:"Healthy breakfast flatlay with açaí bowl, journal, and activewear — morning routine aesthetic",pillar:"body"},
+  {text:"Sunset silhouette of a woman with arms open wide facing the sky, manifestation energy, golden sky",pillar:"body"},
+];
+
+let ddCurrentCalendarDay = null;
+let ddSelectedPillar = 'build';
+let ddPromptFilter = 'all';
+let ddGenerated = null;
+
+function ddGetPostedDays() {
+  return Array.isArray(ddLS.get('posted_days')) ? ddLS.get('posted_days') : [];
+}
+
+function ddSetPostedDays(days) {
+  ddLS.set('posted_days', days);
+}
+
+function ddGetDayPlan(day) {
+  return DD_DAY_SCRIPTS.find(item => item.d === day) || DD_DAY_SCRIPTS[Math.max(0, day - 1)] || DD_DAY_SCRIPTS[0];
+}
+
+function ddGetCurrentDayNumber() {
+  const posted = ddGetPostedDays();
+  return Math.min(40, Math.max(1, posted.length + 1));
+}
+
+function ddGetCurrentSuggestion() {
+  const day = ddCurrentCalendarDay || ddGetCurrentDayNumber();
+  return DD_CALENDAR[day - 1] || DD_CALENDAR[0];
+}
+
+function ddShowPage(page, btn) {
+  document.querySelectorAll('.dd-tab').forEach(tab => tab.classList.toggle('active', tab === btn));
+  document.querySelectorAll('.dd-sub-page').forEach(el => el.classList.toggle('active', el.id === `dd-page-${page}`));
+  if (page === 'library') ddRenderPrompts();
+  if (page === 'calendar') ddRenderCalendar();
+  if (page === 'streak') ddRenderStreak();
+}
+
+function ddSelectPillar(el, pillarOverride) {
+  ddSelectedPillar = pillarOverride || el?.dataset?.pillar || ddSelectedPillar;
+  document.querySelectorAll('.dd-pillar-btn').forEach(btn => btn.classList.toggle('selected', btn.dataset.pillar === ddSelectedPillar));
+}
+
+function ddPillarBadge(pillar) {
+  return {
+    build:'dd-pil-build',
+    mind:'dd-pil-mind',
+    serafina:'dd-pil-serafina',
+    travel:'dd-pil-travel',
+    ai:'dd-pil-ai',
+    body:'dd-pil-body'
+  }[pillar] || 'dd-pil-build';
+}
+
+function ddOpenDay(day) {
+  ddCurrentCalendarDay = day;
+  const suggestion = DD_CALENDAR[day - 1];
+  document.querySelectorAll('.dd-tab').forEach(tab => tab.classList.toggle('active', tab.dataset.ddpage === 'today'));
+  document.querySelectorAll('.dd-sub-page').forEach(el => el.classList.toggle('active', el.id === 'dd-page-today'));
+  if (suggestion) {
+    document.getElementById('dd-idea-input').value = suggestion.idea;
+    ddSelectPillar(null, suggestion.pillar);
+  }
+  ddRenderToday();
+}
+
+function ddUseSuggestion() {
+  const suggestion = ddGetCurrentSuggestion();
+  if (!suggestion) return;
+  document.getElementById('dd-idea-input').value = suggestion.idea;
+  ddSelectPillar(null, suggestion.pillar);
+  ddToast('Idea loaded');
+}
+
+function ddGenerateReel() {
+  const day = ddCurrentCalendarDay || ddGetCurrentDayNumber();
+  const plan = { ...ddGetDayPlan(day) };
+  const input = document.getElementById('dd-idea-input').value.trim();
+  const pillar = ddSelectedPillar || plan.pillar || 'build';
+  if (input) {
+    plan.idea = input;
+    plan.textHook = input;
+  }
+  plan.pillar = pillar;
+  ddGenerated = plan;
+  document.getElementById('dd-output-section').style.display = 'block';
+  document.getElementById('dd-text-hook-display').textContent = plan.textHook || plan.idea || '';
+  document.getElementById('dd-spoken-hook-text').textContent = plan.spokenHook || plan.textHook || '';
+  document.getElementById('dd-insight-text').textContent = plan.insight || '';
+  document.getElementById('dd-cta-text').textContent = plan.cta || '';
+  document.getElementById('dd-higgsfield-text').textContent = plan.higgsfield || '';
+  document.getElementById('dd-caption-text').textContent = `${plan.spokenHook || plan.textHook || ''}\n\n${plan.insight || ''}\n\n${plan.cta || ''}\n\n${plan.tags || ''}`;
+  document.getElementById('dd-shot-list').innerHTML = (plan.shots || []).map(shot => `
+    <div class="dd-shot-item">
+      <div class="dd-shot-time">${shot.t || ''}</div>
+      <div class="dd-shot-body">
+        <div class="dd-shot-type ${(shot.type || '').toLowerCase().includes('b-roll') ? 'broll' : 'aroll'}">${shot.type || 'Shot'}</div>
+        <div class="dd-shot-desc">${shot.desc || ''}</div>
+        ${shot.overlay ? `<div class="dd-shot-overlay">${shot.overlay}</div>` : ''}
+      </div>
+    </div>
+  `).join('');
+  const ref = plan.ref || '';
+  document.getElementById('dd-visual-ref-display').style.display = ref ? 'inline-flex' : 'none';
+  document.getElementById('dd-visual-ref-text').textContent = ref;
+  ddToast('Reel generated');
+}
+
+async function ddCopyText(id, btn) {
+  const text = document.getElementById(id)?.textContent || '';
+  await copyTextValue(text, 'Copied');
+  if (btn) btn.textContent = 'Copied!';
+  setTimeout(() => { if (btn) btn.textContent = btn.textContent.includes('spoken') ? 'Copy spoken' : 'Copy'; }, 1200);
+}
+
+function ddMarkPosted() {
+  const day = ddCurrentCalendarDay || ddGetCurrentDayNumber();
+  const posted = ddGetPostedDays();
+  if (!posted.includes(day)) posted.push(day);
+  posted.sort((a,b)=>a-b);
+  ddSetPostedDays(posted);
+  ddToast(`Day ${day} marked posted`);
+  ddRenderCalendar();
+  ddRenderStreak();
+  ddRenderToday();
+}
+
+function ddRenderCalendar() {
+  const wrap = document.getElementById('dd-calendar-list');
+  if (!wrap) return;
+  const posted = ddGetPostedDays();
+  wrap.innerHTML = DD_CALENDAR.map((item, idx) => {
+    const day = idx + 1;
+    const plan = ddGetDayPlan(day);
+    const isPosted = posted.includes(day);
+    const isToday = day === ddGetCurrentDayNumber();
+    return `
+      <div class="dd-cal-card ${isToday ? 'today-card' : ''} ${isPosted ? 'posted-card' : ''}">
+        <div class="dd-cal-card-main">
+          <div class="dd-cal-day-num" style="color:${isPosted ? 'var(--emerald)' : isToday ? 'var(--saffron)' : 'var(--text)'}">${day}</div>
+          <div class="dd-cal-content">
+            <div class="dd-cal-top">
+              <span class="dd-pillar-badge ${ddPillarBadge(item.pillar)}">${DD_PILLAR_LABELS[item.pillar]?.label || item.pillar}</span>
+              ${isToday ? '<span class="dd-today-badge">Today</span>' : ''}
+              ${isPosted ? '<span class="dd-posted-badge">Posted</span>' : ''}
+            </div>
+            <div class="dd-cal-idea">${item.idea}</div>
+            <div class="dd-cal-hook-preview">${plan.textHook || ''}</div>
+            <div class="dd-cal-shot-preview">${(plan.shots || []).slice(0,2).map(shot => shot.desc).join(' · ')}</div>
+            <div class="dd-cal-actions">
+              <button class="btn btn-ghost btn-sm" onclick="ddOpenDay(${day})">Open</button>
+              <button class="btn btn-ghost btn-sm" onclick="ddCurrentCalendarDay=${day};ddUseSuggestion();">Load idea</button>
+              ${isPosted ? '' : `<button class="btn btn-ghost btn-sm" onclick="ddCurrentCalendarDay=${day};ddMarkPosted();">Mark posted</button>`}
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function ddStreakValue() {
+  const posted = new Set(ddGetPostedDays());
+  let streak = 0;
+  for (let day = ddGetCurrentDayNumber() - 1; day >= 1; day -= 1) {
+    if (posted.has(day)) streak += 1;
+    else break;
+  }
+  return streak;
+}
+
+function ddRenderStreak() {
+  const posted = ddGetPostedDays();
+  const streak = ddStreakValue();
+  const total = posted.length;
+  const pct = `${Math.round((total / 40) * 100)}%`;
+  const milestone = [...DD_MILESTONES].reverse().find(m => streak >= m.days);
+  const grid = document.getElementById('dd-grid-40');
+  if (document.getElementById('dd-top-streak')) document.getElementById('dd-top-streak').textContent = `🔥 ${streak} day streak`;
+  if (document.getElementById('dd-streak-big')) document.getElementById('dd-streak-big').textContent = streak;
+  if (document.getElementById('dd-stat-total')) document.getElementById('dd-stat-total').textContent = total;
+  if (document.getElementById('dd-stat-left')) document.getElementById('dd-stat-left').textContent = 40 - total;
+  if (document.getElementById('dd-stat-pct')) document.getElementById('dd-stat-pct').textContent = pct;
+  if (document.getElementById('dd-streak-badge')) document.getElementById('dd-streak-badge').textContent = milestone ? `${milestone.icon} ${milestone.name}` : 'Just getting started ✦';
+  if (grid) {
+    const todayDay = ddGetCurrentDayNumber();
+    grid.innerHTML = Array.from({ length: 40 }, (_, idx) => {
+      const day = idx + 1;
+      const cls = posted.includes(day) ? 'posted' : day === todayDay ? 'today-d' : 'empty';
+      return `<div class="dd-grid-day ${cls}">${day}</div>`;
+    }).join('');
+  }
+  const mileWrap = document.getElementById('dd-milestones-list');
+  if (mileWrap) {
+    mileWrap.innerHTML = DD_MILESTONES.map(m => `
+      <div class="dd-milestone-item">
+        <div style="font-size:20px;">${m.icon}</div>
+        <div style="flex:1;">
+          <div style="font-size:13px;font-weight:800;">${m.name}</div>
+          <div style="font-size:11px;color:var(--text2);">${m.days} days of posting</div>
+        </div>
+        <div style="font-size:11px;font-weight:700;color:${streak >= m.days ? 'var(--emerald)' : 'var(--text2)'};">${streak >= m.days ? 'Unlocked' : 'Pending'}</div>
+      </div>
+    `).join('');
+  }
+}
+
+function ddSetFilter(filter, btn) {
+  ddPromptFilter = filter;
+  document.querySelectorAll('.dd-filter-tab').forEach(tab => tab.classList.toggle('active', tab === btn));
+  ddRenderPrompts();
+}
+
+function ddRenderPrompts() {
+  const wrap = document.getElementById('dd-prompts-list');
+  if (!wrap) return;
+  const q = (document.getElementById('dd-lib-search')?.value || '').trim().toLowerCase();
+  const prompts = DD_ALL_PROMPTS.filter(item => (ddPromptFilter === 'all' || item.pillar === ddPromptFilter) && (!q || item.text.toLowerCase().includes(q)));
+  wrap.innerHTML = prompts.map(item => `
+    <div class="dd-prompt-card">
+      <div>
+        <div class="dd-pillar-badge ${ddPillarBadge(item.pillar)}" style="margin-bottom:8px;">${DD_PILLAR_LABELS[item.pillar]?.label || item.pillar}</div>
+        <div class="dd-prompt-text">${item.text}</div>
+      </div>
+      <button class="btn btn-ghost btn-sm" onclick='copyTextValue(${JSON.stringify(item.text)}, "Prompt copied")'>Copy</button>
+    </div>
+  `).join('') || `<div style="font-size:12px;color:var(--text2);padding:12px 0;">No prompts match this search.</div>`;
+}
+
+function ddRenderToday() {
+  const suggestion = ddGetCurrentSuggestion();
+  if (!suggestion) return;
+  const day = ddCurrentCalendarDay || ddGetCurrentDayNumber();
+  document.getElementById('dd-sug-day').textContent = `DAY ${day} · TODAY'S IDEA`;
+  document.getElementById('dd-sug-idea').textContent = suggestion.idea;
+  const badge = document.getElementById('dd-sug-pillar');
+  badge.className = `dd-pillar-badge ${ddPillarBadge(suggestion.pillar)}`;
+  badge.textContent = DD_PILLAR_LABELS[suggestion.pillar]?.label || suggestion.pillar;
+  const isSunday = new Date().getDay() === 0;
+  document.getElementById('dd-audio-reminder').style.display = isSunday ? 'flex' : 'none';
+  if (!document.getElementById('dd-idea-input').value.trim()) document.getElementById('dd-idea-input').value = suggestion.idea;
+  ddSelectPillar(null, suggestion.pillar);
+}
+
+function ddInit() {
+  ddRenderCalendar();
+  ddRenderToday();
+  ddRenderStreak();
+  ddRenderPrompts();
+  const activeTag = document.querySelector('.obs-filter.active');
+  renderObs(activeTag?.dataset.tag || 'all');
 }
 
 seed();
