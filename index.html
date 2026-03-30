@@ -2207,6 +2207,30 @@ const SEEDED_EXHIBITION_SIGNATURE = [
   'Jaipur Heritage Market',
   'Hyderabad Style Summit'
 ];
+const SEEDED_TASK_SIGNATURE = [
+  'Restock Linen Co-ord Set — order 5 more',
+  'Create April Instagram content plan',
+  'Design new Blazer silhouette — final sign-off',
+  'Set up basic stock tracking flow',
+  'Research equity deal terms with fabric partner',
+  'Follow up with Bangalore stylist contacts',
+  'Book travel + stay for Hyderabad'
+];
+const SEEDED_IDEA_SIGNATURE = [
+  'Bundle pricing — "Complete the Look"',
+  'Made-to-measure waitlist',
+  'Display quality = conversion rate',
+  'Brand storytelling raises perceived value',
+  'Equity deal with infra partner to reduce capital needs'
+];
+const SEEDED_CUSTOMER_SIGNATURE = [
+  'Priya Mehra',
+  'Aditi Rao',
+  'Sunaina Kapoor',
+  'Meera Iyer',
+  'Tara Singh'
+];
+const SEEDED_PARTNER_SIGNATURE = ['Kavya Textiles'];
 
 function maybeClearSeededExhibitions() {
   const exhs = load(K.exh);
@@ -2219,6 +2243,17 @@ function maybeClearSeededExhibitions() {
   }
 }
 
+function maybeClearSeededList(key, signatureNames, field = 'title') {
+  const items = load(key);
+  if (!items.length) return;
+  const names = items.map(item => item?.[field]).filter(Boolean).sort();
+  const looksSeeded = items.length === signatureNames.length
+    && signatureNames.slice().sort().every((name, idx) => names[idx] === name);
+  if (looksSeeded) {
+    localStorage.removeItem(key);
+  }
+}
+
 function seed() {
   const seedIfEmpty = (key, value) => { if (!load(key).length) save(key, value); };
   // Replace demo products with real Serafina Collective products
@@ -2228,32 +2263,10 @@ function seed() {
     save(K.products, SERAFINA_PRODUCTS);
   }
   maybeClearSeededExhibitions();
-  seedIfEmpty(K.tasks, [
-    {id:'t1',title:'Restock Linen Co-ord Set — order 5 more',owner:'Me',due:'2026-04-02',priority:'urgent',cat:'Production',status:'todo',notes:''},
-    {id:'t2',title:'Create April Instagram content plan',owner:'Me',due:'2026-04-01',priority:'urgent',cat:'Content',status:'todo',notes:''},
-    {id:'t3',title:'Design new Blazer silhouette — final sign-off',owner:'Me',due:'2026-03-28',priority:'urgent',cat:'Production',status:'todo',notes:''},
-    {id:'t4',title:'Set up basic stock tracking flow',owner:'Me',due:'2026-03-30',priority:'active',cat:'Operations',status:'todo',notes:''},
-    {id:'t5',title:'Research equity deal terms with fabric partner',owner:'Me',due:'2026-04-05',priority:'active',cat:'Finance',status:'todo',notes:''},
-    {id:'t6',title:'Follow up with Bangalore stylist contacts',owner:'Me',due:'2026-04-03',priority:'backlog',cat:'Sales',status:'todo',notes:''},
-    {id:'t7',title:'Book travel + stay for Hyderabad',owner:'Me',due:'2026-03-31',priority:'active',cat:'Operations',status:'done',notes:''},
-  ]);
-  seedIfEmpty(K.ideas, [
-    {id:'i1',title:'Bundle pricing — "Complete the Look"',type:'idea',body:'Offer co-ord top+bottom together at a slight discount. Increases average order value and feels more intentional.',tags:['pricing','upsell'],src:'Bangalore show',date:'2025-12-07'},
-    {id:'i2',title:'Made-to-measure waitlist',type:'idea',body:'Multiple customers at Delhi asked for custom sizing. Create a simple MTM order form. Premium offering.',tags:['product','premium'],src:'Delhi Trunk Show',date:'2025-11-17'},
-    {id:'i3',title:'Display quality = conversion rate',type:'learning',body:'High footfall ≠ high sales. The way garments are hung determines buyer intent. Better display = more sales. Invest in good hangers, racks.',tags:['exhibition','conversion'],src:'Mumbai Pop-up',date:'2026-01-19'},
-    {id:'i4',title:'Brand storytelling raises perceived value',type:'learning',body:'When I explained fabric sourcing + design process, customers paid full price without negotiating. Story = value.',tags:['branding','pricing'],src:'Jaipur show',date:'2026-02-15'},
-    {id:'i5',title:'Equity deal with infra partner to reduce capital needs',type:'idea',body:'Offer stall cost split to fabric/infra partner in exchange for % of show revenue. Reduces upfront capital. Test with Kavya Textiles.',tags:['equity','finance'],src:'Own thinking',date:'2026-03-20'},
-  ]);
-  seedIfEmpty(K.partners, [
-    {id:'pt1',name:'Kavya Textiles',type:'Infra Provider',equity:5,contact:'kavya@example.com',notes:'Fabric supplier. Interested in equity deal for preferential pricing + co-branding at shows.'},
-  ]);
-  seedIfEmpty(K.customers, [
-    {id:'c1',name:'Priya Mehra',phone:'9876543210',email:'priya@gmail.com',city:'Mumbai',showId:'e1',showName:'Delhi Trunk Show',items:'Wrap Dress, Linen Co-ord',totalSpend:10300,tag:'vip',followUpDate:'2026-04-05',notes:'Loves earth tones. Asked about next Mumbai show.'},
-    {id:'c2',name:'Aditi Rao',phone:'9823456781',email:'',city:'Bangalore',showId:'e2',showName:'Bangalore Design Week',items:'Open Back Kurta',totalSpend:3200,tag:'new',followUpDate:'',notes:'Instagram: @aditi.wears'},
-    {id:'c3',name:'Sunaina Kapoor',phone:'9911223344',email:'sunaina@work.com',city:'Delhi',showId:'e1',showName:'Delhi Trunk Show',items:'Draped Palazzo × 2, Wrap Dress',totalSpend:13400,tag:'repeat',followUpDate:'2026-04-15',notes:'Regular buyer. Wants custom sizing.'},
-    {id:'c4',name:'Meera Iyer',phone:'9745678901',email:'',city:'Mumbai',showId:'e3',showName:'Mumbai Pop-Up',items:'Linen Co-ord',totalSpend:5800,tag:'new',followUpDate:'',notes:'Came with a friend, both bought.'},
-    {id:'c5',name:'Tara Singh',phone:'9654321098',email:'tara@design.in',city:'Jaipur',showId:'e4',showName:'Jaipur Heritage Fair',items:'Wrap Dress, Open Back Kurta',totalSpend:7700,tag:'repeat',followUpDate:'2026-05-01',notes:'Stylist — potential collab.'},
-  ]);
+  maybeClearSeededList(K.tasks, SEEDED_TASK_SIGNATURE, 'title');
+  maybeClearSeededList(K.ideas, SEEDED_IDEA_SIGNATURE, 'title');
+  maybeClearSeededList(K.partners, SEEDED_PARTNER_SIGNATURE, 'name');
+  maybeClearSeededList(K.customers, SEEDED_CUSTOMER_SIGNATURE, 'name');
   seedIfEmpty(K_DROPS, [{id:'d1',name:'Butter Soft Modal',theme:'Quiet luxury, Indian confidence, classy-sexy comfort',date:'2026-05-01',status:'1',notes:'3 styles · 4-5 colors · hoodies and pants. Soft, classy, sexy modal essentials.',img:''}]);
   seedIfEmpty(K_OBS, [
     {id:'pb1',type:'idea',tag:'weight-loss',text:'Build founder content around becoming the woman who keeps promises to herself.',link:'weight loss angle',img:''},
