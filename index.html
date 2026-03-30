@@ -988,12 +988,22 @@ body.portal-mode .kriti-portal-shell { display:block; }
     </div>
     <div class="g2">
       <div class="panel">
+        <div class="panel-head"><span class="panel-title-sm">Kriti Command</span><button class="btn btn-ghost btn-sm" onclick="navigate('content')">Open content →</button></div>
+        <div id="dash-kriti-command"></div>
+      </div>
+      <div class="panel">
+        <div class="panel-head"><span class="panel-title-sm">Upcoming Exhibitions</span><button class="btn btn-ghost btn-sm" onclick="navigate('exhibitions')">Open shows →</button></div>
+        <div id="dash-exhibitions-preview"></div>
+      </div>
+    </div>
+    <div class="g2">
+      <div class="panel">
         <div class="panel-head"><span class="panel-title-sm">Inventory Pressure</span><button class="btn btn-ghost btn-sm" onclick="navigate('products')">View all →</button></div>
         <div id="dash-inv-health"></div>
       </div>
       <div class="panel">
-        <div class="panel-head"><span class="panel-title-sm">Founder Signals</span><button class="btn btn-ghost btn-sm" onclick="navigate('obsession')">Open founder OS →</button></div>
-        <div id="dash-founder-preview"></div>
+        <div class="panel-head"><span class="panel-title-sm">Digital Product Push</span><button class="btn btn-ghost btn-sm" onclick="navigate('obsession')">Open Dolly Daily →</button></div>
+        <div id="dash-digital-push"></div>
       </div>
     </div>
   </div>
@@ -1993,6 +2003,7 @@ const fmt   = n => n ? '₹'+Number(n).toLocaleString('en-IN') : '₹0';
 const fmtD  = d => { if(!d) return '—'; const dt=new Date(d); return dt.toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'2-digit'}); };
 const CLOUD_SETTINGS_KEY = 'sf3_cloud_settings';
 const MANIFESTATION_URL = 'https://dollydash-knzskech.manus.space/';
+const LIVE_APP_ORIGIN = 'https://serafina-os.vercel.app';
 let runtimeConfig = { loaded:false, features:{ cloudSync:false, contentStorage:false, localIntake:false, managedShopify:false, vercelCron:false } };
 let liveCommerceSummary = null;
 let liveCommerceLoading = false;
@@ -2499,6 +2510,16 @@ function renderDash() {
   const content = load(K.content).map(normalizeContentItem);
   const founder = load(K_OBS).map(normalizeBrandEntry);
   const launch = load(K_DROPS)[0];
+  const commerceSummary = liveCommerceSummary || loadShopifySnapshot();
+  const salesYesterday = commerceSummary?.salesYesterday ?? brief.salesYesterday;
+  const ordersYesterday = commerceSummary?.ordersYesterday ?? 0;
+  const ordersToday = commerceSummary?.ordersToday ?? 0;
+  const repeatYesterday = commerceSummary?.repeatYesterday;
+  const commerceSourceLabel = commerceSummary?.source === 'shopify-admin'
+    ? 'live Shopify admin data'
+    : commerceSummary?.source === 'shopify-csv'
+      ? `Shopify CSV snapshot${commerceSummary.importedAt ? ' · ' + new Date(commerceSummary.importedAt).toLocaleDateString('en-IN',{day:'numeric',month:'short'}) : ''}`
+      : 'manual founder snapshot';
   const lowStock = prods.filter(p=>Number(p.qty)<=Number(p.reorder)&&p.status!=='discontinued');
   const openTasks = tasks.filter(t=>t.status!=='done');
   const roas = brief.adSpend && brief.adRevenue ? (brief.adRevenue / brief.adSpend) : null;
@@ -2506,12 +2527,28 @@ function renderDash() {
   const kritiQueue = content.filter(i=>i.owner==='Kriti' && ['raw','selected','editing'].includes(i.status));
   const overdueKriti = kritiQueue.filter(i => i.deadline && i.deadline < today());
   const upcomingExhibitions = exhs.filter(e=>e.status==='upcoming').sort((a,b)=>String(a.start||'').localeCompare(String(b.start||'')));
+  const founderAssetCount = content.filter(i=>i.lane==='personal'||i.lane==='both').length;
+  const kritiBatches = Object.values(kritiQueue.reduce((acc, item) => {
+    const key = batchNameForItem(item);
+    if (!acc[key]) acc[key] = { name:key, count:0, deadline:item.deadline || '', latest:item.date || '' };
+    acc[key].count += 1;
+    if (!acc[key].deadline && item.deadline) acc[key].deadline = item.deadline;
+    if (item.date && (!acc[key].latest || item.date > acc[key].latest)) acc[key].latest = item.date;
+    return acc;
+  }, {})).sort((a,b)=>String(a.deadline || a.latest || '').localeCompare(String(b.deadline || b.latest || '')));
+  const strategicTask = task => {
+    const hay = `${task.title} ${task.cat} ${task.notes || ''}`.toLowerCase();
+    return task.priority === 'urgent'
+      || /launch|kriti|content|personal|digital|manifest|order|pack|exhibition|show/.test(hay)
+      || ['Content','Launch','Operations','Exhibitions','Orders','Personal Brand','Digital Product'].includes(task.cat);
+  };
   const urgentDashboardTasks = [
-    ...openTasks.filter(t=>['urgent','high'].includes(t.priority) || ['Content','Launch','Operations'].includes(t.cat)),
+    ...openTasks.filter(strategicTask),
+    ...(ordersToday > 0 ? [{ title:`Pack ${ordersToday} Shopify order${ordersToday > 1 ? 's' : ''}`, cat:'Orders', owner:'Dolly', due:today(), priority:'urgent' }] : []),
     ...readyForDolly.map(i => ({ title:`Review ${i.title}`, cat:'Kriti', owner:'Dolly', due:i.deadline || today(), priority:'urgent' })),
     ...overdueKriti.map(i => ({ title:`Follow up with Kriti on ${i.title}`, cat:'Kriti', owner:'Dolly', due:i.deadline || today(), priority:'urgent' })),
     ...upcomingExhibitions.slice(0,2).map(e => ({ title:`Prep for ${e.name}`, cat:'Exhibition', owner:'Dolly', due:e.start || today(), priority:'high' }))
-  ].sort((a,b)=>String(a.due||'').localeCompare(String(b.due||''))).slice(0,6);
+  ].sort((a,b)=>String(a.due||'').localeCompare(String(b.due||''))).slice(0,7);
   const reel = buildDailyReelBrief(content, founder);
 
   document.getElementById('dash-alerts').innerHTML = [
@@ -2519,18 +2556,10 @@ function renderDash() {
     launch ? `<div class="alert-chip">🚀 Launch focus: <strong>${launch.name}</strong></div>` : '',
     readyForDolly[0] ? `<div class="alert-chip">✅ Ready for review: <strong>${readyForDolly.length}</strong></div>` : '',
     lowStock[0] ? `<div class="alert-chip">⚠️ Low stock: <strong>${lowStock[0].name}</strong> (${lowStock[0].qty} left)</div>` : '',
+    ordersToday > 0 ? `<div class="alert-chip">📦 Pack today: <strong>${ordersToday} orders</strong></div>` : '',
     brief.note ? `<div class="alert-chip">🧠 ${brief.note}</div>` : ''
   ].filter(Boolean).join('') || `<div class="alert-chip">✦ Clean slate. Build profit, not noise.</div>`;
 
-  const commerceSummary = liveCommerceSummary || loadShopifySnapshot();
-  const salesYesterday = commerceSummary?.salesYesterday ?? brief.salesYesterday;
-  const ordersYesterday = commerceSummary?.ordersYesterday ?? 0;
-  const repeatYesterday = commerceSummary?.repeatYesterday;
-  const commerceSourceLabel = commerceSummary?.source === 'shopify-admin'
-    ? 'live Shopify admin data'
-    : commerceSummary?.source === 'shopify-csv'
-      ? `Shopify CSV snapshot${commerceSummary.importedAt ? ' · ' + new Date(commerceSummary.importedAt).toLocaleDateString('en-IN',{day:'numeric',month:'short'}) : ''}`
-      : 'manual founder snapshot';
   const adSub = (brief.adSpend != null && brief.adRevenue != null)
     ? `${fmt(brief.adSpend)} spend · ${fmt(brief.adRevenue)} revenue`
     : 'update Meta spend + revenue';
@@ -2584,7 +2613,7 @@ function renderDash() {
       <div style="background:var(--cream);border:1px solid var(--border);border-radius:12px;padding:12px;"><div style="font-size:11px;color:var(--text2);">Conversion Rate</div><div style="font-size:20px;font-weight:900;color:var(--magenta);">${brief.cvr == null ? '—' : `${brief.cvr.toFixed(1)}%`}</div></div>
       <div style="background:var(--cream);border:1px solid var(--border);border-radius:12px;padding:12px;"><div style="font-size:11px;color:var(--text2);">Repeat Yesterday</div><div style="font-size:20px;font-weight:900;color:var(--emerald);">${repeatYesterday == null ? '—' : repeatYesterday ? 'Yes' : 'No'}</div></div>
     </div>
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:14px;font-size:12px;color:var(--text2);"><span>${commerceSummary ? `${commerceSourceLabel}. Ads + cash are still founder-entered.` : 'Sales are not connected yet. Upload Shopify CSV or run Pull Shopify (Mac).'} </span><button class="btn btn-ghost btn-sm" onclick="openModal('modal-brief')">Update →</button></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:14px;font-size:12px;color:var(--text2);gap:10px;flex-wrap:wrap;"><span>${commerceSummary ? `${commerceSourceLabel}. Ads + cash are still founder-entered.` : 'Sales are not connected yet. Upload Shopify CSV or run Pull Shopify (Mac).'} </span><div style="display:flex;gap:8px;flex-wrap:wrap;"><button class="btn btn-ghost btn-sm" onclick="openModal('modal-brief')">Update →</button>${commerceSummary ? `<button class="btn btn-ghost btn-sm" onclick="syncLatestShopifyExport()">⚡ Pull Shopify</button>` : ''}</div></div>
   `;
 
   document.getElementById('dash-task-count').textContent = `${urgentDashboardTasks.filter(t=>t.priority==='urgent').length} urgent · ${urgentDashboardTasks.length} in focus`;
@@ -2595,20 +2624,50 @@ function renderDash() {
       <div style="background:var(--coral-t);border-radius:12px;padding:12px;"><div style="font-size:11px;color:var(--coral);">Kriti queue</div><div style="font-size:22px;font-weight:900;color:var(--coral);">${kritiQueue.length}</div></div>
       <div style="background:var(--indigo-t);border-radius:12px;padding:12px;"><div style="font-size:11px;color:var(--indigo);">Overdue with Kriti</div><div style="font-size:22px;font-weight:900;color:var(--indigo);">${overdueKriti.length}</div></div>
       <div style="background:var(--saffron-t);border-radius:12px;padding:12px;"><div style="font-size:11px;color:var(--gold);">Ready for Dolly</div><div style="font-size:22px;font-weight:900;color:var(--gold);">${readyForDolly.length}</div></div>
-      <div style="background:var(--emerald-t);border-radius:12px;padding:12px;"><div style="font-size:11px;color:var(--emerald);">Founder assets</div><div style="font-size:22px;font-weight:900;color:var(--emerald);">${content.filter(i=>['personal','both'].includes(i.lane)).length}</div></div>
+      <div style="background:var(--emerald-t);border-radius:12px;padding:12px;"><div style="font-size:11px;color:var(--emerald);">Founder assets</div><div style="font-size:22px;font-weight:900;color:var(--emerald);">${founderAssetCount}</div></div>
     </div>
     <div style="font-size:12px;color:var(--text2);line-height:1.8;">Kriti is your bottleneck right now only if uploads stall. Use this snapshot to review, remind, and keep founder footage moving daily.</div>`;
 
+  document.getElementById('dash-kriti-command').innerHTML = `
+    <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-bottom:14px;">
+      <div style="background:var(--coral-t);border-radius:12px;padding:12px;"><div style="font-size:11px;color:var(--coral);">With Kriti</div><div style="font-size:22px;font-weight:900;color:var(--coral);">${kritiQueue.length}</div></div>
+      <div style="background:var(--indigo-t);border-radius:12px;padding:12px;"><div style="font-size:11px;color:var(--indigo);">Overdue</div><div style="font-size:22px;font-weight:900;color:var(--indigo);">${overdueKriti.length}</div></div>
+      <div style="background:var(--saffron-t);border-radius:12px;padding:12px;"><div style="font-size:11px;color:var(--gold);">Ready for review</div><div style="font-size:22px;font-weight:900;color:var(--gold);">${readyForDolly.length}</div></div>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;">
+      <button class="btn btn-ghost btn-sm" onclick="sendKritiDailyReminder()">Ping Kriti</button>
+      <button class="btn btn-ghost btn-sm" onclick="copyKritiPortalLink()">Copy upload link</button>
+      <button class="btn btn-ghost btn-sm" onclick="navigate('content')">Review queue</button>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:10px;">
+      ${(kritiBatches.slice(0,3).map(batch => `<div style="background:var(--cream);border:1px solid var(--border);border-radius:12px;padding:12px;"><div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start;"><div><div style="font-size:13px;font-weight:800;">${batch.name}</div><div style="font-size:11px;color:var(--text2);margin-top:4px;">${batch.count} items${batch.deadline ? ` · due ${fmtD(batch.deadline)}` : ''}</div></div><button class="btn btn-ghost btn-sm" onclick="sendBatchHandoffWhatsApp('${String(batch.name).replace(/'/g, "\\'")}')">Ping</button></div></div>`).join('')) || `<div style="font-size:12px;color:var(--text2);">Nothing is sitting with Kriti right now.</div>`}
+    </div>
+  `;
+
   document.getElementById('dash-launch-preview').innerHTML = launch ? `<div style="background:linear-gradient(135deg,var(--magenta-t),var(--purple-t));border-radius:16px;padding:16px;"><div style="font-size:11px;color:var(--text2);margin-bottom:6px;">Primary launch focus</div><div style="font-size:22px;font-weight:900;">${launch.name}</div><div style="font-size:12px;color:var(--text2);margin-top:4px;">${launch.theme||''}</div><div style="font-size:12px;line-height:1.8;color:var(--text2);margin-top:12px;">${launch.notes||''}</div></div>` : '<div style="font-size:13px;color:var(--text2);">Add your modal collection in Launch HQ.</div>';
+
+  document.getElementById('dash-exhibitions-preview').innerHTML = upcomingExhibitions.slice(0,3).map(e => `
+    <div style="background:var(--cream);border:1px solid var(--border);border-radius:12px;padding:12px;margin-bottom:10px;">
+      <div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start;">
+        <div>
+          <div style="font-size:13px;font-weight:800;">${e.name}</div>
+          <div style="font-size:11px;color:var(--text2);margin-top:4px;">${e.city} · ${fmtD(e.start)}</div>
+        </div>
+        <span style="font-size:10px;font-weight:700;color:var(--indigo);background:var(--indigo-t);padding:4px 8px;border-radius:999px;">Upcoming</span>
+      </div>
+      ${e.notes ? `<div style="font-size:12px;color:var(--text2);line-height:1.6;margin-top:8px;">${e.notes}</div>` : ''}
+    </div>
+  `).join('') || '<div style="font-size:12px;color:var(--text2);">No upcoming exhibitions yet. When you add one, prep work will show up here.</div>';
 
   document.getElementById('dash-inv-health').innerHTML = lowStock.slice(0,4).map(p=>`<div style="margin-bottom:12px;"><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px;"><span style="font-weight:600;">${p.name}</span><span style="color:var(--coral);font-weight:700;">${p.qty} left</span></div><div style="background:var(--cream);border-radius:20px;height:5px;overflow:hidden;"><div style="width:${Math.min(100, Math.round((p.qty/Math.max(p.reorder*2,1))*100))}%;height:100%;border-radius:20px;background:var(--coral);"></div></div></div>`).join('') || '<div style="font-size:12px;color:var(--text2);">No urgent stock pressure right now.</div>';
 
-  document.getElementById('dash-founder-preview').innerHTML = `
+  document.getElementById('dash-digital-push').innerHTML = `
     <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-bottom:14px;">
-      <div style="background:var(--purple-t);border-radius:12px;padding:12px;"><div style="font-size:11px;color:var(--purple);">Founder assets</div><div style="font-size:22px;font-weight:900;color:var(--purple);">${content.filter(i=>i.lane==='personal'||i.lane==='both').length}</div></div>
+      <div style="background:var(--purple-t);border-radius:12px;padding:12px;"><div style="font-size:11px;color:var(--purple);">Founder assets</div><div style="font-size:22px;font-weight:900;color:var(--purple);">${founderAssetCount}</div></div>
       <div style="background:var(--teal-t);border-radius:12px;padding:12px;"><div style="font-size:11px;color:var(--teal);">Strategic notes</div><div style="font-size:22px;font-weight:900;color:var(--teal);">${founder.length}</div></div>
     </div>
-    <div style="font-size:12px;line-height:1.8;color:var(--text2);"><div><strong style="color:var(--text);">Primary pillars:</strong> weight loss, discipline, manifestation, founder x Serafina</div><div><strong style="color:var(--text);">Digital product:</strong> <a href="${MANIFESTATION_URL}" target="_blank" style="color:var(--indigo);font-weight:700;">Manifestation dashboard ↗</a></div></div>
+    <div style="font-size:12px;line-height:1.8;color:var(--text2);"><div><strong style="color:var(--text);">Post first:</strong> one personal brand reel today.</div><div><strong style="color:var(--text);">Bridge angle:</strong> tie weight loss, discipline, founder honesty, and Serafina identity together.</div><div><strong style="color:var(--text);">Digital product:</strong> <a href="${MANIFESTATION_URL}" target="_blank" style="color:var(--indigo);font-weight:700;">Manifestation dashboard ↗</a></div></div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;"><button class="btn btn-ghost btn-sm" onclick="navigate('obsession')">Open Dolly Daily</button><button class="btn btn-ghost btn-sm" onclick="navigate('reels')">Open Reel Lab</button><button class="btn btn-ghost btn-sm" onclick="window.open(${JSON.stringify(MANIFESTATION_URL)}, '_blank')">Open product ↗</button></div>
   `;
   hydrateDashLiveCommerce();
 }
@@ -2650,7 +2709,7 @@ async function syncLatestShopifyExport() {
       headers:{ 'Content-Type':'application/json' },
       body: JSON.stringify({
         workspace,
-        cloudBaseUrl: 'https://serafina-os-vercel.vercel.app'
+        cloudBaseUrl: LIVE_APP_ORIGIN
       })
     });
     const data = await resp.json();
@@ -3344,6 +3403,29 @@ function buildKritiBatchPing(batchName, items) {
     driveLink ? `Drive folder: ${driveLink}` : '',
     `Upload link: ${getKritiPortalLink()}`
   ].filter(Boolean).join('\n');
+}
+
+function buildKritiReminderText(items, readyCount, overdueCount) {
+  const batches = uniqueList(items.map(item => batchNameForItem(item))).slice(0, 4);
+  const nearestDeadline = items.map(item => item.deadline).filter(Boolean).sort()[0];
+  return [
+    'Hi Kriti, quick daily content check-in.',
+    `${items.length} items are still with you${nearestDeadline ? `, earliest deadline is ${fmtD(nearestDeadline)}.` : '.'}`,
+    overdueCount ? `${overdueCount} items are overdue.` : 'Nothing is overdue yet, keep momentum high.',
+    readyCount ? `${readyCount} edits are already in Ready for Dolly.` : 'Please keep uploading finals back into the dashboard one by one.',
+    batches.length ? `Priority drops: ${batches.join(', ')}.` : '',
+    'Please keep the hooks sharp, edits premium, and story arc clear.',
+    `Upload link: ${getKritiPortalLink()}`
+  ].filter(Boolean).join('\n');
+}
+
+function sendKritiDailyReminder() {
+  const items = load(K.content)
+    .map(normalizeContentItem)
+    .filter(item => item.owner === 'Kriti' && ['raw','selected','editing'].includes(item.status));
+  const readyCount = load(K.content).map(normalizeContentItem).filter(item => item.status === 'ready-review').length;
+  const overdueCount = items.filter(item => item.deadline && item.deadline < today()).length;
+  window.open(`https://wa.me/?text=${encodeURIComponent(buildKritiReminderText(items, readyCount, overdueCount))}`, '_blank');
 }
 
 function generateContentBrief() {
