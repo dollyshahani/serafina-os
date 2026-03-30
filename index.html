@@ -1029,7 +1029,7 @@ body.portal-mode .kriti-portal-shell { display:block; }
       <span class="nav-dot" style="background:var(--magenta)"></span> Story War Room ✦
     </button>
     <button class="nav-item" data-page="reels">
-      <span class="nav-dot" style="background:var(--gold)"></span> Reel Lab
+      <span class="nav-dot" style="background:var(--gold)"></span> Higgsfield Lab
     </button>
     <button class="nav-item" data-page="obsession">
       <span class="nav-dot" style="background:var(--coral)"></span> Dolly Daily
@@ -1467,8 +1467,8 @@ body.portal-mode .kriti-portal-shell { display:block; }
 
   <div id="page-reels" class="page">
     <div class="page-top">
-      <div><div class="greeting">✦ inspiration to execution</div><div class="page-title">Reel Lab</div><div class="page-sub">Save a reel link or creator account you love. Then get a simple breakdown and a Dolly version you can actually make.</div></div>
-      <button class="btn btn-saffron" onclick="openModal('modal-reel')">+ Save Inspiration</button>
+      <div><div class="greeting">✦ dolly daily to motion</div><div class="page-title">Higgsfield Lab</div><div class="page-sub">Take today’s Dolly Daily idea, turn it into a Higgsfield motion prompt, and track the generated inserts in one place.</div></div>
+      <button class="btn btn-saffron" onclick="seedHiggsfieldFromDollyDaily()">Use Dolly Daily Prompt</button>
     </div>
     <div class="stat-grid" id="reel-lab-stats"></div>
     <div class="reel-lab-grid" id="reel-lab-grid"></div>
@@ -2777,6 +2777,17 @@ function buildReelHiggsfieldPrompt(ref) {
   ].filter(Boolean).join(', ');
 }
 
+function buildDailyHiggsfieldJob() {
+  const brief = buildDailyReelBrief(load(K.content).map(normalizeContentItem), load(K_OBS).map(normalizeBrandEntry));
+  return {
+    title: brief.title,
+    prompt: buildHiggsfieldPrompt(brief),
+    sourceDrop: brief.sourceDrop,
+    pillar: brief.pillar,
+    mood: brief.mood
+  };
+}
+
 async function copyDollyDailyPrompt() {
   const brief = buildDailyReelBrief(load(K.content).map(normalizeContentItem), load(K_OBS).map(normalizeBrandEntry));
   await copyTextValue(buildDollyDailyPrompt(brief), 'Claude reel prompt copied');
@@ -2956,7 +2967,7 @@ function renderDash() {
       <div style="background:var(--teal-t);border-radius:12px;padding:12px;"><div style="font-size:11px;color:var(--teal);">Strategic notes</div><div style="font-size:22px;font-weight:900;color:var(--teal);">${founder.length}</div></div>
     </div>
     <div style="font-size:12px;line-height:1.8;color:var(--text2);"><div><strong style="color:var(--text);">Post first:</strong> one personal brand reel today.</div><div><strong style="color:var(--text);">Bridge angle:</strong> tie weight loss, discipline, founder honesty, and Serafina identity together.</div><div><strong style="color:var(--text);">Digital product:</strong> <a href="${MANIFESTATION_URL}" target="_blank" style="color:var(--indigo);font-weight:700;">Manifestation dashboard ↗</a></div></div>
-    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;"><button class="btn btn-ghost btn-sm" onclick="navigate('obsession')">Open Dolly Daily</button><button class="btn btn-ghost btn-sm" onclick="navigate('reels')">Open Reel Lab</button><button class="btn btn-ghost btn-sm" onclick="window.open(${JSON.stringify(MANIFESTATION_URL)}, '_blank')">Open product ↗</button></div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;"><button class="btn btn-ghost btn-sm" onclick="navigate('obsession')">Open Dolly Daily</button><button class="btn btn-ghost btn-sm" onclick="navigate('reels')">Open Higgsfield Lab</button><button class="btn btn-ghost btn-sm" onclick="window.open(${JSON.stringify(MANIFESTATION_URL)}, '_blank')">Open product ↗</button></div>
   `;
   hydrateDashLiveCommerce();
 }
@@ -6091,19 +6102,42 @@ function buildReelBreakdownDraft(input) {
 }
 
 function renderReelLab() {
-  const refs = load(K_REELS).map(normalizeReelRef).sort((a,b)=>String(b.createdAt).localeCompare(String(a.createdAt)));
   const jobs = load(K_HIGGS).map(normalizeHiggsJob).sort((a,b)=>String(b.updatedAt).localeCompare(String(a.updatedAt)));
+  const daily = buildDailyHiggsfieldJob();
   document.getElementById('reel-lab-stats').innerHTML = `
-    <div class="stat-card sc-saffron"><div class="stat-label">Saved</div><div class="stat-val">${refs.length}</div><div class="stat-sub">reels + creator accounts</div></div>
-    <div class="stat-card sc-coral"><div class="stat-label">Story-led</div><div class="stat-val">${refs.filter(r=>/story|emotional|confession/i.test([r.why,r.editStyle,r.hookPattern].join(' '))).length}</div><div class="stat-sub">strong narrative references</div></div>
-    <div class="stat-card sc-teal"><div class="stat-label">Make My Version</div><div class="stat-val">${refs.filter(r=>r.dollyVersion).length}</div><div class="stat-sub">usable remake plans</div></div>
-    <div class="stat-card sc-magenta"><div class="stat-label">Storyboard Ready</div><div class="stat-val">${refs.length}</div><div class="stat-sub">send any idea to War Room</div></div>
+    <div class="stat-card sc-saffron"><div class="stat-label">Today’s Source</div><div class="stat-val" style="font-size:18px;">${escapeHtml(daily.sourceDrop || 'Dolly Daily')}</div><div class="stat-sub">where this motion brief came from</div></div>
+    <div class="stat-card sc-coral"><div class="stat-label">Pillar</div><div class="stat-val" style="font-size:20px;">${escapeHtml(daily.pillar || 'Founder')}</div><div class="stat-sub">today’s creative lane</div></div>
+    <div class="stat-card sc-teal"><div class="stat-label">Jobs</div><div class="stat-val">${jobs.length}</div><div class="stat-sub">Higgsfield generations tracked</div></div>
+    <div class="stat-card sc-magenta"><div class="stat-label">Ready Clips</div><div class="stat-val">${jobs.filter(j=>j.outputUrl).length}</div><div class="stat-sub">finished motion inserts</div></div>
   `;
   document.getElementById('reel-lab-grid').innerHTML = `
+    <div class="playbook-card" style="grid-column:1/-1;">
+      <div class="playbook-title">Dolly Daily -> Higgsfield</div>
+      <div class="playbook-sub" style="margin-top:6px;">This is your simple AI motion workflow. Use today’s Dolly Daily prompt, add one public image URL, generate a clip, and track it here.</div>
+      <div class="g2" style="margin-top:14px;">
+        <div class="panel">
+          <div class="panel-head"><span class="panel-title-sm">Today’s motion brief</span><button class="btn btn-ghost btn-sm" onclick="copyTextValue(buildDailyHiggsfieldJob().prompt,'Higgsfield prompt copied')">Copy prompt</button></div>
+          <div class="reel-ref-section"><div class="reel-ref-label">Title</div><div class="reel-ref-text">${escapeHtml(daily.title)}</div></div>
+          <div class="reel-ref-section"><div class="reel-ref-label">Source</div><div class="reel-ref-text">${escapeHtml(daily.sourceDrop || 'Dolly Daily')}</div></div>
+          <div class="reel-ref-section"><div class="reel-ref-label">Mood</div><div class="reel-ref-text">${escapeHtml(daily.mood || '')}</div></div>
+          <div class="reel-ref-section"><div class="reel-ref-label">Prompt</div><div class="reel-ref-text">${escapeHtml(daily.prompt)}</div></div>
+        </div>
+        <div class="panel">
+          <div class="panel-head"><span class="panel-title-sm">Generate now</span></div>
+          <div class="fgrp" style="margin-bottom:10px;"><label>Public image URL</label><input id="hf-inline-image-url" placeholder="Paste a public still image URL" /></div>
+          <div class="fgrp" style="margin-bottom:10px;"><label>Duration</label><input id="hf-inline-duration" type="number" min="3" max="10" step="1" value="5" /></div>
+          <div class="fgrp" style="margin-bottom:10px;"><label>Motion prompt</label><textarea id="hf-inline-prompt">${escapeHtml(daily.prompt)}</textarea></div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <button class="btn btn-ghost btn-sm" onclick="seedHiggsfieldFromDollyDaily()">Reset from Dolly Daily</button>
+            <button class="btn btn-saffron btn-sm" onclick="submitInlineHiggsfieldJob()">Generate in Higgsfield</button>
+          </div>
+        </div>
+      </div>
+    </div>
     ${jobs.length ? `
       <div class="playbook-card" style="grid-column:1/-1;">
-        <div class="playbook-title">Higgsfield Studio</div>
-        <div class="playbook-sub" style="margin-top:6px;">Generate cinematic inserts from your source stills, then pull the finished clips back into your editing flow.</div>
+        <div class="playbook-title">Generated clips</div>
+        <div class="playbook-sub" style="margin-top:6px;">Check status here and open finished outputs when they’re ready.</div>
         <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;margin-top:14px;">
           ${jobs.map(job => `
             <div class="reel-ref-card" style="padding:14px;">
@@ -6120,51 +6154,7 @@ function renderReelLab() {
           `).join('')}
         </div>
       </div>
-    ` : ''}
-    ${refs.map(ref => `
-    <div class="reel-ref-card">
-      <div class="reel-ref-title">${ref.creator}</div>
-      <div class="reel-ref-sub">${ref.sourceType === 'account' ? 'creator account' : 'reel reference'} · ${ref.pillar} · saved ${fmtD(ref.createdAt)}${ref.link ? ` · <a href="${ref.link}" target="_blank" style="color:var(--indigo);font-weight:700;">open ↗</a>` : ''}</div>
-      ${(ref.openingShotImg || ref.middleShotImg || ref.textShotImg || ref.ctaShotImg) ? `
-      <div class="reel-shot-grid">
-        ${ref.openingShotImg ? `<div class="reel-shot-slot"><img src="${ref.openingShotImg}" alt="Opening frame"><div class="reel-shot-caption">Opening</div></div>` : ''}
-        ${ref.middleShotImg ? `<div class="reel-shot-slot"><img src="${ref.middleShotImg}" alt="Middle frame"><div class="reel-shot-caption">Middle</div></div>` : ''}
-        ${ref.textShotImg ? `<div class="reel-shot-slot"><img src="${ref.textShotImg}" alt="Text frame"><div class="reel-shot-caption">Text Overlay</div></div>` : ''}
-        ${ref.ctaShotImg ? `<div class="reel-shot-slot"><img src="${ref.ctaShotImg}" alt="CTA frame"><div class="reel-shot-caption">CTA</div></div>` : ''}
-      </div>` : ''}
-      <div class="reel-ref-section"><div class="reel-ref-label">Why you saved it</div><div class="reel-ref-text">${escapeHtml(ref.why || ref.notes || 'Saved for storytelling reference.')}</div></div>
-      <div class="reel-ref-section"><div class="reel-ref-label">Opening</div><div class="reel-ref-text">${escapeHtml(ref.opening)}</div></div>
-      <div class="reel-ref-section"><div class="reel-ref-label">Scene map</div><div class="reel-ref-text">${escapeHtml(ref.sceneMap)}</div></div>
-      <div class="reel-ref-section"><div class="reel-ref-label">Shot grammar</div><div class="reel-ref-text">${escapeHtml(ref.shotGrammar)} ${escapeHtml(ref.cameraLanguage)}</div></div>
-      <div class="reel-ref-section"><div class="reel-ref-label">Fonts + text feel</div><div class="reel-ref-text">${escapeHtml(ref.fontDirection)} ${escapeHtml(ref.textTiming)}</div></div>
-      <div class="reel-ref-section"><div class="reel-ref-label">Pacing + edit style</div><div class="reel-ref-text">${escapeHtml(ref.pacing)} ${escapeHtml(ref.editStyle)} ${escapeHtml(ref.editMoves)}</div></div>
-      <div class="reel-ref-section"><div class="reel-ref-label">Seconds per scene</div><div class="reel-ref-text">${escapeHtml(ref.secondsPerScene)}</div></div>
-      <div class="reel-ref-section"><div class="reel-ref-label">Retention triggers</div><div class="reel-ref-text">${escapeHtml(ref.retentionTriggers)}</div></div>
-      <div class="reel-ref-section"><div class="reel-ref-label">Text system</div><div class="reel-ref-text">${escapeHtml(ref.textStyle)} ${escapeHtml(ref.textOverlaySystem)}</div></div>
-      <div class="reel-ref-section"><div class="reel-ref-label">Audio</div><div class="reel-ref-text">${escapeHtml(ref.audioMood)} ${escapeHtml(ref.audioUse)}</div></div>
-      <div class="reel-ref-section"><div class="reel-ref-label">Colors + palette</div><div class="reel-ref-text">${escapeHtml(ref.colorMood)} ${escapeHtml(ref.paletteNotes)}</div></div>
-      <div class="reel-ref-section"><div class="reel-ref-label">Hook + angle</div><div class="reel-ref-text">${escapeHtml(ref.hookPattern)} ${escapeHtml(ref.anglePattern)}</div></div>
-      <div class="reel-ref-section"><div class="reel-ref-label">Emotion</div><div class="reel-ref-text">${escapeHtml(ref.emotionalArc)} ${escapeHtml(ref.emotionSequence)}</div></div>
-      <div class="reel-ref-section"><div class="reel-ref-label">CTA + why people save it</div><div class="reel-ref-text">${escapeHtml(ref.ctaStyle)} ${escapeHtml(ref.ctaMechanic)} ${escapeHtml(ref.saveWhy)}</div></div>
-      <div class="reel-ref-section"><div class="reel-ref-label">Make my version</div><div class="reel-ref-text">${escapeHtml(ref.dollyVersion)}</div></div>
-      <div class="reel-ref-section"><div class="reel-ref-label">Remake plan</div><div class="reel-ref-text">${escapeHtml(ref.remakePlan)}</div></div>
-      <div class="reel-ref-section is-system"><div class="reel-ref-label">Dolly Edit Recipe</div><div class="reel-ref-text">${escapeHtml(ref.dollyEditRecipe).replace(/\n/g,'<br>')}</div></div>
-      <div class="reel-ref-section is-system"><div class="reel-ref-label">Videoleap Checklist</div><div class="reel-ref-text">${escapeHtml(ref.videoleapChecklist).replace(/\n/g,'<br>')}</div></div>
-      <div class="reel-ref-section is-system"><div class="reel-ref-label">Shot List</div><div class="reel-ref-text">${escapeHtml(ref.creatorShotList).replace(/\n/g,'<br>')}</div></div>
-      <div class="reel-ref-section is-system"><div class="reel-ref-label">System</div><div class="reel-ref-text">${escapeHtml(ref.executionSystem)}</div></div>
-      <div class="reel-ref-actions">
-        <button class="btn btn-ghost btn-sm" onclick="copyReelBreakdown('${ref.id}')">Copy analysis</button>
-        <button class="btn btn-ghost btn-sm" onclick="copyDollyEditRecipe('${ref.id}')">Copy edit recipe</button>
-        <button class="btn btn-ghost btn-sm" onclick="copyVideoleapChecklist('${ref.id}')">Copy Videoleap</button>
-        <button class="btn btn-ghost btn-sm" onclick="copyReelShotList('${ref.id}')">Copy shot list</button>
-        <button class="btn btn-ghost btn-sm" onclick="analyzeReelRefWithAI('${ref.id}')">AI analyze frames</button>
-        <button class="btn btn-ghost btn-sm" onclick="openHiggsfieldModal('${ref.id}')">Generate in Higgsfield</button>
-        <button class="btn btn-ghost btn-sm" onclick="createDollyStoryboard('${ref.id}')">Turn into storyboard</button>
-        <button class="btn btn-ghost btn-sm" onclick="sendReelToWarRoom('${ref.id}')">Send analysis to War Room</button>
-        <button class="btn btn-ghost btn-sm" onclick="deleteReelRef('${ref.id}')">Delete</button>
-      </div>
-    </div>
-  `).join('') || `<div class="playbook-card" style="grid-column:1/-1;"><div class="playbook-title">No reel references yet</div><div class="playbook-sub" style="margin-top:8px;">Paste reels you love here. This becomes your storytelling library and breakdown tool.</div></div>`}
+    ` : `<div class="playbook-card" style="grid-column:1/-1;"><div class="playbook-title">No Higgsfield jobs yet</div><div class="playbook-sub" style="margin-top:8px;">Paste one source still image URL above and generate your first motion insert.</div></div>`}
   `;
 }
 
@@ -6383,6 +6373,67 @@ function openHiggsfieldModal(id) {
   document.getElementById('hf-duration').value = '5';
   document.getElementById('hf-prompt').value = buildReelHiggsfieldPrompt(ref);
   openModal('modal-higgsfield');
+}
+
+function seedHiggsfieldFromDollyDaily() {
+  const daily = buildDailyHiggsfieldJob();
+  const promptEl = document.getElementById('hf-inline-prompt');
+  const urlEl = document.getElementById('hf-inline-image-url');
+  const durationEl = document.getElementById('hf-inline-duration');
+  if (promptEl) promptEl.value = daily.prompt;
+  if (urlEl && !urlEl.value) urlEl.value = '';
+  if (durationEl) durationEl.value = '5';
+  if (currentPage === 'reels') {
+    alert('Dolly Daily prompt loaded into Higgsfield Lab.');
+  }
+}
+
+async function submitInlineHiggsfieldJob() {
+  const cfg = await loadRuntimeConfig(true);
+  if (!cfg.features?.higgsfieldVideo) {
+    alert('Add HIGGSFIELD_API_KEY and HIGGSFIELD_API_SECRET in Vercel first.');
+    return;
+  }
+  const daily = buildDailyHiggsfieldJob();
+  const imageUrl = document.getElementById('hf-inline-image-url')?.value.trim() || '';
+  const prompt = document.getElementById('hf-inline-prompt')?.value.trim() || '';
+  const duration = Number(document.getElementById('hf-inline-duration')?.value || 5) || 5;
+  if (!imageUrl) {
+    alert('Paste a public still image URL first.');
+    return;
+  }
+  if (!prompt) {
+    alert('Add a motion prompt first.');
+    return;
+  }
+  const resp = await fetch('/api/reels/analyze', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      action: 'higgsfield-generate',
+      job: { imageUrl, prompt, duration }
+    })
+  });
+  const data = await resp.json();
+  if (!resp.ok) {
+    alert(data?.error || 'Higgsfield generation failed');
+    return;
+  }
+  const jobs = load(K_HIGGS).map(normalizeHiggsJob);
+  jobs.unshift(normalizeHiggsJob({
+    refId: '',
+    refName: daily.title || 'Dolly Daily',
+    imageUrl,
+    prompt,
+    duration,
+    requestId: data.requestId,
+    status: data.status || 'queued',
+    model: data.model || '',
+    updatedAt: new Date().toISOString()
+  }));
+  save(K_HIGGS, jobs);
+  if (currentPage === 'reels') renderReelLab();
+  alert('Sent to Higgsfield. Check the Generated clips section.');
 }
 
 async function submitHiggsfieldJob() {
