@@ -251,6 +251,17 @@ body.mobile-nav-open { overflow:hidden; }
 }
 .task-card.dragging { opacity: .55; transform: rotate(1deg); }
 .task-card:hover { box-shadow: 0 4px 14px var(--shadow); }
+.task-drag {
+  margin-left: auto;
+  background: none;
+  border: none;
+  cursor: grab;
+  color: var(--text2);
+  font-size: 14px;
+  padding: 0 2px;
+  opacity: .55;
+}
+.task-drag:active { cursor: grabbing; }
 .task-title-row { display: flex; align-items: flex-start; gap: 8px; }
 .task-check {
   width: 17px; height: 17px; border-radius: 50%; border: 2px solid var(--border);
@@ -265,7 +276,7 @@ body.mobile-nav-open { overflow:hidden; }
 .tk-cat  { font-size: 10px; padding: 2px 7px; border-radius: 20px; background: var(--white); color: var(--text2); border: 1px solid var(--border); }
 .tk-due  { font-size: 10px; color: var(--text2); }
 .tk-who  { font-size: 10px; color: var(--teal); font-weight: 600; }
-.task-del { margin-left: auto; background: none; border: none; cursor: pointer; color: var(--text2); font-size: 14px; opacity: 0; transition: opacity 0.15s; padding: 0 2px; }
+.task-del { background: none; border: none; cursor: pointer; color: var(--text2); font-size: 14px; opacity: 0; transition: opacity 0.15s; padding: 0 2px; }
 .task-card:hover .task-del { opacity: 1; }
 
 /* ─── CONTENT TABLE ALT ─── */
@@ -3244,10 +3255,11 @@ function renderTasks() {
     return `<div class="kanban-col ${col.cls}">
       <div class="kanban-head">${col.label}<span style="font-size:11px;opacity:.6;">${items.length}</span></div>
       <div class="kanban-body" ondragover="taskDragOver(event)" ondragleave="taskDragLeave(event)" ondrop="taskDrop(event,'${col.key}')">
-        ${items.map(t=>`<div class="task-card" draggable="true" ondragstart="taskDragStart(event,'${t.id}')" ondragend="taskDragEnd(event)">
+        ${items.map(t=>`<div class="task-card">
           <div class="task-title-row">
             <button class="task-check ${t.status==='done'?'done':''}" onclick="toggleTask('${t.id}')"></button>
             <div class="task-text ${t.status==='done'?'done':''}">${t.title}</div>
+            <button class="task-drag" draggable="true" ondragstart="taskDragStart(event,'${t.id}')" ondragend="taskDragEnd(event)" title="Drag to another column">⋮⋮</button>
             <button class="task-del" onclick="deleteTask('${t.id}')">×</button>
           </div>
           <div class="task-meta">
