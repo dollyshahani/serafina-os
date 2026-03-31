@@ -263,6 +263,7 @@ body.mobile-nav-open { overflow:hidden; }
 }
 .task-drag:active { cursor: grabbing; }
 .task-title-row { display: flex; align-items: flex-start; gap: 8px; }
+.task-open { flex: 1; min-width: 0; background: none; border: none; padding: 0; text-align: left; cursor: pointer; }
 .task-check {
   width: 17px; height: 17px; border-radius: 50%; border: 2px solid var(--border);
   flex-shrink: 0; cursor: pointer; margin-top: 1px; background: none;
@@ -272,6 +273,7 @@ body.mobile-nav-open { overflow:hidden; }
 .task-check.done::after { content: '✓'; font-size: 9px; color: white; }
 .task-text { font-size: 13px; font-weight: 600; line-height: 1.3; }
 .task-text.done { text-decoration: line-through; color: var(--text2); }
+.task-notes-preview { font-size:11px;color:var(--text2);margin-top:8px;line-height:1.5; text-align:left; }
 .task-meta { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; align-items: center; }
 .tk-cat  { font-size: 10px; padding: 2px 7px; border-radius: 20px; background: var(--white); color: var(--text2); border: 1px solid var(--border); }
 .tk-due  { font-size: 10px; color: var(--text2); }
@@ -3257,17 +3259,19 @@ function renderTasks() {
       <div class="kanban-body" ondragover="taskDragOver(event)" ondragleave="taskDragLeave(event)" ondrop="taskDrop(event,'${col.key}')">
         ${items.map(t=>`<div class="task-card">
           <div class="task-title-row">
-            <button class="task-check ${t.status==='done'?'done':''}" onclick="toggleTask('${t.id}')"></button>
-            <div class="task-text ${t.status==='done'?'done':''}">${t.title}</div>
+            <button class="task-check ${t.status==='done'?'done':''}" type="button" onclick="toggleTask('${t.id}')"></button>
+            <button class="task-open" type="button" onclick="editTask('${t.id}')">
+              <div class="task-text ${t.status==='done'?'done':''}">${t.title}</div>
+              ${t.notes?`<div class="task-notes-preview">${t.notes}</div>`:''}
+            </button>
             <button class="task-drag" draggable="true" ondragstart="taskDragStart(event,'${t.id}')" ondragend="taskDragEnd(event)" title="Drag to another column">⋮⋮</button>
-            <button class="task-del" onclick="deleteTask('${t.id}')">×</button>
+            <button class="task-del" type="button" onclick="deleteTask('${t.id}')">×</button>
           </div>
           <div class="task-meta">
             <span class="tk-who">👤 ${t.owner||'Me'}</span>
             <span class="tk-cat">${t.cat}</span>
             ${t.due?`<span class="tk-due">📅 ${fmtD(t.due)}</span>`:''}
           </div>
-          ${t.notes?`<div style="font-size:11px;color:var(--text2);margin-top:8px;line-height:1.5;">${t.notes}</div>`:''}
         </div>`).join('')}
         ${!items.length?`<div style="text-align:center;padding:16px;font-size:12px;color:var(--text2);">Nothing here</div>`:''}
       </div>
@@ -3329,6 +3333,18 @@ function toggleTask(id) {
 }
 function deleteTask(id) {
   save(K.tasks,load(K.tasks).filter(t=>t.id!==id)); renderTasks();
+}
+function editTask(id) {
+  const t = load(K.tasks).find(x=>x.id===id);
+  if (!t) return;
+  document.getElementById('t-id').value = t.id;
+  document.getElementById('t-title').value = t.title || '';
+  document.getElementById('t-owner').value = t.owner || t.assignee || 'Me';
+  document.getElementById('t-due').value = t.due || '';
+  document.getElementById('t-priority').value = normalizeTaskPriority(t.priority);
+  document.getElementById('t-cat').value = t.cat || 'Production';
+  document.getElementById('t-notes').value = t.notes || t.desc || '';
+  openModal('modal-task');
 }
 function saveTask() {
   const id=document.getElementById('t-id').value;
