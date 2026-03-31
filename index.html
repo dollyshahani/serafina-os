@@ -1332,155 +1332,72 @@ body.portal-mode .kriti-portal-shell { display:block; }
   <div id="page-obsession" class="page">
     <div class="page-top">
       <div>
-        <div class="greeting">✦ dolly daily</div>
-        <div class="page-title">Dolly Daily</div>
-        <div class="page-sub">Your personal brand engine — 40-day calendar, script generator, streak tracker</div>
+        <div class="greeting">✦ script to production</div>
+        <div class="page-title">Script Studio</div>
+        <div class="page-sub">Paste or upload a finished script file and get one clean execution page for filming, styling, graphics, motion, sourcing, and editing.</div>
       </div>
       <div style="display:flex;gap:8px;align-items:center">
-        <span class="dd-top-streak" id="dd-top-streak">🔥 0 days</span>
-        <button class="btn btn-coral" onclick="openModal('modal-obs')" style="background:var(--coral);color:white;">+ Add Note</button>
+        <button class="btn btn-ghost" onclick="ssClear()">Clear</button>
       </div>
     </div>
-
-    <div class="dd-tabs">
-      <button class="dd-tab active" data-ddpage="calendar" onclick="ddShowPage('calendar',this)">📅 40-Day Calendar</button>
-      <button class="dd-tab" data-ddpage="today" onclick="ddShowPage('today',this)">✦ Today</button>
-      <button class="dd-tab" data-ddpage="streak" onclick="ddShowPage('streak',this)">🔥 Streak</button>
-      <button class="dd-tab" data-ddpage="library" onclick="ddShowPage('library',this)">✨ Prompts</button>
-      <button class="dd-tab" data-ddpage="notes" onclick="ddShowPage('notes',this)">📌 Notes</button>
-    </div>
-
-    <!-- CALENDAR -->
-    <div class="dd-sub-page active" id="dd-page-calendar">
-      <div id="dd-calendar-list"></div>
-    </div>
-
-    <!-- TODAY -->
-    <div class="dd-sub-page" id="dd-page-today">
-      <div class="dd-audio-reminder" id="dd-audio-reminder" style="display:none">
-        <div style="font-size:22px">🎵</div>
-        <div>It's Sunday — <strong>open Edits app</strong> and screenshot your top 10 trending sounds. Label by mood: energetic / emotional / ambient / fun.</div>
-      </div>
-      <div class="dd-suggestion-card">
-        <div class="dd-sug-day" id="dd-sug-day">DAY 1 · TODAY'S IDEA</div>
-        <div class="dd-sug-idea" id="dd-sug-idea">Loading your content idea...</div>
-        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-top:10px">
-          <span class="dd-pillar-badge" id="dd-sug-pillar"></span>
-          <button class="btn btn-ghost btn-sm" onclick="ddUseSuggestion()">Use this idea →</button>
-        </div>
-      </div>
-      <div class="panel" style="margin-bottom:14px">
+    <div class="panel" style="margin-bottom:16px;">
+      <div class="frow c2">
         <div class="fgrp">
-          <label>What happened today?</label>
-          <textarea id="dd-idea-input" rows="3" placeholder="One sentence. What happened, what you realised, what you're building." oninput="ddCurrentCalendarDay=null" style="width:100%;padding:10px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;resize:none;outline:none;font-family:inherit;background:var(--cream);color:var(--text);transition:border-color .15s;" onfocus="this.style.borderColor='var(--saffron)'" onblur="this.style.borderColor='var(--border)'"></textarea>
+          <label>Script title (optional)</label>
+          <input id="ss-title" placeholder="e.g. 6 lessons from 5 months as a baby athleisure CEO" />
+        </div>
+        <div class="fgrp">
+          <label>Upload .txt file (optional)</label>
+          <input id="ss-file" type="file" accept=".txt,text/plain" onchange="ssLoadFile(event)" />
         </div>
       </div>
-      <div class="panel" style="margin-bottom:14px">
-        <div class="panel-head"><span class="panel-title-sm">Pick your pillar</span></div>
-        <div class="dd-pillar-grid">
-          <button class="dd-pillar-btn" data-pillar="build" onclick="ddSelectPillar(this)"><span class="dd-p-icon">🏗️</span>The Build</button>
-          <button class="dd-pillar-btn" data-pillar="mind" onclick="ddSelectPillar(this)"><span class="dd-p-icon">✨</span>The Mind</button>
-          <button class="dd-pillar-btn" data-pillar="serafina" onclick="ddSelectPillar(this)"><span class="dd-p-icon">🩷</span>Serafina</button>
-          <button class="dd-pillar-btn" data-pillar="travel" onclick="ddSelectPillar(this)"><span class="dd-p-icon">🌍</span>Travel</button>
-          <button class="dd-pillar-btn" data-pillar="ai" onclick="ddSelectPillar(this)"><span class="dd-p-icon">🤖</span>AI Angle</button>
-          <button class="dd-pillar-btn" data-pillar="body" onclick="ddSelectPillar(this)"><span class="dd-p-icon">💪</span>The Body</button>
-        </div>
+      <div class="fgrp">
+        <label>Paste full script or TXT contents</label>
+        <textarea id="ss-script" rows="14" placeholder="Paste the full script here. Keep the script final — Script Studio will focus only on execution, production, styling, graphics, sourcing, and editing."></textarea>
       </div>
-      <button class="dd-generate-btn" onclick="ddGenerateReel()">✦ Build My Production Brief →</button>
-      <div id="dd-output-section" style="display:none;margin-top:20px">
-        <div class="section-divider"><span>Your Reel — Ready to Shoot</span></div>
-        <div id="dd-visual-ref-display" class="dd-visual-ref" style="display:none">🎬 <span id="dd-visual-ref-text"></span></div>
-        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;">
-          <button class="btn btn-coral btn-sm" onclick="ddCopyFullProductionBrief(this)" style="background:var(--coral);color:white;">Copy full production brief</button>
-          <button class="btn btn-ghost btn-sm" onclick="ddCopyShotList(this)">Copy shot list</button>
-        </div>
-        <div class="panel" style="margin-bottom:12px">
-          <div class="panel-head"><span class="panel-title-sm">Hook</span><button class="btn btn-ghost btn-sm" onclick="ddCopyText('dd-spoken-hook-text',this)">Copy spoken</button></div>
-          <div class="dd-hook-split">
-            <div class="dd-hook-block"><div class="dd-hook-label saffron">📱 Text overlay</div><div class="dd-hook-text" id="dd-text-hook-display"></div></div>
-            <div class="dd-hook-block"><div class="dd-hook-label teal">🎙 Spoken</div><div class="dd-hook-text" id="dd-spoken-hook-text"></div></div>
-          </div>
-        </div>
-        <div class="panel" style="margin-bottom:12px">
-          <div class="panel-head"><span class="panel-title-sm">🎥 Shot List</span></div>
-          <div class="dd-shot-list" id="dd-shot-list"></div>
-        </div>
-        <div class="panel" style="margin-bottom:12px">
-          <div class="panel-head"><span class="panel-title-sm">🎬 Production Direction</span><button class="btn btn-ghost btn-sm" onclick="ddCopyText('dd-production-text',this)">Copy</button></div>
-          <div class="dd-caption-box" id="dd-production-text"></div>
-        </div>
-        <div class="panel" style="margin-bottom:12px">
-          <div class="panel-head"><span class="panel-title-sm">💡 Insight</span><button class="btn btn-ghost btn-sm" onclick="ddCopyText('dd-insight-text',this)">Copy</button></div>
-          <div class="dd-output-text" id="dd-insight-text"></div>
-        </div>
-        <div class="panel" style="margin-bottom:12px">
-          <div class="panel-head"><span class="panel-title-sm">📣 CTA</span><button class="btn btn-ghost btn-sm" onclick="ddCopyText('dd-cta-text',this)">Copy</button></div>
-          <div class="dd-output-text" id="dd-cta-text"></div>
-        </div>
-        <div class="panel" style="margin-bottom:16px">
-          <div class="panel-head"><span class="panel-title-sm">📝 Caption Skeleton</span><button class="btn btn-ghost btn-sm" onclick="ddCopyText('dd-caption-text',this)">Copy</button></div>
-          <div class="dd-caption-box" id="dd-caption-text"></div>
-        </div>
-        <div class="section-divider"><span>5-Step Checklist</span></div>
-        <div class="panel" style="padding:8px 18px;margin-bottom:16px">
-          <div class="dd-check-item" onclick="this.classList.toggle('done')"><div class="dd-check-box">✓</div><div><div class="dd-check-label">Script ready</div><div class="dd-check-sub">Review shot list, insight, CTA above</div></div><div class="dd-check-time">5 min</div></div>
-          <div class="dd-check-item" onclick="this.classList.toggle('done')"><div class="dd-check-box">✓</div><div><div class="dd-check-label">A-Roll filmed</div><div class="dd-check-sub">iPhone, window light, eye level, 2 takes</div></div><div class="dd-check-time">10 min</div></div>
-          <div class="dd-check-item" onclick="this.classList.toggle('done')"><div class="dd-check-box">✓</div><div><div class="dd-check-label">B-Roll from Higgsfield</div><div class="dd-check-sub">Use the Higgsfield prompt above</div></div><div class="dd-check-time">10 min</div></div>
-          <div class="dd-check-item" onclick="this.classList.toggle('done')"><div class="dd-check-box">✓</div><div><div class="dd-check-label">Edited in Videoleap</div><div class="dd-check-sub">Apply "Dolly Daily" template, auto-captions on</div></div><div class="dd-check-time">10 min</div></div>
-          <div class="dd-check-item" onclick="this.classList.toggle('done')"><div class="dd-check-box">✓</div><div><div class="dd-check-label">Posted via Edits</div><div class="dd-check-sub">Trending audio + caption + tag @serafina.collective</div></div><div class="dd-check-time">5 min</div></div>
-        </div>
-        <button id="dd-post-btn" onclick="ddMarkPosted()" style="width:100%;padding:14px;border-radius:10px;font-size:14px;font-weight:800;cursor:pointer;border:none;background:var(--teal);color:white;letter-spacing:.5px;transition:all .2s;">✦ Posted — Mark Today Complete</button>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <button class="btn btn-coral" onclick="ssAnalyze()" style="background:var(--coral);color:white;">Analyze into production plan</button>
+        <button class="btn btn-ghost" onclick="ssUseSample()">Use sample format</button>
       </div>
     </div>
 
-    <!-- STREAK -->
-    <div class="dd-sub-page" id="dd-page-streak">
-      <div class="dd-streak-hero">
-        <div class="dd-streak-num" id="dd-streak-big">0</div>
-        <div class="dd-streak-label">Day Streak</div>
-        <div class="dd-streak-badge-pill" id="dd-streak-badge">Just getting started ✦</div>
+    <div id="ss-output" style="display:none;">
+      <div class="section-divider"><span>Final Output Page</span></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;">
+        <button class="btn btn-coral btn-sm" onclick="ssCopyFullBrief(this)" style="background:var(--coral);color:white;">Copy full production brief</button>
+        <button class="btn btn-ghost btn-sm" onclick="ssCopySection('ss-shotlist',this)">Copy shot list</button>
+        <button class="btn btn-ghost btn-sm" onclick="ssCopySection('ss-editpasses',this)">Copy edit passes</button>
       </div>
-      <div class="dd-stats-row">
-        <div class="dd-stat-card"><div class="dd-stat-num" id="dd-stat-total">0</div><div class="dd-stat-label">Total Posts</div></div>
-        <div class="dd-stat-card"><div class="dd-stat-num" id="dd-stat-left">40</div><div class="dd-stat-label">Days Left</div></div>
-        <div class="dd-stat-card"><div class="dd-stat-num" id="dd-stat-pct">0%</div><div class="dd-stat-label">Complete</div></div>
-      </div>
-      <div class="section-divider"><span>40-Day Grid</span></div>
-      <div class="dd-grid-40" id="dd-grid-40"></div>
-      <div class="section-divider"><span>Milestones</span></div>
-      <div id="dd-milestones-list"></div>
-    </div>
 
-    <!-- LIBRARY -->
-    <div class="dd-sub-page" id="dd-page-library">
-      <input class="dd-search" id="dd-lib-search" placeholder="Search visual references, moods, and shot prompts..." oninput="ddRenderPrompts()">
-      <div class="dd-filter-tabs">
-        <button class="dd-filter-tab active" data-ddfilter="all" onclick="ddSetFilter('all',this)">All (30)</button>
-        <button class="dd-filter-tab" data-ddfilter="build" onclick="ddSetFilter('build',this)">🏗️ Build</button>
-        <button class="dd-filter-tab" data-ddfilter="mind" onclick="ddSetFilter('mind',this)">✨ Mind</button>
-        <button class="dd-filter-tab" data-ddfilter="serafina" onclick="ddSetFilter('serafina',this)">🩷 Serafina</button>
-        <button class="dd-filter-tab" data-ddfilter="travel" onclick="ddSetFilter('travel',this)">🌍 Travel</button>
-        <button class="dd-filter-tab" data-ddfilter="ai" onclick="ddSetFilter('ai',this)">🤖 AI</button>
-        <button class="dd-filter-tab" data-ddfilter="body" onclick="ddSetFilter('body',this)">💪 Body</button>
+      <div class="panel" style="margin-bottom:12px;">
+        <div class="panel-head"><span class="panel-title-sm">🎥 Shot List</span></div>
+        <div class="dd-shot-list" id="ss-shotlist"></div>
       </div>
-      <div id="dd-prompts-list"></div>
-    </div>
 
-    <!-- NOTES (existing board) -->
-    <div class="dd-sub-page" id="dd-page-notes">
-      <div class="obs-filter-bar" id="obs-filters">
-        <button class="obs-filter active" data-tag="all" onclick="obsFilter(this,'all')">All</button>
-        <button class="obs-filter" data-tag="weight-loss" onclick="obsFilter(this,'weight-loss')">⚡ Weight Loss</button>
-        <button class="obs-filter" data-tag="discipline" onclick="obsFilter(this,'discipline')">📓 Discipline</button>
-        <button class="obs-filter" data-tag="manifestation" onclick="obsFilter(this,'manifestation')">✨ Manifestation</button>
-        <button class="obs-filter" data-tag="serafina" onclick="obsFilter(this,'serafina')">🪡 Serafina</button>
-        <button class="obs-filter" data-tag="digital-product" onclick="obsFilter(this,'digital-product')">💻 Digital Product</button>
+      <div class="panel" style="margin-bottom:12px;">
+        <div class="panel-head"><span class="panel-title-sm">✂️ Edit Timeline — Passes</span></div>
+        <div class="dd-caption-box" id="ss-editpasses"></div>
       </div>
-      <div class="g2" style="margin-bottom:18px;">
-        <div class="panel"><div class="panel-head"><span class="panel-title-sm">Founder Pillars</span></div><div id="pb-pillars"></div></div>
-        <div class="panel"><div class="panel-head"><span class="panel-title-sm">Current Offers</span></div><div id="pb-offers"></div></div>
+
+      <div class="panel" style="margin-bottom:12px;">
+        <div class="panel-head"><span class="panel-title-sm">✨ Graphics + Motion + Widgets</span></div>
+        <div class="dd-caption-box" id="ss-graphics"></div>
       </div>
-      <div class="obs-masonry" id="obs-grid"></div>
+
+      <div class="panel" style="margin-bottom:12px;">
+        <div class="panel-head"><span class="panel-title-sm">🧰 Source + Asset Plan</span></div>
+        <div class="dd-caption-box" id="ss-sources"></div>
+      </div>
+
+      <div class="panel" style="margin-bottom:12px;">
+        <div class="panel-head"><span class="panel-title-sm">🎬 Production Direction</span></div>
+        <div class="dd-caption-box" id="ss-production"></div>
+      </div>
+
+      <div class="panel" style="margin-bottom:12px;">
+        <div class="panel-head"><span class="panel-title-sm">📝 Posting Prep</span></div>
+        <div class="dd-caption-box" id="ss-posting"></div>
+      </div>
     </div>
   </div>
 
@@ -7642,6 +7559,7 @@ let ddCurrentCalendarDay = null;
 let ddSelectedPillar = 'build';
 let ddPromptFilter = 'all';
 let ddGenerated = null;
+let ssPlan = null;
 
 function ddGetPostedDays() {
   return Array.isArray(ddLS.get('posted_days')) ? ddLS.get('posted_days') : [];
@@ -7891,6 +7809,263 @@ async function ddCopyShotList(btn) {
   }
 }
 
+function ssClear() {
+  const ids = ['ss-title','ss-script'];
+  ids.forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+  const file = document.getElementById('ss-file');
+  if (file) file.value = '';
+  const out = document.getElementById('ss-output');
+  if (out) out.style.display = 'none';
+  ssPlan = null;
+}
+
+function ssUseSample() {
+  const sample = `TITLE: 6 lessons from 5 months as a baby athleisure CEO
+
+HOOK:
+I thought building a clothing brand would mostly be about the product. I was wrong.
+
+0-3s
+Face to camera. Direct. Start with the hook.
+
+3-8s
+Busy street walking shot or founder desk b-roll.
+
+8-16s
+Lesson 1 and 2 with text overlays and supporting cutaways.
+
+16-23s
+Lesson 3 and 4 with product, packaging, notebook, and screen recordings.
+
+23-28s
+Lesson 5 and 6 with emotional payoff.
+
+28-30s
+CTA and end frame.`;
+  document.getElementById('ss-title').value = '6 lessons from 5 months as a baby athleisure CEO';
+  document.getElementById('ss-script').value = sample;
+  ssToast('Sample loaded');
+}
+
+function ssLoadFile(event) {
+  const file = event?.target?.files?.[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    document.getElementById('ss-script').value = String(reader.result || '');
+    if (!document.getElementById('ss-title').value.trim()) {
+      document.getElementById('ss-title').value = file.name.replace(/\.[^.]+$/, '').replace(/[-_]+/g, ' ');
+    }
+    ssToast('Script file loaded');
+  };
+  reader.readAsText(file);
+}
+
+function ssAnalyze() {
+  const raw = document.getElementById('ss-script')?.value?.trim();
+  if (!raw) return ssToast('Paste a script or upload a txt file first');
+  const title = document.getElementById('ss-title')?.value?.trim() || ssExtractTitle(raw);
+  ssPlan = ssBuildPlanFromScript(title, raw);
+  ssRenderPlan(ssPlan);
+  document.getElementById('ss-output').style.display = 'block';
+  ssToast('Production plan ready');
+}
+
+function ssExtractTitle(text) {
+  const lines = String(text || '').split('\n').map(l => l.trim()).filter(Boolean);
+  const explicit = lines.find(l => /^title\s*:/i.test(l));
+  if (explicit) return explicit.replace(/^title\s*:/i, '').trim();
+  return lines[0] || 'Untitled Script';
+}
+
+function ssParseScenes(text) {
+  const lines = String(text || '').split('\n');
+  const scenes = [];
+  let current = null;
+  const pushCurrent = () => {
+    if (current) {
+      current.body = current.body.join(' ').replace(/\s+/g, ' ').trim();
+      scenes.push(current);
+    }
+  };
+  lines.forEach(line => {
+    const trimmed = line.trim();
+    const timeMatch = trimmed.match(/^(\d{1,2}(?::\d{2})?\s*(?:-|–)\s*\d{1,2}(?::\d{2})?(?:s)?)/i);
+    if (timeMatch) {
+      pushCurrent();
+      current = { time: timeMatch[1], body: [trimmed.replace(timeMatch[0], '').trim()] };
+    } else if (current && trimmed) {
+      current.body.push(trimmed);
+    }
+  });
+  pushCurrent();
+  if (scenes.length) return scenes;
+  const paragraphs = String(text || '').split(/\n{2,}/).map(s => s.trim()).filter(Boolean).slice(0, 6);
+  const fallbackTimes = ['0-3s','3-8s','8-14s','14-20s','20-26s','26-30s'];
+  return paragraphs.map((p, idx) => ({ time: fallbackTimes[idx] || `${idx * 5}-${idx * 5 + 5}s`, body: p }));
+}
+
+function ssClassifySource(body='') {
+  const lower = body.toLowerCase();
+  if (/screen|dashboard|app|phone|recording|screenshot/.test(lower)) return 'Screen recording';
+  if (/higgsfield|ai|generated|cinematic insert/.test(lower)) return 'Higgsfield';
+  if (/text overlay|graphics|widget|title card/.test(lower)) return 'Adobe Express';
+  return 'Film on iPhone';
+}
+
+function ssInferAngle(body='', idx=0) {
+  const lower = body.toLowerCase();
+  if (/face|to camera|direct/.test(lower)) return 'Tight eye-level close-up';
+  if (/walk|street|outdoor/.test(lower)) return 'Moving medium shot, street-level';
+  if (/product|fabric|packaging|hands|detail/.test(lower)) return 'Detail macro or over-shoulder close-up';
+  if (/screen|dashboard|app/.test(lower)) return 'Screen capture or over-shoulder laptop angle';
+  return idx === 0 ? 'Direct close-up opener' : 'Medium close-up with one detail insert';
+}
+
+function ssInferMovement(body='') {
+  const lower = body.toLowerCase();
+  if (/slow|emotional|pause|payoff/.test(lower)) return 'Minimal movement, hold the frame';
+  if (/walk|busy street|moving/.test(lower)) return 'Handheld follow or side walk-by';
+  if (/product|fabric|hands/.test(lower)) return 'Slow push-in or hand-led movement';
+  return 'Static first, then one subtle push-in';
+}
+
+function ssInferTextOverlay(body='', idx=0) {
+  const cleaned = String(body || '').replace(/\s+/g, ' ').trim();
+  if (!cleaned) return idx === 0 ? 'Strong opener headline' : 'One supporting line';
+  return cleaned.length > 90 ? `${cleaned.slice(0, 87)}...` : cleaned;
+}
+
+function ssInferLocation(script='') {
+  const lower = script.toLowerCase();
+  if (/street|outdoor|market|traffic|walk/.test(lower)) return 'Outdoor busy street';
+  if (/product|fabric|packaging|dashboard|notebook|desk|bedroom|room/.test(lower)) return 'Indoor room';
+  return 'Mixed: start indoors, add one outdoor movement beat if the story needs energy';
+}
+
+function ssBuildPlanFromScript(title, text) {
+  const rawScenes = ssParseScenes(text);
+  const scenes = rawScenes.map((scene, idx) => ({
+    time: scene.time,
+    purpose: idx === 0 ? 'Hook' : idx === 1 ? 'Context' : idx === rawScenes.length - 1 ? 'CTA' : 'Story beat',
+    body: scene.body,
+    angle: ssInferAngle(scene.body, idx),
+    movement: ssInferMovement(scene.body),
+    overlay: ssInferTextOverlay(scene.body, idx),
+    source: ssClassifySource(scene.body),
+    styling: /product|fabric|packaging/.test(scene.body.toLowerCase())
+      ? 'Keep outfit clean and premium; add product or packaging in hand'
+      : 'Use your fixed makeup/look; keep wardrobe tonal and uncluttered'
+  }));
+  const location = ssInferLocation(text);
+  const graphics = [
+    'Build chapter cards and clean text slides in Adobe Express.',
+    'Use in-app text in Videoleap for simple emphasis words and subtitles.',
+    'Use checklist/stat/search-bar widgets only where they clarify the lesson.',
+    'Use Higgsfield often for cinematic inserts the script implies but you cannot easily film.'
+  ];
+  const sources = [
+    'Film: all face-to-camera, room details, hands, props, packaging, street walk shots.',
+    'Adobe Express: title cards, stat bubbles, checklist widgets, lower thirds, chapter cards.',
+    'Higgsfield: premium cinematic inserts, transition shots, atmospheric cutaways, impossible beauty shots.',
+    'Screen recordings: app/product/dashboard/proof moments that support the spoken lesson.'
+  ];
+  const editPasses = [
+    'Pass 1 — Build the base cut in viewer order and lock the spoken story first.',
+    'Pass 2 — Add B-roll and Higgsfield inserts only where the viewer needs visual relief or proof.',
+    'Pass 3 — Add text overlays, widgets, and chapter cards from Adobe Express/Videoleap.',
+    'Pass 4 — Refine motion: zooms, push-ins, subtitle emphasis, and clean transitions.',
+    'Pass 5 — Add audio bed, keep voice dominant, then export for Edits app posting.'
+  ];
+  const posting = [
+    'Export final reel master first.',
+    'Create one story cutdown and one static/carousel extraction from strongest overlays.',
+    'Post from Edits app with trending audio layered under the voice if it improves retention.',
+    'Keep the cover frame text simple and strong.'
+  ];
+  return { title, text, location, scenes, graphics, sources, editPasses, posting };
+}
+
+function ssRenderPlan(plan) {
+  document.getElementById('ss-shotlist').innerHTML = plan.scenes.map(scene => `
+    <div class="dd-shot-item">
+      <div class="dd-shot-time">${escapeHtml(scene.time)}</div>
+      <div class="dd-shot-body">
+        <div class="dd-shot-type ${(scene.source || '').toLowerCase().includes('iphone') ? 'aroll' : 'broll'}">${escapeHtml(scene.purpose)}</div>
+        <div class="dd-shot-desc"><strong>Scene:</strong> ${escapeHtml(scene.body)}</div>
+        <div class="dd-shot-overlay"><strong>Angle:</strong> ${escapeHtml(scene.angle)}\n<strong>Movement:</strong> ${escapeHtml(scene.movement)}\n<strong>Text:</strong> ${escapeHtml(scene.overlay)}\n<strong>Source:</strong> ${escapeHtml(scene.source)}\n<strong>Styling/Prop:</strong> ${escapeHtml(scene.styling)}</div>
+      </div>
+    </div>
+  `).join('');
+  document.getElementById('ss-editpasses').textContent = plan.editPasses.map((pass, idx) => `${idx + 1}. ${pass}`).join('\n\n');
+  document.getElementById('ss-graphics').textContent = [
+    `Location recommendation: ${plan.location}`,
+    '',
+    ...plan.graphics.map((item, idx) => `${idx + 1}. ${item}`)
+  ].join('\n');
+  document.getElementById('ss-sources').textContent = plan.sources.map((item, idx) => `${idx + 1}. ${item}`).join('\n\n');
+  document.getElementById('ss-production').textContent = [
+    'Default styling: keep your fixed makeup and use one strong tonal outfit.',
+    `Primary location: ${plan.location}.`,
+    'Angles: mix tight close-ups, medium speaking frames, one movement shot, and one detail shot every few beats.',
+    'Props: choose only what the script needs to prove the point — notebook, laptop, packaging, product, phone, water bottle, journal.',
+    'Motion: keep animations purposeful. Use simple text reveals, underlines, stat pops, and search-bar/checklist widgets only when they clarify the message.'
+  ].join('\n\n');
+  document.getElementById('ss-posting').textContent = plan.posting.map((item, idx) => `${idx + 1}. ${item}`).join('\n\n');
+}
+
+function ssBuildFullBrief() {
+  if (!ssPlan) return '';
+  return [
+    `TITLE: ${ssPlan.title}`,
+    '',
+    'SHOT LIST:',
+    ...ssPlan.scenes.map((scene, idx) => [
+      `${idx + 1}. ${scene.time} · ${scene.purpose}`,
+      `SCENE: ${scene.body}`,
+      `ANGLE: ${scene.angle}`,
+      `MOVEMENT: ${scene.movement}`,
+      `TEXT OVERLAY: ${scene.overlay}`,
+      `SOURCE: ${scene.source}`,
+      `STYLING / PROP: ${scene.styling}`
+    ].join('\n')),
+    '',
+    'EDIT PASSES:',
+    ...ssPlan.editPasses.map((pass, idx) => `${idx + 1}. ${pass}`),
+    '',
+    'GRAPHICS + MOTION + WIDGETS:',
+    ...ssPlan.graphics.map((item, idx) => `${idx + 1}. ${item}`),
+    '',
+    'SOURCE + ASSET PLAN:',
+    ...ssPlan.sources.map((item, idx) => `${idx + 1}. ${item}`),
+    '',
+    'POSTING PREP:',
+    ...ssPlan.posting.map((item, idx) => `${idx + 1}. ${item}`)
+  ].join('\n\n');
+}
+
+async function ssCopyFullBrief(btn) {
+  if (!ssPlan) return;
+  await copyTextValue(ssBuildFullBrief(), 'Full production brief copied');
+  if (btn) {
+    const prev = btn.textContent;
+    btn.textContent = 'Copied!';
+    setTimeout(() => { btn.textContent = prev; }, 1200);
+  }
+}
+
+async function ssCopySection(id, btn) {
+  const text = document.getElementById(id)?.textContent || '';
+  await copyTextValue(text, 'Section copied');
+  if (btn) {
+    const prev = btn.textContent;
+    btn.textContent = 'Copied!';
+    setTimeout(() => { btn.textContent = prev; }, 1200);
+  }
+}
+
+function ssToast(msg) { ddToast(msg); }
+
 function ddMarkPosted() {
   const day = ddCurrentCalendarDay || ddGetCurrentDayNumber();
   const posted = ddGetPostedDays();
@@ -8021,12 +8196,9 @@ function ddRenderToday() {
 }
 
 function ddInit() {
-  ddRenderCalendar();
-  ddRenderToday();
-  ddRenderStreak();
-  ddRenderPrompts();
-  const activeTag = document.querySelector('.obs-filter.active');
-  renderObs(activeTag?.dataset.tag || 'all');
+  if (document.getElementById('ss-script') && !document.getElementById('ss-script').value.trim()) {
+    document.getElementById('ss-script').value = '';
+  }
 }
 
 seed();
