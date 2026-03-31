@@ -2133,6 +2133,11 @@ body.portal-mode .kriti-portal-shell { display:block; }
         </select>
       </div>
     </div>
+    <div class="frow c2">
+      <div class="fgrp"><label>Platform</label><input id="obs-platform" value="Instagram/TikTok Reels" placeholder="Instagram/TikTok Reels"/></div>
+      <div class="fgrp"><label>Duration</label><input id="obs-duration" value="0:30" placeholder="0:30"/></div>
+    </div>
+    <div class="frow"><div class="fgrp"><label>Hook Type</label><input id="obs-hooktype" value="Bold Confession" placeholder="e.g. Vulnerable Confession, Listicle, Pattern Interrupt"/></div></div>
     <div class="frow"><div class="fgrp"><label>Image URL (optional)</label><input id="obs-img" placeholder="Paste image URL if you want a visual"/></div></div>
     <div class="frow"><div class="fgrp"><label>Note / Script / Thought</label><textarea id="obs-text" placeholder="What should future Dolly remember, post, or build?"></textarea></div></div>
     <div class="frow"><div class="fgrp"><label>Offer / link / context (optional)</label><input id="obs-link" placeholder="e.g. manifestation dashboard, launch CTA, founder angle"/></div></div>
@@ -2414,6 +2419,9 @@ function normalizeBrandEntry(item) {
     img: item.img || '',
     text: item.text || '',
     link: item.link || '',
+    platform: item.platform || 'Instagram/TikTok Reels',
+    duration: item.duration || '0:30',
+    hookType: item.hookType || 'Bold Confession',
   };
 }
 
@@ -5944,6 +5952,7 @@ function renderObs(tag) {
     ${!all.length ? `<div style="text-align:center;padding:48px;color:var(--text2);"><div style="font-size:36px;margin-bottom:12px;">🧠</div><div style="font-weight:700;">Nothing here yet</div><div style="font-size:12px;margin-top:4px;">Add founder hooks, manifestation notes, and digital product prompts.</div></div>` : all.map(o => {
     const bg = OBS_COLORS[o.type]||'var(--text2)';
     const imgSrc = o.img && o.img.includes('drive.google.com') ? o.img.replace('/view','/uc?export=view&') : o.img;
+    const filmmaker = ['idea','script'].includes(o.type) ? buildObsProductionBrief(o) : null;
     return `
     <div class="obs-card">
       ${imgSrc ? `<img class="obs-card-img" src="${imgSrc}" alt="" loading="lazy">` : ''}
@@ -5952,8 +5961,28 @@ function renderObs(tag) {
         ${o.text ? `<div class="obs-card-text">${o.text}</div>` : ''}
         <div class="obs-tags">
           <span class="obs-tag">${o.tag}</span>
+          ${filmmaker ? `<span class="obs-tag">${escapeHtml(filmmaker.platform)}</span><span class="obs-tag">${escapeHtml(filmmaker.duration)}</span>` : ''}
           ${o.link ? `<span class="obs-tag">→ ${o.link}</span>` : ''}
         </div>
+        ${filmmaker ? `
+          <div style="margin-top:12px;padding:12px;border-radius:12px;background:linear-gradient(135deg,#fff8ed,#fff1f7);border:1px solid rgba(212,168,83,.18);">
+            <div style="font-size:11px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--magenta);margin-bottom:6px;">Filmmaker Brief</div>
+            <div style="font-size:12px;line-height:1.7;color:var(--text2);margin-bottom:8px;">
+              <strong style="color:var(--text);">Hook Type:</strong> ${escapeHtml(filmmaker.hookType)}<br>
+              <strong style="color:var(--text);">Visual Tone:</strong> ${escapeHtml(filmmaker.visualTone)}<br>
+              <strong style="color:var(--text);">Audio:</strong> ${escapeHtml(filmmaker.audio)}<br>
+              <strong style="color:var(--text);">Text System:</strong> ${escapeHtml(filmmaker.textSystem)}
+            </div>
+            <div style="font-size:11px;font-weight:800;color:var(--text);margin-bottom:6px;">Shot List</div>
+            <div style="display:flex;flex-direction:column;gap:6px;">
+              ${filmmaker.scenes.map(scene=>`<div style="font-size:11px;line-height:1.55;color:var(--text2);padding:8px 10px;border-radius:10px;background:rgba(255,255,255,.7);"><strong style="color:var(--text);">${escapeHtml(scene.time)}</strong> ${escapeHtml(scene.label)}<br><span style="color:var(--text);">Camera:</span> ${escapeHtml(scene.camera)}<br><span style="color:var(--text);">B-roll:</span> ${escapeHtml(scene.broll)}<br><span style="color:var(--text);">Text:</span> ${escapeHtml(scene.text)}</div>`).join('')}
+            </div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;">
+              <button class="btn btn-ghost btn-sm" onclick="copyObsDirectorBrief('${o.id}')">Copy director brief</button>
+              <button class="btn btn-ghost btn-sm" onclick="copyObsShotList('${o.id}')">Copy shot list</button>
+            </div>
+          </div>
+        ` : ''}
         <button onclick="deleteObs('${o.id}')" style="background:none;border:none;cursor:pointer;font-size:10px;color:var(--text2);margin-top:6px;padding:0;">remove ×</button>
       </div>
     </div>`;
@@ -5969,13 +5998,153 @@ function obsFilter(el, tag) {
 function saveObs() {
   const o = { id:uid(), type:document.getElementById('obs-type').value, tag:document.getElementById('obs-tag').value,
     img:document.getElementById('obs-img').value, text:document.getElementById('obs-text').value,
-    link:document.getElementById('obs-link').value };
+    link:document.getElementById('obs-link').value,
+    platform:document.getElementById('obs-platform').value,
+    duration:document.getElementById('obs-duration').value,
+    hookType:document.getElementById('obs-hooktype').value };
   const all = load(K_OBS); all.unshift(o); save(K_OBS, all);
   closeModal('modal-obs');
   ['obs-id','obs-img','obs-text','obs-link'].forEach(x=>{ const el=document.getElementById(x); if(el) el.value=''; });
+  document.getElementById('obs-platform').value='Instagram/TikTok Reels';
+  document.getElementById('obs-duration').value='0:30';
+  document.getElementById('obs-hooktype').value='Bold Confession';
   if (currentPage==='obsession') renderObs('all');
 }
 function deleteObs(id) { save(K_OBS, load(K_OBS).filter(x=>x.id!==id)); renderObs(document.querySelector('.obs-filter.active')?.dataset.tag||'all'); }
+
+function obsTagLabel(tag) {
+  const map = {
+    'weight-loss': 'The Body',
+    discipline: 'The Build',
+    manifestation: 'The Mind',
+    serafina: 'Founder x Serafina',
+    'digital-product': 'The AI Angle'
+  };
+  return map[tag] || 'The Build';
+}
+
+function splitIdeaIntoBeats(text='') {
+  return String(text || '')
+    .split(/[\n\.!\?]+/)
+    .map(s => s.trim())
+    .filter(Boolean)
+    .slice(0, 6);
+}
+
+function parseDurationSeconds(duration='0:30') {
+  const parts = String(duration || '0:30').split(':').map(x => Number(x) || 0);
+  if (parts.length === 2) return (parts[0] * 60) + parts[1];
+  return Number(duration) || 30;
+}
+
+function buildObsProductionBrief(entry) {
+  const beats = splitIdeaIntoBeats(entry.text || entry.link || 'Tell the story clearly.');
+  const duration = entry.duration || '0:30';
+  const totalSeconds = Math.max(parseDurationSeconds(duration), 20);
+  const pillar = obsTagLabel(entry.tag);
+  const beatCount = Math.max(4, Math.min(6, beats.length || 4));
+  const sceneLength = Math.max(3, Math.floor(totalSeconds / beatCount));
+  const visualTone = pillar === 'The Body'
+    ? 'clean, disciplined, intimate, premium wellness'
+    : pillar === 'The Mind'
+      ? 'dreamy, rich, warm, emotionally precise'
+      : pillar === 'Founder x Serafina'
+        ? 'soft luxury, premium product textures, founder-led'
+        : pillar === 'The AI Angle'
+          ? 'smart, sleek, modern, high-signal'
+          : 'documentary founder energy with premium softness';
+  const audio = pillar === 'The Mind'
+    ? 'soft cinematic instrumental with emotional lift'
+    : pillar === 'The Body'
+      ? 'clean rhythmic audio with disciplined energy'
+      : 'motivational but tasteful instrumental, speech-first';
+  const textSystem = 'One headline per beat. Keep overlays short, bottom-center or top-center, with one highlighted keyword.';
+  const sceneTemplates = [
+    { label:'Hook', camera:'frontal close-up, direct eye contact, first line lands hard', broll:'none, let your face do the work', text:'Title / hook overlay in Montserrat Bold' },
+    { label:'Proof / context', camera:'slightly wider, same eyeline, calmer delivery', broll:'supporting real-life clip or product texture', text:'One proof line or lesson number' },
+    { label:'Visual expansion', camera:'over-shoulder, profile, or moving handheld detail', broll:'hands, laptop, fabric, notebook, walk-in frame', text:'Short supporting phrase only' },
+    { label:'Emotional beat', camera:'closer again, slower, softer expression', broll:'one cinematic detail shot or Higgsfield insert', text:'The truth / shift / realization' },
+    { label:'Payoff', camera:'steady medium close-up, direct, confident', broll:'show the outcome, product, or transformation cue', text:'The key takeaway' },
+    { label:'CTA', camera:'direct to camera, warm but certain', broll:'logo, brand object, or end frame if needed', text:'Follow / save / come back tomorrow' }
+  ];
+  const scenes = Array.from({ length: beatCount }).map((_, idx) => {
+    const start = idx * sceneLength;
+    const end = idx === beatCount - 1 ? totalSeconds : Math.min(totalSeconds, start + sceneLength);
+    const template = sceneTemplates[idx] || sceneTemplates[sceneTemplates.length - 1];
+    return {
+      time: `${start.toString().padStart(2,'0')}:${'00'.slice(0,0)}${''}`.replace(':00','') // placeholder fixed below
+    };
+  });
+  const formattedScenes = Array.from({ length: beatCount }).map((_, idx) => {
+    const start = idx * sceneLength;
+    const end = idx === beatCount - 1 ? totalSeconds : Math.min(totalSeconds, start + sceneLength);
+    const template = sceneTemplates[idx] || sceneTemplates[sceneTemplates.length - 1];
+    const beatText = beats[idx] || beats[beats.length - 1] || 'Carry the story forward.';
+    return {
+      time: `${Math.floor(start/60)}:${String(start%60).padStart(2,'0')}–${Math.floor(end/60)}:${String(end%60).padStart(2,'0')}`,
+      label: template.label,
+      camera: template.camera,
+      broll: template.broll,
+      text: beatText.length > 72 ? `${beatText.slice(0,69)}...` : beatText
+    };
+  });
+  return {
+    title: entry.text || 'Untitled Dolly Daily Brief',
+    pillar,
+    platform: entry.platform || 'Instagram/TikTok Reels',
+    duration,
+    hookType: entry.hookType || 'Bold Confession',
+    visualTone,
+    audio,
+    textSystem,
+    scenes: formattedScenes,
+    filmingTips: [
+      'Keep lighting warm and consistent through the whole reel.',
+      'Vary shot size every 1-2 beats to maintain visual retention.',
+      'Let the hook be direct and slightly uncomfortable.',
+      'Use real footage first, then add one Higgsfield insert only where it deepens the story.',
+      'Cut on meaning, not just on music.'
+    ]
+  };
+}
+
+async function copyObsDirectorBrief(id) {
+  const entry = normalizeBrandEntry(load(K_OBS).find(x => x.id === id) || {});
+  if (!entry.id) return;
+  const brief = buildObsProductionBrief(entry);
+  const text = [
+    `Title: ${entry.text || 'Untitled'}`,
+    `Pillar: ${brief.pillar}`,
+    `Platform: ${brief.platform}`,
+    `Duration: ${brief.duration}`,
+    `Hook Type: ${brief.hookType}`,
+    '',
+    `Visual Tone: ${brief.visualTone}`,
+    `Audio: ${brief.audio}`,
+    `Text System: ${brief.textSystem}`,
+    '',
+    ...brief.scenes.map(scene => [
+      `[${scene.time}] ${scene.label}`,
+      `CAMERA: ${scene.camera}`,
+      `B-ROLL: ${scene.broll}`,
+      `TEXT OVERLAY: ${scene.text}`
+    ].join('\n')),
+    '',
+    'FILMING TIPS:',
+    ...brief.filmingTips.map((tip, idx) => `${idx + 1}. ${tip}`)
+  ].join('\n\n');
+  await copyTextValue(text, 'Director brief copied');
+}
+
+async function copyObsShotList(id) {
+  const entry = normalizeBrandEntry(load(K_OBS).find(x => x.id === id) || {});
+  if (!entry.id) return;
+  const brief = buildObsProductionBrief(entry);
+  const text = brief.scenes.map((scene, idx) => (
+    `${idx + 1}. ${scene.label} (${scene.time})\nCamera: ${scene.camera}\nB-roll: ${scene.broll}\nText: ${scene.text}`
+  )).join('\n\n');
+  await copyTextValue(text, 'Shot list copied');
+}
 
 function buildReelBreakdownDraft(input) {
   const creator = String(input.creator || 'Reference').trim();
