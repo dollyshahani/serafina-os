@@ -67,6 +67,47 @@ const ANALYSIS_SCHEMA = {
   }
 };
 
+const SCRIPT_STUDIO_SCHEMA = {
+  name: 'script_studio_plan',
+  strict: true,
+  schema: {
+    type: 'object',
+    additionalProperties: false,
+    properties: {
+      title: { type: 'string' },
+      locationRecommendation: { type: 'string' },
+      visualDirection: { type: 'string' },
+      shotList: {
+        type: 'array',
+        items: {
+          type: 'object',
+          additionalProperties: false,
+          properties: {
+            time: { type: 'string' },
+            purpose: { type: 'string' },
+            scene: { type: 'string' },
+            voiceover: { type: 'string' },
+            visuals: { type: 'string' },
+            angle: { type: 'string' },
+            framing: { type: 'string' },
+            movement: { type: 'string' },
+            textOverlay: { type: 'string' },
+            sourceType: { type: 'string' },
+            stylingProp: { type: 'string' }
+          },
+          required: ['time', 'purpose', 'scene', 'voiceover', 'visuals', 'angle', 'framing', 'movement', 'textOverlay', 'sourceType', 'stylingProp']
+        }
+      },
+      editPasses: { type: 'array', items: { type: 'string' } },
+      graphicsPlan: { type: 'array', items: { type: 'string' } },
+      sourcePlan: { type: 'array', items: { type: 'string' } },
+      productionDirection: { type: 'array', items: { type: 'string' } },
+      postingPrep: { type: 'array', items: { type: 'string' } }
+    },
+    required: ['title', 'locationRecommendation', 'visualDirection', 'shotList', 'editPasses', 'graphicsPlan', 'sourcePlan', 'productionDirection', 'postingPrep']
+  }
+};
+
 function extractText(responseJson) {
   if (responseJson.output_text) return responseJson.output_text;
   const parts = [];
@@ -182,6 +223,66 @@ module.exports = async function handler(req, res) {
     const apiKey = getEnv('OPENAI_API_KEY');
     const model = getEnv('OPENAI_REEL_MODEL', 'gpt-4.1');
     if (!apiKey) return sendJson(res, 500, { error: 'OPENAI_API_KEY is not configured' });
+
+    if (action === 'script-studio') {
+      const title = body?.title || 'Untitled Script';
+      const script = body?.script || '';
+      if (!script.trim()) return sendJson(res, 400, { error: 'A script is required' });
+
+      const resp = await fetch('https://api.openai.com/v1/responses', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${apiKey}`
+        },
+        body: JSON.stringify({
+          model,
+          input: [{
+            role: 'user',
+            content: [{
+              type: 'input_text',
+              text: [
+                'You are an elite short-form video director, cinematographer, editor, and art director.',
+                'The user will paste a finished script/TXT file. Do NOT rewrite the script.',
+                'Your job is execution only: convert the script into a premium, specific, filmmaker-grade production plan.',
+                'Be concrete and non-generic. Use the exact script structure, labels, timestamps, and emotional cues in the text.',
+                'Optimize for a solo founder making strong personal-brand content with iPhone footage, Adobe Express graphics, Videoleap/CapCut editing, Edits app posting, and frequent Higgsfield support shots.',
+                'Assign source types explicitly: Film on iPhone, Existing archive footage, Screen recording, Adobe Express, Higgsfield.',
+                'Be decisive.',
+                `Title: ${title}`,
+                '',
+                'SCRIPT:',
+                script
+              ].join('\n')
+            }]
+          }],
+          text: {
+            format: {
+              type: 'json_schema',
+              ...SCRIPT_STUDIO_SCHEMA
+            }
+          }
+        })
+      });
+
+      const data = await resp.json();
+      if (!resp.ok) {
+        const message = data?.error?.message || `OpenAI request failed (${resp.status})`;
+        return sendJson(res, resp.status, { error: message });
+      }
+
+      const outputText = extractText(data);
+      if (!outputText) return sendJson(res, 500, { error: 'No structured production plan returned' });
+
+      let plan;
+      try {
+        plan = JSON.parse(outputText);
+      } catch (err) {
+        return sendJson(res, 500, { error: 'Failed to parse structured production plan' });
+      }
+
+      return sendJson(res, 200, { ok: true, plan, model });
+    }
 
     const ref = body?.reference || {};
     const images = [

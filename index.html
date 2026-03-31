@@ -7861,14 +7861,25 @@ function ssLoadFile(event) {
   reader.readAsText(file);
 }
 
-function ssAnalyze() {
+async function ssAnalyze() {
   const raw = document.getElementById('ss-script')?.value?.trim();
   if (!raw) return ssToast('Paste a script or upload a txt file first');
   const title = document.getElementById('ss-title')?.value?.trim() || ssExtractTitle(raw);
-  ssPlan = ssBuildPlanFromScript(title, raw);
-  ssRenderPlan(ssPlan);
-  document.getElementById('ss-output').style.display = 'block';
-  ssToast('Production plan ready');
+  try {
+    const resp = await fetch('/api/reels/analyze', {
+      method:'POST',
+      headers:{ 'Content-Type':'application/json' },
+      body: JSON.stringify({ action:'script-studio', title, script: raw })
+    });
+    const data = await resp.json();
+    if (!resp.ok || !data?.ok || !data?.plan) throw new Error(data?.error || 'Script analysis failed');
+    ssPlan = ssNormalizePlan(data.plan);
+    ssRenderPlan(ssPlan);
+    document.getElementById('ss-output').style.display = 'block';
+    ssToast('AI production plan ready');
+  } catch (err) {
+    ssToast(err.message || 'Script analysis failed');
+  }
 }
 
 function ssExtractTitle(text) {
@@ -8042,13 +8053,47 @@ function ssRenderPlan(plan) {
   ].join('\n');
   document.getElementById('ss-sources').textContent = plan.sources.map((item, idx) => `${idx + 1}. ${item}`).join('\n\n');
   document.getElementById('ss-production').textContent = [
+    plan.visualDirection ? `Visual direction: ${plan.visualDirection}` : null,
     'Default styling: keep your fixed makeup and use one strong tonal outfit.',
     `Primary location: ${plan.location}.`,
     'Angles: mix tight close-ups, medium speaking frames, one movement shot, and one detail shot every few beats.',
     'Props: choose only what the script needs to prove the point — notebook, laptop, packaging, product, phone, water bottle, journal.',
-    'Motion: keep animations purposeful. Use simple text reveals, underlines, stat pops, and search-bar/checklist widgets only when they clarify the message.'
-  ].join('\n\n');
+    'Motion: keep animations purposeful. Use simple text reveals, underlines, stat pops, and search-bar/checklist widgets only when they clarify the message.',
+    ...(plan.production || [])
+  ].filter(Boolean).join('\n\n');
   document.getElementById('ss-posting').textContent = plan.posting.map((item, idx) => `${idx + 1}. ${item}`).join('\n\n');
+}
+
+function ssNormalizePlan(plan) {
+  if (plan?.shotList && !plan?.scenes) {
+    return {
+      title: plan.title || 'Untitled Script',
+      location: plan.locationRecommendation || '',
+      scenes: plan.shotList.map(item => ({
+        time: item.time || '',
+        purpose: item.purpose || 'Story beat',
+        body: item.scene || '',
+        parts: {
+          voiceover: item.voiceover || '',
+          visuals: item.visuals || '',
+          opening: ''
+        },
+        angle: item.angle || '',
+        movement: item.movement || '',
+        overlay: item.textOverlay || '',
+        source: item.sourceType || '',
+        styling: item.stylingProp || '',
+        framing: item.framing || ''
+      })),
+      graphics: plan.graphicsPlan || [],
+      sources: plan.sourcePlan || [],
+      editPasses: plan.editPasses || [],
+      posting: plan.postingPrep || [],
+      production: plan.productionDirection || [],
+      visualDirection: plan.visualDirection || ''
+    };
+  }
+  return plan;
 }
 
 function ssBuildFullBrief() {
