@@ -7781,6 +7781,28 @@ function ddBuildProductionDirection(plan) {
     : plan.pillar === 'body'
       ? 'Yoga mat, water bottle, gym bag, mirror, sneakers, phone timer, journal.'
       : 'Laptop, journal, coffee cup, phone, tote, bed linen, desk lamp, mood lighting, one premium personal object.';
+  const lighting = plan.pillar === 'mind'
+    ? 'Window light, early morning or late-evening warmth, soft shadows, dreamy contrast.'
+    : plan.pillar === 'serafina'
+      ? 'Warm directional light with premium texture on fabric, no harsh overhead white light.'
+      : 'Clean soft daylight or warm lamp key light; keep skin tones rich and natural.';
+  const background = plan.pillar === 'serafina'
+    ? 'Clean bed, couch, wardrobe rail, packing table, marble counter, premium neutral surfaces.'
+    : plan.pillar === 'ai'
+      ? 'Desk setup, laptop glow, app screens, notebook, calm founder workspace.'
+      : 'Bedroom corner, desk, mirror, hallway walk-out, café-style table, minimal uncluttered backgrounds.';
+  const wardrobe = plan.pillar === 'serafina'
+    ? 'Wear Serafina or aligned premium basics in tonal shades.'
+    : plan.pillar === 'body'
+      ? 'Fitted activewear, clean hair, one strong silhouette, no distracting logos.'
+      : 'Soft elevated neutrals, gold accents, clean grooming, one hero piece.';
+  const editRecipe = plan.pillar === 'body'
+    ? 'Cut tighter in the first 5 seconds, use one stat or timer widget, punch in on the strongest line, keep transitions clean.'
+    : plan.pillar === 'mind'
+      ? 'Let the opening breathe for 1 beat, dissolve or fade between emotional visuals, keep text sparse and intimate.'
+      : plan.pillar === 'serafina'
+        ? 'Lead with texture, then face, then detail. Use elegant text reveals and one premium end frame with brand cue.'
+        : 'Use a hard first line, alternate A-roll with proof visuals, cut on meaning, and end with a clean CTA hold.';
   const sources = [
     'Real A-roll from iPhone front/back camera',
     'Real B-roll from your room, desk, mirror, packing table, or walk-out shots',
@@ -7788,17 +7810,23 @@ function ddBuildProductionDirection(plan) {
     'Still image sources from product shoots or Dropbox screenshots',
     'Optional AI inserts only if a real-life scene is missing'
   ];
+  const deliverables = 'Main reel, one shorter story cutdown, one clean text-slide/carousel extraction, and one ad-safe version if the angle is performance-friendly.';
   return [
     `Pillar: ${pillar}`,
     `Visual reference style: ${ddFormatReference(plan.ref || 'Founder documentary with premium softness')}`,
+    `Lighting direction: ${lighting}`,
+    `Background / set: ${background}`,
+    `Wardrobe direction: ${wardrobe}`,
     `Graphics direction: Use refined editorial typography, one strong headline per beat, muted cream/black/gold styling, no cluttered stickers.`,
     `Widgets to add: ${widgets}`,
     `Motion animation style: ${baseMotion}`,
     `Angles to capture: tight close-up, medium eye-level, over-shoulder detail, hands-in-frame insert, one movement shot, one texture close-up.`,
     `Props / wardrobe: ${props}`,
     `Audio direction: voice-first. Layer with tasteful instrumental or trending audio at low volume under speech.`,
+    `Edit recipe: ${editRecipe}`,
     `Source footage to gather: ${sources.join('; ')}.`,
-    `Editing rule: cut on meaning, not just beat. Keep the first 3 seconds visually decisive and emotionally clear.`
+    `Editing rule: cut on meaning, not just beat. Keep the first 3 seconds visually decisive and emotionally clear.`,
+    `Deliverables: ${deliverables}`
   ].join('\n\n');
 }
 
