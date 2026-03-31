@@ -244,10 +244,12 @@ body.mobile-nav-open { overflow:hidden; }
 .kc-active  .kanban-head { color: var(--saffron); border-top: 3px solid var(--saffron); }
 .kc-done    .kanban-head { color: var(--emerald); border-top: 3px solid var(--emerald); }
 .kanban-body { padding: 12px; display: flex; flex-direction: column; gap: 8px; min-height: 120px; }
+.kanban-body.drag-over { background: rgba(212,168,83,.08); outline: 2px dashed rgba(212,168,83,.45); outline-offset: -6px; border-radius: 12px; }
 .task-card {
   background: var(--cream); border-radius: 10px; padding: 12px;
   border: 1.5px solid var(--border); transition: box-shadow 0.15s;
 }
+.task-card.dragging { opacity: .55; transform: rotate(1deg); }
 .task-card:hover { box-shadow: 0 4px 14px var(--shadow); }
 .task-title-row { display: flex; align-items: flex-start; gap: 8px; }
 .task-check {
@@ -1180,7 +1182,7 @@ body.portal-mode .kriti-portal-shell { display:block; }
       <div>
         <div class="greeting">✦ action</div>
         <div class="page-title">Tasks & Delegation</div>
-        <div class="page-sub">What needs to happen, and who owns it</div>
+        <div class="page-sub">What needs to happen, who owns it, and now you can drag tasks between columns</div>
       </div>
       <button class="btn btn-coral" onclick="openModal('modal-task')" style="background:var(--coral);color:white;">+ Add Task</button>
     </div>
@@ -3241,8 +3243,8 @@ function renderTasks() {
     const items = tasks.filter(col.filter);
     return `<div class="kanban-col ${col.cls}">
       <div class="kanban-head">${col.label}<span style="font-size:11px;opacity:.6;">${items.length}</span></div>
-      <div class="kanban-body">
-        ${items.map(t=>`<div class="task-card">
+      <div class="kanban-body" ondragover="taskDragOver(event)" ondragleave="taskDragLeave(event)" ondrop="taskDrop(event,'${col.key}')">
+        ${items.map(t=>`<div class="task-card" draggable="true" ondragstart="taskDragStart(event,'${t.id}')" ondragend="taskDragEnd(event)">
           <div class="task-title-row">
             <button class="task-check ${t.status==='done'?'done':''}" onclick="toggleTask('${t.id}')"></button>
             <div class="task-text ${t.status==='done'?'done':''}">${t.title}</div>
@@ -3259,6 +3261,52 @@ function renderTasks() {
       </div>
     </div>`;
   }).join('');
+}
+
+let draggedTaskId = '';
+
+function taskDragStart(event, id) {
+  draggedTaskId = id;
+  event.dataTransfer.effectAllowed = 'move';
+  event.dataTransfer.setData('text/plain', id);
+  event.currentTarget.classList.add('dragging');
+}
+
+function taskDragEnd(event) {
+  event.currentTarget.classList.remove('dragging');
+  document.querySelectorAll('.kanban-body.drag-over').forEach(el => el.classList.remove('drag-over'));
+}
+
+function taskDragOver(event) {
+  event.preventDefault();
+  event.dataTransfer.dropEffect = 'move';
+  event.currentTarget.classList.add('drag-over');
+}
+
+function taskDragLeave(event) {
+  event.currentTarget.classList.remove('drag-over');
+}
+
+function moveTaskToColumn(id, columnKey) {
+  const tasks = load(K.tasks);
+  const task = tasks.find(x => x.id === id);
+  if (!task) return;
+  if (columnKey === 'done') {
+    task.status = 'done';
+  } else {
+    task.status = 'todo';
+    task.priority = columnKey;
+  }
+  save(K.tasks, tasks);
+}
+
+function taskDrop(event, columnKey) {
+  event.preventDefault();
+  event.currentTarget.classList.remove('drag-over');
+  const id = event.dataTransfer.getData('text/plain') || draggedTaskId;
+  if (!id) return;
+  moveTaskToColumn(id, columnKey);
+  if (currentPage === 'tasks') renderTasks(); else renderDash();
 }
 
 function toggleTask(id) {
