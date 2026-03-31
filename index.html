@@ -1386,10 +1386,14 @@ body.portal-mode .kriti-portal-shell { display:block; }
           <button class="dd-pillar-btn" data-pillar="body" onclick="ddSelectPillar(this)"><span class="dd-p-icon">💪</span>The Body</button>
         </div>
       </div>
-      <button class="dd-generate-btn" onclick="ddGenerateReel()">✦ Generate My Reel →</button>
+      <button class="dd-generate-btn" onclick="ddGenerateReel()">✦ Build My Production Brief →</button>
       <div id="dd-output-section" style="display:none;margin-top:20px">
-        <div class="section-divider"><span>Your Reel — Ready to Film</span></div>
+        <div class="section-divider"><span>Your Reel — Ready to Shoot</span></div>
         <div id="dd-visual-ref-display" class="dd-visual-ref" style="display:none">🎬 <span id="dd-visual-ref-text"></span></div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;">
+          <button class="btn btn-coral btn-sm" onclick="ddCopyFullProductionBrief(this)" style="background:var(--coral);color:white;">Copy full production brief</button>
+          <button class="btn btn-ghost btn-sm" onclick="ddCopyShotList(this)">Copy shot list</button>
+        </div>
         <div class="panel" style="margin-bottom:12px">
           <div class="panel-head"><span class="panel-title-sm">Hook</span><button class="btn btn-ghost btn-sm" onclick="ddCopyText('dd-spoken-hook-text',this)">Copy spoken</button></div>
           <div class="dd-hook-split">
@@ -1402,6 +1406,10 @@ body.portal-mode .kriti-portal-shell { display:block; }
           <div class="dd-shot-list" id="dd-shot-list"></div>
         </div>
         <div class="panel" style="margin-bottom:12px">
+          <div class="panel-head"><span class="panel-title-sm">🎬 Production Direction</span><button class="btn btn-ghost btn-sm" onclick="ddCopyText('dd-production-text',this)">Copy</button></div>
+          <div class="dd-caption-box" id="dd-production-text"></div>
+        </div>
+        <div class="panel" style="margin-bottom:12px">
           <div class="panel-head"><span class="panel-title-sm">💡 Insight</span><button class="btn btn-ghost btn-sm" onclick="ddCopyText('dd-insight-text',this)">Copy</button></div>
           <div class="dd-output-text" id="dd-insight-text"></div>
         </div>
@@ -1409,12 +1417,8 @@ body.portal-mode .kriti-portal-shell { display:block; }
           <div class="panel-head"><span class="panel-title-sm">📣 CTA</span><button class="btn btn-ghost btn-sm" onclick="ddCopyText('dd-cta-text',this)">Copy</button></div>
           <div class="dd-output-text" id="dd-cta-text"></div>
         </div>
-        <div class="panel" style="margin-bottom:12px">
-          <div class="panel-head"><span class="panel-title-sm">✨ Higgsfield Prompt</span><button class="btn btn-ghost btn-sm" onclick="ddCopyText('dd-higgsfield-text',this)">Copy</button></div>
-          <div class="dd-caption-box" id="dd-higgsfield-text"></div>
-        </div>
         <div class="panel" style="margin-bottom:16px">
-          <div class="panel-head"><span class="panel-title-sm">📝 Full Caption</span><button class="btn btn-ghost btn-sm" onclick="ddCopyText('dd-caption-text',this)">Copy</button></div>
+          <div class="panel-head"><span class="panel-title-sm">📝 Caption Skeleton</span><button class="btn btn-ghost btn-sm" onclick="ddCopyText('dd-caption-text',this)">Copy</button></div>
           <div class="dd-caption-box" id="dd-caption-text"></div>
         </div>
         <div class="section-divider"><span>5-Step Checklist</span></div>
@@ -1449,7 +1453,7 @@ body.portal-mode .kriti-portal-shell { display:block; }
 
     <!-- LIBRARY -->
     <div class="dd-sub-page" id="dd-page-library">
-      <input class="dd-search" id="dd-lib-search" placeholder="Search Higgsfield prompts..." oninput="ddRenderPrompts()">
+      <input class="dd-search" id="dd-lib-search" placeholder="Search visual references, moods, and shot prompts..." oninput="ddRenderPrompts()">
       <div class="dd-filter-tabs">
         <button class="dd-filter-tab active" data-ddfilter="all" onclick="ddSetFilter('all',this)">All (30)</button>
         <button class="dd-filter-tab" data-ddfilter="build" onclick="ddSetFilter('build',this)">🏗️ Build</button>
@@ -7721,7 +7725,7 @@ function ddGenerateReel() {
   document.getElementById('dd-spoken-hook-text').textContent = plan.spokenHook || plan.textHook || '';
   document.getElementById('dd-insight-text').textContent = plan.insight || '';
   document.getElementById('dd-cta-text').textContent = plan.cta || '';
-  document.getElementById('dd-higgsfield-text').textContent = plan.higgsfield || '';
+  document.getElementById('dd-production-text').textContent = ddBuildProductionDirection(plan);
   document.getElementById('dd-caption-text').textContent = `${plan.spokenHook || plan.textHook || ''}\n\n${plan.insight || ''}\n\n${plan.cta || ''}\n\n${plan.tags || ''}`;
   document.getElementById('dd-shot-list').innerHTML = (plan.shots || []).map(shot => `
     <div class="dd-shot-item">
@@ -7735,8 +7739,8 @@ function ddGenerateReel() {
   `).join('');
   const ref = plan.ref || '';
   document.getElementById('dd-visual-ref-display').style.display = ref ? 'inline-flex' : 'none';
-  document.getElementById('dd-visual-ref-text').textContent = ref;
-  ddToast('Reel generated');
+  document.getElementById('dd-visual-ref-text').textContent = ddFormatReference(ref);
+  ddToast('Production brief ready');
 }
 
 async function ddCopyText(id, btn) {
@@ -7744,6 +7748,119 @@ async function ddCopyText(id, btn) {
   await copyTextValue(text, 'Copied');
   if (btn) btn.textContent = 'Copied!';
   setTimeout(() => { if (btn) btn.textContent = btn.textContent.includes('spoken') ? 'Copy spoken' : 'Copy'; }, 1200);
+}
+
+function ddFormatReference(ref='') {
+  return String(ref || '')
+    .replace(/NAS Daily/gi, 'Fast documentary explainer')
+    .replace(/Codie Sanchez/gi, 'sharp business storyteller')
+    .replace(/Hormozi/gi, 'high-density business voice')
+    .replace(/Wong Kar Wai/gi, 'romantic cinematic mood')
+    .replace(/Lana Del Rey/gi, 'dreamy nostalgia mood')
+    .trim();
+}
+
+function ddBuildProductionDirection(plan) {
+  const pillar = DD_PILLAR_LABELS[plan.pillar]?.label || 'The Build';
+  const baseMotion = plan.pillar === 'mind'
+    ? 'Slow dissolves, gentle zoom-ins, soft blur reveals, text entering with slight float.'
+    : plan.pillar === 'serafina'
+      ? 'Luxury editorial cuts, fabric close-ups, slide-up text, elegant end-card motion.'
+      : plan.pillar === 'body'
+        ? 'Rhythmic hard cuts, clean punch-ins, timer or stat widgets, confident text pops.'
+        : 'Clean narrative cuts, subtle push-ins, documentary overlays, fast but readable motion.';
+  const widgets = plan.pillar === 'ai'
+    ? 'Use clean UI widgets: search bars, typed prompts, cursor movement, screen callouts, subtle terminal or dashboard inserts.'
+    : plan.pillar === 'build'
+      ? 'Use founder widgets: lesson counters, day stamps, mini metrics, checklist overlays, annotation arrows.'
+      : plan.pillar === 'serafina'
+        ? 'Use premium fashion widgets: shade labels, fabric tags, fit notes, product callouts, pricing or drop countdowns.'
+        : 'Use minimal widgets: chapter titles, one-word emphasis, date stamps, location tags, soft lower-thirds.';
+  const props = plan.pillar === 'serafina'
+    ? 'Leggings, matching top, fabric swatches, packaging, order slips, tape, marble surface, branded notebook.'
+    : plan.pillar === 'body'
+      ? 'Yoga mat, water bottle, gym bag, mirror, sneakers, phone timer, journal.'
+      : 'Laptop, journal, coffee cup, phone, tote, bed linen, desk lamp, mood lighting, one premium personal object.';
+  const sources = [
+    'Real A-roll from iPhone front/back camera',
+    'Real B-roll from your room, desk, mirror, packing table, or walk-out shots',
+    'Screen recordings from Serafina OS / your product / notes app',
+    'Still image sources from product shoots or Dropbox screenshots',
+    'Optional AI inserts only if a real-life scene is missing'
+  ];
+  return [
+    `Pillar: ${pillar}`,
+    `Visual reference style: ${ddFormatReference(plan.ref || 'Founder documentary with premium softness')}`,
+    `Graphics direction: Use refined editorial typography, one strong headline per beat, muted cream/black/gold styling, no cluttered stickers.`,
+    `Widgets to add: ${widgets}`,
+    `Motion animation style: ${baseMotion}`,
+    `Angles to capture: tight close-up, medium eye-level, over-shoulder detail, hands-in-frame insert, one movement shot, one texture close-up.`,
+    `Props / wardrobe: ${props}`,
+    `Audio direction: voice-first. Layer with tasteful instrumental or trending audio at low volume under speech.`,
+    `Source footage to gather: ${sources.join('; ')}.`,
+    `Editing rule: cut on meaning, not just beat. Keep the first 3 seconds visually decisive and emotionally clear.`
+  ].join('\n\n');
+}
+
+function ddBuildFullProductionBrief(plan) {
+  const production = ddBuildProductionDirection(plan);
+  return [
+    `TITLE: ${plan.idea || plan.textHook || 'Untitled Reel'}`,
+    `PILLAR: ${DD_PILLAR_LABELS[plan.pillar]?.label || plan.pillar || 'The Build'}`,
+    `REFERENCE STYLE: ${ddFormatReference(plan.ref || 'Founder documentary with premium softness')}`,
+    `PLATFORM: Instagram Reels / TikTok`,
+    `DURATION: 30 seconds`,
+    '',
+    `TEXT HOOK:`,
+    plan.textHook || '',
+    '',
+    `SPOKEN HOOK:`,
+    plan.spokenHook || '',
+    '',
+    `SHOT LIST:`,
+    ...(plan.shots || []).map((shot, idx) => [
+      `${idx + 1}. ${shot.t || ''} · ${shot.type || 'Shot'}`,
+      `SHOT: ${shot.desc || ''}`,
+      `TEXT OVERLAY: ${shot.overlay || 'None'}`
+    ].join('\n')),
+    '',
+    `INSIGHT:`,
+    plan.insight || '',
+    '',
+    `CTA:`,
+    plan.cta || '',
+    '',
+    `PRODUCTION DIRECTION:`,
+    production,
+    '',
+    `CAPTION SKELETON:`,
+    `${plan.spokenHook || plan.textHook || ''}\n\n${plan.insight || ''}\n\n${plan.cta || ''}\n\n${plan.tags || ''}`
+  ].join('\n\n');
+}
+
+async function ddCopyFullProductionBrief(btn) {
+  if (!ddGenerated) return;
+  await copyTextValue(ddBuildFullProductionBrief(ddGenerated), 'Production brief copied');
+  if (btn) {
+    const prev = btn.textContent;
+    btn.textContent = 'Copied!';
+    setTimeout(() => { btn.textContent = prev; }, 1200);
+  }
+}
+
+async function ddCopyShotList(btn) {
+  if (!ddGenerated) return;
+  const text = (ddGenerated.shots || []).map((shot, idx) => [
+    `${idx + 1}. ${shot.t || ''} · ${shot.type || 'Shot'}`,
+    `SHOT: ${shot.desc || ''}`,
+    `TEXT: ${shot.overlay || 'None'}`
+  ].join('\n')).join('\n\n');
+  await copyTextValue(text, 'Shot list copied');
+  if (btn) {
+    const prev = btn.textContent;
+    btn.textContent = 'Copied!';
+    setTimeout(() => { btn.textContent = prev; }, 1200);
+  }
 }
 
 function ddMarkPosted() {
