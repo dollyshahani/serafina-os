@@ -7905,35 +7905,68 @@ function ssParseScenes(text) {
   return paragraphs.map((p, idx) => ({ time: fallbackTimes[idx] || `${idx * 5}-${idx * 5 + 5}s`, body: p }));
 }
 
+function ssExtractLabeledParts(body='') {
+  const text = String(body || '');
+  const parts = {};
+  const patterns = [
+    ['opening', /OPENING SHOT\s*:\s*([\s\S]*?)(?=(?:\bVOICE OVER\b|\bVO\b|\bVISUALS\b|\bTEXT OVERLAY\b|\bCTA\b)\s*:|$)/i],
+    ['visuals', /VISUALS\s*:\s*([\s\S]*?)(?=(?:\bVOICE OVER\b|\bVO\b|\bTEXT OVERLAY\b|\bCTA\b)\s*:|$)/i],
+    ['voiceover', /(?:HOOK\s*\(VO\)|VOICE OVER|VO)\s*:\s*([\s\S]*?)(?=(?:\bVISUALS\b|\bTEXT OVERLAY\b|\bCTA\b)\s*:|$)/i],
+    ['cta', /CTA\s*:\s*([\s\S]*?)$/i]
+  ];
+  patterns.forEach(([key, regex]) => {
+    const m = text.match(regex);
+    if (m) parts[key] = m[1].replace(/\s+/g, ' ').trim();
+  });
+  if (!parts.opening && !parts.visuals && !parts.voiceover && !parts.cta) {
+    parts.voiceover = text.replace(/\s+/g, ' ').trim();
+  }
+  return parts;
+}
+
+function ssBestSceneText(parts={}) {
+  return parts.visuals || parts.opening || parts.voiceover || parts.cta || '';
+}
+
 function ssClassifySource(body='') {
   const lower = body.toLowerCase();
   if (/screen|dashboard|app|phone|recording|screenshot/.test(lower)) return 'Screen recording';
-  if (/higgsfield|ai|generated|cinematic insert/.test(lower)) return 'Higgsfield';
-  if (/text overlay|graphics|widget|title card/.test(lower)) return 'Adobe Express';
+  if (/montage|graduation|skyline|times square|fashion week|selfies|archive|photo|clip/.test(lower)) return 'Existing archive footage';
+  if (/higgsfield|ai|generated|impossible shot|cinematic insert/.test(lower)) return 'Higgsfield';
+  if (/text overlay|graphics|widget|title card|chapter card/.test(lower)) return 'Adobe Express';
   return 'Film on iPhone';
 }
 
 function ssInferAngle(body='', idx=0) {
   const lower = body.toLowerCase();
+  if (/opening shot|hands|close-up|detail/.test(lower)) return 'Detail close-up or over-shoulder macro';
   if (/face|to camera|direct/.test(lower)) return 'Tight eye-level close-up';
-  if (/walk|street|outdoor/.test(lower)) return 'Moving medium shot, street-level';
-  if (/product|fabric|packaging|hands|detail/.test(lower)) return 'Detail macro or over-shoulder close-up';
+  if (/walk|street|outdoor/.test(lower)) return 'Moving medium shot at street level';
+  if (/product|fabric|packaging/.test(lower)) return 'Texture close-up with shallow depth feel';
   if (/screen|dashboard|app/.test(lower)) return 'Screen capture or over-shoulder laptop angle';
+  if (/montage|graduation|skyline|archive/.test(lower)) return 'Rapid montage mix of wide, medium, and detail frames';
   return idx === 0 ? 'Direct close-up opener' : 'Medium close-up with one detail insert';
 }
 
 function ssInferMovement(body='') {
   const lower = body.toLowerCase();
-  if (/slow|emotional|pause|payoff/.test(lower)) return 'Minimal movement, hold the frame';
+  if (/slow-motion|slow|thoughtful|gazing|melancholic|payoff/.test(lower)) return 'Slow hold or gentle push-in';
+  if (/rapid montage|montage/.test(lower)) return 'Fast-cut montage, 1-2 seconds per visual';
   if (/walk|busy street|moving/.test(lower)) return 'Handheld follow or side walk-by';
-  if (/product|fabric|hands/.test(lower)) return 'Slow push-in or hand-led movement';
-  return 'Static first, then one subtle push-in';
+  if (/product|fabric|hands|detail/.test(lower)) return 'Slow hand-led movement or texture sweep';
+  return 'Mostly static, then one subtle push-in';
 }
 
 function ssInferTextOverlay(body='', idx=0) {
-  const cleaned = String(body || '').replace(/\s+/g, ' ').trim();
+  const parts = ssExtractLabeledParts(body);
+  const source = parts.voiceover || parts.cta || parts.visuals || parts.opening || '';
+  const cleaned = String(source || '').replace(/\s+/g, ' ').trim();
   if (!cleaned) return idx === 0 ? 'Strong opener headline' : 'One supporting line';
-  return cleaned.length > 90 ? `${cleaned.slice(0, 87)}...` : cleaned;
+  const concise = cleaned
+    .replace(/^['"]|['"]$/g, '')
+    .split(/[.!?]/)[0]
+    .trim();
+  return concise.length > 58 ? `${concise.slice(0, 55)}...` : concise;
 }
 
 function ssInferLocation(script='') {
@@ -7946,9 +7979,10 @@ function ssInferLocation(script='') {
 function ssBuildPlanFromScript(title, text) {
   const rawScenes = ssParseScenes(text);
   const scenes = rawScenes.map((scene, idx) => ({
+    parts: ssExtractLabeledParts(scene.body),
     time: scene.time,
     purpose: idx === 0 ? 'Hook' : idx === 1 ? 'Context' : idx === rawScenes.length - 1 ? 'CTA' : 'Story beat',
-    body: scene.body,
+    body: ssBestSceneText(ssExtractLabeledParts(scene.body)) || scene.body,
     angle: ssInferAngle(scene.body, idx),
     movement: ssInferMovement(scene.body),
     overlay: ssInferTextOverlay(scene.body, idx),
@@ -7993,6 +8027,9 @@ function ssRenderPlan(plan) {
       <div class="dd-shot-body">
         <div class="dd-shot-type ${(scene.source || '').toLowerCase().includes('iphone') ? 'aroll' : 'broll'}">${escapeHtml(scene.purpose)}</div>
         <div class="dd-shot-desc"><strong>Scene:</strong> ${escapeHtml(scene.body)}</div>
+        ${scene.parts.voiceover ? `<div class="dd-shot-overlay"><strong>Voiceover:</strong> ${escapeHtml(scene.parts.voiceover)}</div>` : ''}
+        ${scene.parts.visuals ? `<div class="dd-shot-overlay"><strong>Visuals:</strong> ${escapeHtml(scene.parts.visuals)}</div>` : ''}
+        ${scene.parts.opening ? `<div class="dd-shot-overlay"><strong>Opening:</strong> ${escapeHtml(scene.parts.opening)}</div>` : ''}
         <div class="dd-shot-overlay"><strong>Angle:</strong> ${escapeHtml(scene.angle)}\n<strong>Movement:</strong> ${escapeHtml(scene.movement)}\n<strong>Text:</strong> ${escapeHtml(scene.overlay)}\n<strong>Source:</strong> ${escapeHtml(scene.source)}\n<strong>Styling/Prop:</strong> ${escapeHtml(scene.styling)}</div>
       </div>
     </div>
@@ -8023,12 +8060,15 @@ function ssBuildFullBrief() {
     ...ssPlan.scenes.map((scene, idx) => [
       `${idx + 1}. ${scene.time} · ${scene.purpose}`,
       `SCENE: ${scene.body}`,
+      scene.parts.voiceover ? `VOICEOVER: ${scene.parts.voiceover}` : null,
+      scene.parts.visuals ? `VISUALS: ${scene.parts.visuals}` : null,
+      scene.parts.opening ? `OPENING: ${scene.parts.opening}` : null,
       `ANGLE: ${scene.angle}`,
       `MOVEMENT: ${scene.movement}`,
       `TEXT OVERLAY: ${scene.overlay}`,
       `SOURCE: ${scene.source}`,
       `STYLING / PROP: ${scene.styling}`
-    ].join('\n')),
+    ].filter(Boolean).join('\n')),
     '',
     'EDIT PASSES:',
     ...ssPlan.editPasses.map((pass, idx) => `${idx + 1}. ${pass}`),
