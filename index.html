@@ -205,6 +205,37 @@ body.mobile-nav-open { overflow:hidden; }
 .badge-upcoming { background: var(--indigo-t); color: var(--indigo); }
 .exh-note { font-size: 11px; color: var(--text2); margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border); line-height: 1.5; }
 .exh-actions { padding: 10px 16px; border-top: 1px solid var(--border); display: flex; gap: 6px; }
+.exh-sections{display:flex;flex-direction:column;gap:16px;}
+.exh-section{background:var(--white);border:1.5px solid var(--border);border-radius:16px;padding:16px;}
+.exh-section-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px;flex-wrap:wrap;}
+.exh-section-title{font-size:14px;font-weight:800;color:var(--text);}
+.exh-op-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;}
+.exh-op-card{background:var(--white);border:1.5px solid var(--border);border-radius:16px;overflow:hidden;box-shadow:0 6px 20px var(--shadow);}
+.exh-op-top{padding:16px;border-bottom:1px solid var(--border);background:linear-gradient(135deg,rgba(214,41,106,.05),rgba(255,255,255,.85));}
+.exh-op-meta{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;font-size:11px;color:var(--text2);}
+.exh-chip{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:999px;background:var(--cream);font-size:11px;font-weight:700;color:var(--text);}
+.exh-op-body{padding:16px;display:flex;flex-direction:column;gap:14px;}
+.exh-mini-title{font-size:11px;font-weight:800;letter-spacing:1.2px;text-transform:uppercase;color:var(--text2);margin-bottom:6px;}
+.exh-checklist{display:flex;flex-direction:column;gap:8px;}
+.exh-check-item{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border:1px solid var(--border);border-radius:12px;background:var(--cream);cursor:pointer;}
+.exh-check-item.done{border-color:rgba(26,140,90,.3);background:rgba(26,140,90,.08);}
+.exh-check-box{width:18px;height:18px;border-radius:50%;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0;margin-top:2px;}
+.exh-check-item.done .exh-check-box{background:var(--emerald);border-color:var(--emerald);color:white;}
+.exh-check-text{font-size:12px;line-height:1.45;color:var(--text);}
+.exh-training-card{border:1px solid var(--border);border-radius:12px;padding:12px;background:var(--white);}
+.exh-training-list{display:flex;flex-direction:column;gap:6px;font-size:12px;color:var(--text);}
+.exh-quick-actions{display:flex;gap:8px;flex-wrap:wrap;}
+.exh-quick-actions .btn{flex:1 1 140px;}
+.exh-review-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;}
+.exh-field{display:flex;flex-direction:column;gap:6px;}
+.exh-field label{font-size:11px;font-weight:700;color:var(--text2);}
+.exh-field input,.exh-field textarea,.exh-field select{background:var(--cream);border:1.5px solid var(--border);border-radius:10px;padding:10px 12px;font-size:12px;font-family:inherit;color:var(--text);outline:none;}
+.exh-field textarea{min-height:78px;resize:vertical;}
+.exh-scripts{display:flex;gap:8px;flex-wrap:wrap;}
+.exh-empty{font-size:12px;color:var(--text2);padding:10px 0;}
+@media (max-width: 860px){
+  .exh-op-grid,.exh-review-grid{grid-template-columns:1fr;}
+}
 
 /* ─── IDEA / STICKY CARDS ─── */
 .idea-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 16px; }
@@ -1162,13 +1193,13 @@ body.portal-mode .kriti-portal-shell { display:block; }
     <div class="page-top">
       <div>
         <div class="greeting">✦ shows</div>
-        <div class="page-title">Exhibitions</div>
-        <div class="page-sub">Every show — revenue, moments, learnings</div>
+        <div class="page-title">Exhibition Prep</div>
+        <div class="page-sub">Prep, train, run, capture leads, and review every show without carrying it all in your brain.</div>
       </div>
       <div style="display:flex;gap:8px;">
         <button class="btn btn-ghost" onclick="toggleROI()">🔮 Should I do this show?</button>
         <button class="btn btn-ghost" onclick="openWarRoom(load(K.exh)[0]?.id)" style="background:#1c1028;color:#ffd166;border-color:#ffd166;">⚔️ War Room</button>
-        <button class="btn btn-magenta" onclick="openModal('modal-exh')">+ Log Show</button>
+        <button class="btn btn-magenta" onclick="openModal('modal-exh')">+ Add Show</button>
       </div>
     </div>
     <!-- ROI Predictor Panel -->
@@ -1186,7 +1217,7 @@ body.portal-mode .kriti-portal-shell { display:block; }
       </div>
     </div>
     <div class="stat-grid" id="exh-stats"></div>
-    <div class="g3" id="exh-grid"></div>
+    <div class="exh-sections" id="exh-grid"></div>
   </div>
 
   <!-- ── TASKS ── -->
@@ -1624,7 +1655,7 @@ body.portal-mode .kriti-portal-shell { display:block; }
 <div class="overlay" id="modal-exh">
   <div class="modal">
     <div class="modal-head">
-      <div class="modal-title">Log Exhibition</div>
+      <div class="modal-title">Add / Edit Show</div>
       <button class="modal-x" onclick="closeModal('modal-exh')">×</button>
     </div>
     <input type="hidden" id="e-id" />
@@ -1640,8 +1671,18 @@ body.portal-mode .kriti-portal-shell { display:block; }
       <div class="fgrp"><label>City</label><input id="e-city" placeholder="Delhi" /></div>
     </div>
     <div class="frow c2">
+      <div class="fgrp"><label>Venue</label><input id="e-venue" placeholder="Hotel / Club / Venue" /></div>
+      <div class="fgrp"><label>Status</label>
+        <select id="e-status"><option value="upcoming">Upcoming</option><option value="live">Live</option><option value="completed">Completed</option></select>
+      </div>
+    </div>
+    <div class="frow c2">
       <div class="fgrp"><label>Start Date</label><input id="e-start" type="date" /></div>
       <div class="fgrp"><label>End Date</label><input id="e-end" type="date" /></div>
+    </div>
+    <div class="frow c2">
+      <div class="fgrp"><label>Helper</label><input id="e-helper" placeholder="Inventory / setup support" /></div>
+      <div class="fgrp"><label>Hostess</label><input id="e-hostess" placeholder="Customer-facing replacement" /></div>
     </div>
     <div class="frow c3">
       <div class="fgrp"><label>Revenue ₹</label><input id="e-rev" type="number" placeholder="0" /></div>
@@ -1649,10 +1690,8 @@ body.portal-mode .kriti-portal-shell { display:block; }
       <div class="fgrp"><label>Total Expenses ₹</label><input id="e-exp" type="number" placeholder="0" /></div>
     </div>
     <div class="frow c2">
-      <div class="fgrp"><label>Status</label>
-        <select id="e-status"><option value="completed">Completed</option><option value="upcoming">Upcoming</option></select>
-      </div>
       <div class="fgrp"><label>Stall Cost ₹</label><input id="e-stall" type="number" placeholder="0" /></div>
+      <div class="fgrp"><label>Best-seller (optional)</label><input id="e-best" placeholder="What sold best?" /></div>
     </div>
     <div class="frow"><div class="fgrp"><label>Notes / Learnings</label><textarea id="e-notes" placeholder="What worked, what didn't, who you met…"></textarea></div></div>
     <div class="modal-btns">
@@ -3072,52 +3111,268 @@ function resetProductModal() {
 // ═══════════════════════════════════════
 //  EXHIBITIONS
 // ═══════════════════════════════════════
-function renderExh() {
-  const exhs = load(K.exh);
-  const done = exhs.filter(e=>e.status==='completed');
-  const totalRev = done.reduce((s,e)=>s+Number(e.rev||0),0);
-  const totalNet = done.reduce((s,e)=>s+Number(e.rev||0)-Number(e.exp||0)-Number(e.stall||0),0);
-  const avg = done.length ? Math.round(totalRev/done.length) : 0;
-  const statCurrency = value => exhs.length ? fmt(value) : '—';
+const EXH_CHECKLIST_TEMPLATE = {
+  stallFeePaid: false,
+  stockPacked: false,
+  bagsPacked: false,
+  signagePacked: false,
+  paymentReady: false,
+  helperBriefed: false,
+  hostessBriefed: false,
+  whatsappReady: false,
+  postShowNotesDone: false,
+};
 
-  document.getElementById('exh-stats').innerHTML = `
-    <div class="stat-card sc-magenta"><div class="stat-label">Total Revenue</div><div class="stat-val">${statCurrency(totalRev)}</div><div class="stat-sub">${done.length} shows done</div></div>
-    <div class="stat-card sc-emerald"><div class="stat-label">Net Profit</div><div class="stat-val">${statCurrency(totalNet)}</div><div class="stat-sub">after expenses</div></div>
-    <div class="stat-card sc-saffron"><div class="stat-label">Avg per Show</div><div class="stat-val">${exhs.length ? fmt(avg) : '—'}</div></div>
-    <div class="stat-card sc-teal"><div class="stat-label">Total Shows</div><div class="stat-val">${exhs.length}</div><div class="stat-sub">${exhs.filter(e=>e.status==='upcoming').length} upcoming</div></div>
-  `;
+const EXH_TRAINING_TEMPLATE = {
+  hostess: {
+    explainSerafina: false,
+    explainFabric: false,
+    explainUSP: false,
+    collectPhones: false,
+    handleObjections: false,
+  },
+  helper: {
+    carryStock: false,
+    setupStall: false,
+    refoldReplenish: false,
+    packagingSupport: false,
+    backOfHouse: false,
+  }
+};
 
-  document.getElementById('exh-grid').innerHTML = exhs.length ? exhs.sort((a,b)=>new Date(b.start)-new Date(a.start)).map(e=>{
-    const net = Number(e.rev||0)-Number(e.exp||0)-Number(e.stall||0);
-    const bgGrad = e.status==='upcoming'
-      ? 'linear-gradient(135deg,var(--indigo-t),var(--teal-t))'
-      : 'linear-gradient(135deg,var(--magenta-t),var(--saffron-t))';
-    return `<div class="exh-card">
-      <div class="exh-img" style="background:${bgGrad};" onclick="triggerExhImg('${e.id}')">
-        ${e.img?`<img src="${e.img}" alt="" />`:`<div class="exh-img-ph"><span style="font-size:38px">🎪</span><span>${e.status==='upcoming'?'Upcoming':'Click to add photo'}</span></div>`}
-        <input type="file" accept="image/*" data-exh-id="${e.id}" onchange="handleExhImg(event,'${e.id}')" style="display:none" />
-        <div style="position:absolute;top:10px;right:10px;">
-          <span class="exh-badge ${e.status==='completed'?'badge-done':'badge-upcoming'}">${e.status==='completed'?'Completed':'Upcoming'}</span>
-        </div>
+const EXH_CHECKLIST_LABELS = {
+  stallFeePaid: 'stall fee paid',
+  stockPacked: 'stock packed',
+  bagsPacked: 'bags / packaging packed',
+  signagePacked: 'signage packed',
+  paymentReady: 'payment setup ready',
+  helperBriefed: 'helper briefed',
+  hostessBriefed: 'hostess briefed',
+  whatsappReady: 'WhatsApp capture ready',
+  postShowNotesDone: 'post-show notes done',
+};
+
+const EXH_TRAINING_LABELS = {
+  hostess: {
+    explainSerafina: 'explain Serafina',
+    explainFabric: 'explain fabric',
+    explainUSP: 'explain USP',
+    collectPhones: 'collect phone numbers',
+    handleObjections: 'handle objections',
+  },
+  helper: {
+    carryStock: 'carry stock',
+    setupStall: 'setup stall',
+    refoldReplenish: 'refold / replenish',
+    packagingSupport: 'packaging support',
+    backOfHouse: 'back-of-house organization',
+  }
+};
+
+function buildExhSOP(kind, e) {
+  const showLine = e ? `${e.name || 'Show'}${e.city ? ` · ${e.city}` : ''}` : 'Exhibition Prep';
+  const scripts = {
+    serafina: `${showLine}\n\nHow to explain Serafina:\nSerafina is built around elevated athleisure that feels premium, wearable, and genuinely comfortable. We focus on pieces that are flattering, easy to repeat, and designed to make women feel put together without trying too hard.`,
+    fabric: `${showLine}\n\nHow to explain fabric:\nLead with feel first. Invite the customer to touch the fabric and say: this is soft, breathable, easy on the skin, and chosen so it still feels elevated when worn for long hours. Keep it simple and sensory, not technical.`,
+    usp: `${showLine}\n\nHow to explain the USP:\nOur edge is not just the silhouette. It is the combination of comfort, premium feel, and pieces that look polished enough to stand out but easy enough to live in. The goal is to make dressing up feel effortless.`,
+    leads: `${showLine}\n\nHow to collect a WhatsApp lead:\n1. Thank them for stopping.\n2. Ask what caught their eye.\n3. Say you can send new drops / follow-ups on WhatsApp.\n4. Open WhatsApp self-capture and save: name, phone, what they liked, objection, follow-up note.`,
+    objections: `${showLine}\n\nHow to handle objections:\nListen first. Clarify what is stopping them. Respond with comfort, fabric feel, styling ease, and repeat-wear value. Never push. Keep it calm, specific, and helpful.\n\nCommon close:\nIf you want, I can note down the piece you liked and send you follow-up details on WhatsApp.`,
+    helper: `${showLine}\n\nHelper setup checklist:\n1. Carry and sort stock by category / size.\n2. Keep the back table clean.\n3. Refold and replenish immediately.\n4. Keep packaging, bags, tags, and payment essentials ready.\n5. Flag stock issues fast instead of waiting.`,
+  };
+  return scripts[kind] || '';
+}
+
+function normalizeExhItem(e) {
+  e = e || {};
+  return {
+    ...e,
+    venue: e.venue || '',
+    helper: e.helper || '',
+    hostess: e.hostess || '',
+    status: e.status || 'upcoming',
+    notes: e.notes || '',
+    img: e.img || null,
+    bestSeller: e.bestSeller || '',
+    objections: e.objections || '',
+    wrapNotes: e.wrapNotes || '',
+    hostessNotes: e.hostessNotes || '',
+    helperNotes: e.helperNotes || '',
+    checklist: { ...EXH_CHECKLIST_TEMPLATE, ...(e.checklist || {}) },
+    training: {
+      hostess: { ...EXH_TRAINING_TEMPLATE.hostess, ...((e.training || {}).hostess || {}) },
+      helper: { ...EXH_TRAINING_TEMPLATE.helper, ...((e.training || {}).helper || {}) },
+    },
+  };
+}
+
+function saveExhCollection(exhs) {
+  save(K.exh, exhs);
+  renderExh();
+}
+
+function renderExhCard(e) {
+  const helperName = e.helper || 'Add helper';
+  const hostessName = e.hostess || 'Add hostess';
+  const statusTone = e.status === 'completed'
+    ? ['var(--emerald-t)', 'var(--emerald)', 'Completed']
+    : e.status === 'live'
+      ? ['var(--coral-t)', 'var(--coral)', 'Live']
+      : ['var(--indigo-t)', 'var(--indigo)', 'Upcoming'];
+
+  return `<div class="exh-op-card">
+    <div class="exh-op-top">
+      <div>
+        <div class="exh-name">${e.name || 'Untitled show'}</div>
+        <div class="exh-op-meta">📍 ${e.city || 'City'}${e.venue ? ` · ${e.venue}` : ''} · ${e.start ? fmtD(e.start) : 'Add date'}</div>
       </div>
-      <div class="exh-content">
-        <div class="exh-name">${e.name}</div>
-        <div class="exh-loc">📍 ${e.city} · ${fmtD(e.start)}</div>
-        ${e.status==='completed'?`
-        <div class="exh-stats">
-          <div class="exh-stat"><div class="exh-stat-val" style="color:var(--saffron)">${fmt(e.rev)}</div><div class="exh-stat-lab">Revenue</div></div>
-          <div class="exh-stat"><div class="exh-stat-val">${e.units}</div><div class="exh-stat-lab">Units Sold</div></div>
-          <div class="exh-stat"><div class="exh-stat-val" style="color:${net>=0?'var(--emerald)':'var(--coral)'}">${fmt(net)}</div><div class="exh-stat-lab">Net Profit</div></div>
-          <div class="exh-stat"><div class="exh-stat-val">${fmt(Number(e.exp||0)+Number(e.stall||0))}</div><div class="exh-stat-lab">Total Cost</div></div>
-        </div>`:`<div style="margin-top:12px;font-size:12px;color:var(--indigo);font-weight:600;">Stall booked: ${fmt(e.stall)}</div>`}
-        ${e.notes?`<div class="exh-note">💬 ${e.notes}</div>`:''}
-      </div>
-      <div class="exh-actions">
+      <span class="exh-chip" style="background:${statusTone[0]};color:${statusTone[1]};">${statusTone[2]}</span>
+    </div>
+    <div class="exh-op-body">
+      <div class="exh-op-meta">Helper: <strong>${helperName}</strong> · Hostess: <strong>${hostessName}</strong></div>
+      ${e.notes ? `<div class="exh-note">💬 ${e.notes}</div>` : ''}
+      <div class="exh-quick-actions">
+        <button class="btn btn-ghost btn-sm" onclick="captureExhLead('${e.id}')">Capture lead</button>
+        <button class="btn btn-ghost btn-sm" onclick="addExhNote('${e.id}')">Add note</button>
+        <button class="btn btn-ghost btn-sm" onclick="markExhStockIssue('${e.id}')">Mark stock issue</button>
+        <button class="btn btn-ghost btn-sm" onclick="wrapExh('${e.id}')">Wrap up</button>
         <button class="btn btn-ghost btn-sm" onclick="editExh('${e.id}')">Edit</button>
         <button class="btn btn-sm" onclick="deleteExh('${e.id}')" style="background:var(--coral-t);color:var(--coral);border:none;border-radius:8px;padding:5px 10px;cursor:pointer;font-size:11px;">Delete</button>
       </div>
-    </div>`;
-  }).join('') : '<div class="empty-state" style="grid-column:1/-1"><div class="empty-icon">🎪</div><div class="empty-text">No exhibitions yet</div><div class="empty-sub">Log your first show to track revenue and learnings</div></div>';
+    </div>
+  </div>`;
+}
+
+function renderExhChecklistCard(e) {
+  return `<div class="exh-op-card">
+    <div class="exh-op-top">
+      <div>
+        <div class="exh-name">${e.name}</div>
+        <div class="exh-op-meta">${e.city}${e.start ? ` · ${fmtD(e.start)}` : ''}</div>
+      </div>
+      <span class="exh-chip">Checklist</span>
+    </div>
+    <div class="exh-checklist">
+      ${Object.entries(EXH_CHECKLIST_LABELS).map(([key, label])=>`
+        <button class="exh-check-item" onclick="toggleExhChecklist('${e.id}','${key}')">
+          <span class="exh-check-box" style="background:${e.checklist[key] ? 'var(--emerald)' : 'transparent'};border-color:${e.checklist[key] ? 'var(--emerald)' : 'var(--border)'};color:${e.checklist[key] ? 'white' : 'transparent'};">✓</span>
+          <span class="exh-check-text">${label}</span>
+        </button>
+      `).join('')}
+    </div>
+  </div>`;
+}
+
+function renderExhTrainingCard(e) {
+  return `<div class="exh-op-card">
+    <div class="exh-op-top">
+      <div>
+        <div class="exh-name">${e.name}</div>
+        <div class="exh-op-meta">Train your hostess and helper before the show</div>
+      </div>
+      <span class="exh-chip">Training</span>
+    </div>
+    <div class="exh-op-body">
+      <div class="exh-training-card">
+        <div class="exh-mini-title">Hostess Training</div>
+        <div class="exh-training-list">
+          ${Object.entries(EXH_TRAINING_LABELS.hostess).map(([key, label])=>`
+            <button class="exh-check-item" onclick="toggleExhTraining('${e.id}','hostess','${key}')">
+              <span class="exh-check-box" style="background:${e.training.hostess[key] ? 'var(--emerald)' : 'transparent'};border-color:${e.training.hostess[key] ? 'var(--emerald)' : 'var(--border)'};color:${e.training.hostess[key] ? 'white' : 'transparent'};">✓</span>
+              <span class="exh-check-text">${label}</span>
+            </button>
+          `).join('')}
+        </div>
+        <div class="exh-scripts">
+          <button class="btn btn-ghost btn-sm" onclick="copyExhSOP('${e.id}','serafina',this)">How to explain Serafina</button>
+          <button class="btn btn-ghost btn-sm" onclick="copyExhSOP('${e.id}','fabric',this)">How to explain fabric</button>
+          <button class="btn btn-ghost btn-sm" onclick="copyExhSOP('${e.id}','usp',this)">How to explain USP</button>
+          <button class="btn btn-ghost btn-sm" onclick="copyExhSOP('${e.id}','leads',this)">How to collect a WhatsApp lead</button>
+          <button class="btn btn-ghost btn-sm" onclick="copyExhSOP('${e.id}','objections',this)">How to handle objections</button>
+        </div>
+      </div>
+      <div class="exh-training-card">
+        <div class="exh-mini-title">Helper Training</div>
+        <div class="exh-training-list">
+          ${Object.entries(EXH_TRAINING_LABELS.helper).map(([key, label])=>`
+            <button class="exh-check-item" onclick="toggleExhTraining('${e.id}','helper','${key}')">
+              <span class="exh-check-box" style="background:${e.training.helper[key] ? 'var(--emerald)' : 'transparent'};border-color:${e.training.helper[key] ? 'var(--emerald)' : 'var(--border)'};color:${e.training.helper[key] ? 'white' : 'transparent'};">✓</span>
+              <span class="exh-check-text">${label}</span>
+            </button>
+          `).join('')}
+        </div>
+        <div class="exh-scripts">
+          <button class="btn btn-ghost btn-sm" onclick="copyExhSOP('${e.id}','helper',this)">Helper setup checklist</button>
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+function renderExhReviewCard(e) {
+  const net = Number(e.rev || 0) - Number(e.exp || 0) - Number(e.stall || 0);
+  return `<div class="exh-op-card">
+    <div class="exh-op-top">
+      <div>
+        <div class="exh-name">${e.name}</div>
+        <div class="exh-op-meta">${e.city}${e.end ? ` · ${fmtD(e.end || e.start)}` : ''}</div>
+      </div>
+      <span class="exh-chip">Review</span>
+    </div>
+    <div class="exh-review-grid">
+      <div class="exh-field"><label>Sales</label><input type="number" value="${e.rev || ''}" onchange="updateExhField('${e.id}','rev',this.value)" /></div>
+      <div class="exh-field"><label>Units sold</label><input type="number" value="${e.units || ''}" onchange="updateExhField('${e.id}','units',this.value)" /></div>
+      <div class="exh-field"><label>Total cost</label><input type="number" value="${e.exp || ''}" onchange="updateExhField('${e.id}','exp',this.value)" /></div>
+      <div class="exh-field"><label>Stall fee</label><input type="number" value="${e.stall || ''}" onchange="updateExhField('${e.id}','stall',this.value)" /></div>
+      <div class="exh-field"><label>Net profit</label><input value="${fmt(net)}" disabled /></div>
+      <div class="exh-field"><label>Best-selling product</label><input value="${e.bestSeller || ''}" onchange="updateExhField('${e.id}','bestSeller',this.value)" /></div>
+      <div class="exh-field" style="grid-column:1/-1;"><label>Top customer objections</label><textarea onchange="updateExhField('${e.id}','objections',this.value)">${e.objections || ''}</textarea></div>
+      <div class="exh-field" style="grid-column:1/-1;"><label>What to improve next time</label><textarea onchange="updateExhField('${e.id}','wrapNotes',this.value)">${e.wrapNotes || ''}</textarea></div>
+      <div class="exh-field"><label>Hostess performance notes</label><textarea onchange="updateExhField('${e.id}','hostessNotes',this.value)">${e.hostessNotes || ''}</textarea></div>
+      <div class="exh-field"><label>Helper performance notes</label><textarea onchange="updateExhField('${e.id}','helperNotes',this.value)">${e.helperNotes || ''}</textarea></div>
+    </div>
+  </div>`;
+}
+
+function renderExh() {
+  const exhs = load(K.exh).map(normalizeExhItem);
+  const upcoming = exhs.filter(e=>e.status==='upcoming').sort((a,b)=>new Date(a.start||0)-new Date(b.start||0));
+  const live = exhs.filter(e=>e.status==='live').sort((a,b)=>new Date(a.start||0)-new Date(b.start||0));
+  const completed = exhs.filter(e=>e.status==='completed').sort((a,b)=>new Date(b.end||b.start||0)-new Date(a.end||a.start||0));
+  const totalNet = completed.reduce((sum, e)=>sum + (Number(e.rev||0) - Number(e.exp||0) - Number(e.stall||0)), 0);
+
+  document.getElementById('exh-stats').innerHTML = `
+    <div class="stat-card sc-indigo"><div class="stat-label">Upcoming</div><div class="stat-val">${upcoming.length}</div><div class="stat-sub">shows to prep</div></div>
+    <div class="stat-card sc-coral"><div class="stat-label">Live</div><div class="stat-val">${live.length}</div><div class="stat-sub">currently running</div></div>
+    <div class="stat-card sc-emerald"><div class="stat-label">Completed</div><div class="stat-val">${completed.length}</div><div class="stat-sub">shows reviewed</div></div>
+    <div class="stat-card sc-saffron"><div class="stat-label">Net Profit</div><div class="stat-val">${completed.length ? fmt(totalNet) : '—'}</div><div class="stat-sub">from completed shows</div></div>
+  `;
+
+  document.getElementById('exh-grid').innerHTML = `
+    <div class="exh-section">
+      <div class="exh-section-head"><div><div class="exh-section-title">Upcoming Shows</div><div class="content-sub">Your operating cards for what is coming up and what is currently live.</div></div></div>
+      <div class="exh-op-grid">
+        ${[...live, ...upcoming].map(renderExhCard).join('') || '<div class="exh-empty">No upcoming or live shows yet. Add your next exhibition and it will show up here with staff, checklist, and quick actions.</div>'}
+      </div>
+    </div>
+    <div class="exh-section">
+      <div class="exh-section-head"><div><div class="exh-section-title">Show Checklist</div><div class="content-sub">One-tap prep so nothing gets forgotten before the stall opens.</div></div></div>
+      <div class="exh-op-grid">
+        ${[...live, ...upcoming].map(renderExhChecklistCard).join('') || '<div class="exh-empty">Your upcoming shows will get a default checklist automatically.</div>'}
+      </div>
+    </div>
+    <div class="exh-section">
+      <div class="exh-section-head"><div><div class="exh-section-title">Team Training</div><div class="content-sub">Train the hostess and helper fast, and copy SOPs straight from your phone.</div></div></div>
+      <div class="exh-op-grid">
+        ${[...live, ...upcoming].map(renderExhTrainingCard).join('') || '<div class="exh-empty">Add a show first and the hostess/helper training cards will appear here.</div>'}
+      </div>
+    </div>
+    <div class="exh-section">
+      <div class="exh-section-head"><div><div class="exh-section-title">Post-Show Review</div><div class="content-sub">Wrap each show with the money, objections, learnings, and team notes in one place.</div></div></div>
+      <div class="exh-op-grid">
+        ${[...live, ...completed].map(renderExhReviewCard).join('') || '<div class="exh-empty">Completed shows will show up here for review and wrap-up.</div>'}
+      </div>
+    </div>
+  `;
 }
 
 function triggerExhImg(id) { const el=document.querySelector(`.exh-img [data-exh-id="${id}"]`); if(el) el.click(); }
@@ -3128,13 +3383,17 @@ function handleExhImg(e,id) {
   r.readAsDataURL(file);
 }
 function editExh(id) {
-  const e=load(K.exh).find(x=>x.id===id); if(!e) return;
+  const e=normalizeExhItem(load(K.exh).find(x=>x.id===id)); if(!e) return;
   document.getElementById('e-id').value=id;
   document.getElementById('e-name').value=e.name; document.getElementById('e-city').value=e.city;
+  document.getElementById('e-venue').value=e.venue;
   document.getElementById('e-start').value=e.start; document.getElementById('e-end').value=e.end;
+  document.getElementById('e-helper').value=e.helper;
+  document.getElementById('e-hostess').value=e.hostess;
   document.getElementById('e-rev').value=e.rev; document.getElementById('e-units').value=e.units;
   document.getElementById('e-exp').value=e.exp; document.getElementById('e-stall').value=e.stall;
   document.getElementById('e-status').value=e.status; document.getElementById('e-notes').value=e.notes;
+  document.getElementById('e-best').value=e.bestSeller;
   document.getElementById('e-img-data').value=e.img||'';
   if(e.img) document.getElementById('e-img-area').innerHTML=`<img src="${e.img}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;" /><input type="file" id="e-img-file" accept="image/*" onchange="previewUpload(event,'e-img-area','e-img-data')" /><span style="position:absolute;bottom:8px;background:rgba(0,0,0,.5);color:white;font-size:11px;padding:2px 10px;border-radius:4px;z-index:2;">Change</span>`;
   openModal('modal-exh');
@@ -3143,20 +3402,95 @@ function deleteExh(id) {
   if(!confirm('Delete this show?')) return;
   save(K.exh, load(K.exh).filter(e=>e.id!==id)); renderExh();
 }
+function toggleExhChecklist(id, key) {
+  const exhs = load(K.exh).map(normalizeExhItem);
+  const exh = exhs.find(x=>x.id===id);
+  if (!exh) return;
+  exh.checklist[key] = !exh.checklist[key];
+  saveExhCollection(exhs);
+}
+function toggleExhTraining(id, role, key) {
+  const exhs = load(K.exh).map(normalizeExhItem);
+  const exh = exhs.find(x=>x.id===id);
+  if (!exh) return;
+  exh.training[role][key] = !exh.training[role][key];
+  saveExhCollection(exhs);
+}
+function updateExhField(id, field, value) {
+  const exhs = load(K.exh).map(normalizeExhItem);
+  const exh = exhs.find(x=>x.id===id);
+  if (!exh) return;
+  exh[field] = ['rev','units','exp','stall'].includes(field) ? (Number(value) || 0) : value;
+  if (field === 'wrapNotes' && value) exh.checklist.postShowNotesDone = true;
+  saveExhCollection(exhs);
+}
+async function copyExhSOP(id, kind, btn) {
+  const exh = normalizeExhItem(load(K.exh).find(x=>x.id===id) || {});
+  await copyTextValue(buildExhSOP(kind, exh), 'SOP copied');
+}
+function captureExhLead(id) {
+  const exh = normalizeExhItem(load(K.exh).find(x=>x.id===id) || {});
+  const extra = prompt('Optional note before opening WhatsApp:', '') || '';
+  const lines = [
+    `Exhibition lead`,
+    `${exh.name || 'Show'}${exh.city ? ` · ${exh.city}` : ''}`,
+    '',
+    'Name:',
+    'Phone:',
+    'What they liked:',
+    'Objection:',
+    'Follow-up priority:',
+    extra ? `Note: ${extra}` : 'Note:',
+  ];
+  window.open(`https://wa.me/?text=${encodeURIComponent(lines.join('\n'))}`, '_blank');
+}
+function addExhNote(id) {
+  const note = prompt('What note do you want to save for this show?');
+  if (!note) return;
+  const exhs = load(K.exh).map(normalizeExhItem);
+  const exh = exhs.find(x=>x.id===id);
+  if (!exh) return;
+  exh.notes = exh.notes ? `${exh.notes}\n• ${note}` : `• ${note}`;
+  saveExhCollection(exhs);
+}
+function markExhStockIssue(id) {
+  const issue = prompt('What stock issue do you want to log?');
+  if (!issue) return;
+  const exhs = load(K.exh).map(normalizeExhItem);
+  const exh = exhs.find(x=>x.id===id);
+  if (!exh) return;
+  const next = exh.wrapNotes ? `${exh.wrapNotes}\n• Stock issue: ${issue}` : `• Stock issue: ${issue}`;
+  exh.wrapNotes = next;
+  saveExhCollection(exhs);
+}
+function wrapExh(id) {
+  const exhs = load(K.exh).map(normalizeExhItem);
+  const exh = exhs.find(x=>x.id===id);
+  if (!exh) return;
+  exh.status = 'completed';
+  exh.checklist.postShowNotesDone = !!(exh.wrapNotes || exh.objections || exh.bestSeller);
+  saveExhCollection(exhs);
+}
 function saveExh() {
   const id=document.getElementById('e-id').value;
-  const e={
+  const existing = id ? normalizeExhItem(load(K.exh).find(x=>x.id===id) || {}) : null;
+  const e=normalizeExhItem({
+    ...(existing || {}),
     id:id||uid(), name:document.getElementById('e-name').value, city:document.getElementById('e-city').value,
+    venue:document.getElementById('e-venue').value,
     start:document.getElementById('e-start').value, end:document.getElementById('e-end').value,
+    helper:document.getElementById('e-helper').value, hostess:document.getElementById('e-hostess').value,
     rev:Number(document.getElementById('e-rev').value)||0, units:Number(document.getElementById('e-units').value)||0,
     exp:Number(document.getElementById('e-exp').value)||0, stall:Number(document.getElementById('e-stall').value)||0,
     status:document.getElementById('e-status').value, notes:document.getElementById('e-notes').value,
     img:document.getElementById('e-img-data').value||null,
-  };
+    bestSeller:document.getElementById('e-best').value,
+  });
   const exhs=load(K.exh);
   if(id){const i=exhs.findIndex(x=>x.id===id);exhs[i]=e;}else exhs.push(e);
   save(K.exh,exhs); closeModal('modal-exh');
-  ['e-id','e-name','e-city','e-start','e-end','e-rev','e-units','e-exp','e-stall','e-notes','e-img-data'].forEach(x=>{const el=document.getElementById(x);if(el)el.value='';});
+  ['e-id','e-name','e-city','e-venue','e-start','e-end','e-helper','e-hostess','e-rev','e-units','e-exp','e-stall','e-notes','e-img-data','e-best'].forEach(x=>{const el=document.getElementById(x);if(el)el.value='';});
+  document.getElementById('e-status').value='upcoming';
   document.getElementById('e-img-area').innerHTML=`<span style="font-size:28px">🎪</span><span>Upload stall or show photo</span><input type="file" id="e-img-file" accept="image/*" onchange="previewUpload(event,'e-img-area','e-img-data')" />`;
   renderExh();
 }
