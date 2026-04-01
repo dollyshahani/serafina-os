@@ -1352,6 +1352,10 @@ body.portal-mode .kriti-portal-shell { display:block; }
         </div>
       </div>
       <div class="fgrp">
+        <label>Style inspiration</label>
+        <input id="ss-style" value="Lana Del Rey style dreamy nostalgia + premium founder documentary" placeholder="e.g. Lana Del Rey dreamy nostalgia, Sofia Coppola softness, editorial founder documentary" />
+      </div>
+      <div class="fgrp">
         <label>Paste full script or TXT contents</label>
         <textarea id="ss-script" rows="14" placeholder="Paste the full script here. Keep the script final — Script Studio will focus only on execution, production, styling, graphics, sourcing, and editing."></textarea>
       </div>
@@ -7812,6 +7816,8 @@ async function ddCopyShotList(btn) {
 function ssClear() {
   const ids = ['ss-title','ss-script'];
   ids.forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+  const style = document.getElementById('ss-style');
+  if (style) style.value = 'Lana Del Rey style dreamy nostalgia + premium founder documentary';
   const file = document.getElementById('ss-file');
   if (file) file.value = '';
   const out = document.getElementById('ss-output');
@@ -7865,11 +7871,12 @@ async function ssAnalyze() {
   const raw = document.getElementById('ss-script')?.value?.trim();
   if (!raw) return ssToast('Paste a script or upload a txt file first');
   const title = document.getElementById('ss-title')?.value?.trim() || ssExtractTitle(raw);
+  const style = document.getElementById('ss-style')?.value?.trim() || 'Lana Del Rey style dreamy nostalgia + premium founder documentary';
   try {
     const resp = await fetch('/api/reels/analyze', {
       method:'POST',
       headers:{ 'Content-Type':'application/json' },
-      body: JSON.stringify({ action:'script-studio', title, script: raw })
+      body: JSON.stringify({ action:'script-studio', title, script: raw, style })
     });
     const data = await resp.json();
     if (!resp.ok || !data?.ok || !data?.plan) throw new Error(data?.error || 'Script analysis failed');

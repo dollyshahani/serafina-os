@@ -227,6 +227,7 @@ module.exports = async function handler(req, res) {
     if (action === 'script-studio') {
       const title = body?.title || 'Untitled Script';
       const script = body?.script || '';
+      const style = body?.style || 'Lana Del Rey style dreamy nostalgia + premium founder documentary';
       if (!script.trim()) return sendJson(res, 400, { error: 'A script is required' });
 
       const resp = await fetch('https://api.openai.com/v1/responses', {
@@ -246,10 +247,15 @@ module.exports = async function handler(req, res) {
                 'The user will paste a finished script/TXT file. Do NOT rewrite the script.',
                 'Your job is execution only: convert the script into a premium, specific, filmmaker-grade production plan.',
                 'Be concrete and non-generic. Use the exact script structure, labels, timestamps, and emotional cues in the text.',
+                'Honor the style inspiration closely in your execution decisions: color, pacing, camera language, framing, texture, motion, and graphics should all reflect that style.',
                 'Optimize for a solo founder making strong personal-brand content with iPhone footage, Adobe Express graphics, Videoleap/CapCut editing, Edits app posting, and frequent Higgsfield support shots.',
                 'Assign source types explicitly: Film on iPhone, Existing archive footage, Screen recording, Adobe Express, Higgsfield.',
+                'Do not default to generic founder content. If the style is dreamy, nostalgic, romantic, cinematic, or editorial, the output must feel that way in the production decisions.',
+                'Make the graphics plan specific: tell her which overlays, widgets, title cards, lower-thirds, subtitles, chapter cards, or UI elements to build, and in which tool.',
+                'Make the edit passes specific to Videoleap/CapCut/Adobe Express, not generic editing advice.',
                 'Be decisive.',
                 `Title: ${title}`,
+                `Style inspiration: ${style}`,
                 '',
                 'SCRIPT:',
                 script
