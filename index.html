@@ -47,6 +47,12 @@ body.portal-mode #bs-wrap,
 body.portal-mode #bs-toolbar,
 body.portal-mode #bs-hint { display:none !important; }
 body.portal-mode { background:linear-gradient(180deg, var(--cream), #fffaf4); }
+body.portal-mode-lead #sidebar,
+body.portal-mode-lead #main,
+body.portal-mode-lead #bs-wrap,
+body.portal-mode-lead #bs-toolbar,
+body.portal-mode-lead #bs-hint { display:none !important; }
+body.portal-mode-lead { background:linear-gradient(180deg, var(--cream), #fffaf4); }
 body.mobile-nav-open { overflow:hidden; }
 
 #mobile-header, #mobile-nav-backdrop { display:none; }
@@ -365,6 +371,24 @@ body.portal-mode .kriti-portal-shell { display:block; }
 .kriti-field label { display:block; font-size:11px; color:var(--text2); font-weight:700; margin-bottom:6px; }
 .kriti-field input, .kriti-field textarea, .kriti-field select { width:100%; background:var(--cream); border:1.5px solid var(--border); border-radius:10px; padding:10px 12px; font-size:12px; font-family:inherit; color:var(--text); outline:none; }
 .kriti-field textarea { min-height:86px; resize:vertical; }
+.lead-portal-shell { display:none; min-height:100vh; padding:34px 22px 60px; max-width:760px; margin:0 auto; }
+body.portal-mode-lead .lead-portal-shell { display:block; }
+.lead-portal-card { background:var(--white); border:1.5px solid var(--border); border-radius:18px; padding:18px; }
+.lead-portal-status { display:none; margin:0 0 16px; border-radius:12px; padding:11px 14px; font-size:12px; }
+.lead-portal-status.ok { display:block; color:var(--emerald); background:var(--emerald-t); border:1.5px solid rgba(26,140,90,.15); }
+.lead-portal-status.err { display:block; color:var(--magenta); background:var(--magenta-t); border:1.5px solid rgba(214,41,106,.15); }
+.lead-portal-status.warn { display:block; color:var(--gold); background:var(--gold-t); border:1.5px solid rgba(200,137,28,.15); }
+.lead-helper { font-size:12px; color:var(--text2); line-height:1.6; margin-top:8px; }
+.exh-finder-toolbar { display:flex; gap:10px; flex-wrap:wrap; align-items:flex-end; margin-bottom:14px; }
+.exh-finder-toolbar .fgrp { flex:1; min-width:200px; margin:0; }
+.exh-finder-results { display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:14px; }
+.finder-card { background:var(--white); border:1.5px solid var(--border); border-radius:14px; padding:16px; }
+.finder-source { font-size:10px; font-weight:800; letter-spacing:1.2px; text-transform:uppercase; color:var(--text2); margin-bottom:8px; }
+.finder-title { font-size:14px; font-weight:800; color:var(--text); line-height:1.4; }
+.finder-snippet { font-size:12px; color:var(--text2); line-height:1.6; margin-top:8px; }
+.finder-tags { display:flex; gap:6px; flex-wrap:wrap; margin-top:10px; }
+.finder-tag { font-size:10px; font-weight:700; border-radius:999px; padding:4px 8px; background:var(--cream); color:var(--text2); }
+.finder-actions { display:flex; gap:8px; flex-wrap:wrap; margin-top:12px; }
 .batch-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:14px; margin:0 0 18px; }
 .batch-card { background:var(--white); border:1.5px solid var(--border); border-radius:14px; padding:16px; }
 .batch-title { font-size:14px; font-weight:800; color:var(--text); }
@@ -1198,6 +1222,7 @@ body.portal-mode .kriti-portal-shell { display:block; }
       </div>
       <div style="display:flex;gap:8px;">
         <button class="btn btn-ghost" onclick="toggleROI()">🔮 Should I do this show?</button>
+        <button class="btn btn-ghost" onclick="runExhibitionFinder()">🌐 Search Internet</button>
         <button class="btn btn-ghost" onclick="openWarRoom(load(K.exh)[0]?.id)" style="background:#1c1028;color:#ffd166;border-color:#ffd166;">⚔️ War Room</button>
         <button class="btn btn-magenta" onclick="openModal('modal-exh')">+ Add Show</button>
       </div>
@@ -1217,6 +1242,18 @@ body.portal-mode .kriti-portal-shell { display:block; }
       </div>
     </div>
     <div class="stat-grid" id="exh-stats"></div>
+    <div class="panel" style="margin-bottom:18px;">
+      <div class="panel-head"><span class="panel-title-sm">🌐 Exhibition Finder</span></div>
+      <div class="exh-finder-toolbar">
+        <div class="fgrp">
+          <label>Search market</label>
+          <input id="exh-search-market" placeholder="India, Mumbai, Bangalore, Delhi..." />
+        </div>
+        <button class="btn btn-ghost" onclick="runExhibitionFinder()">Search current opportunities</button>
+      </div>
+      <div class="content-sync-status" id="exh-finder-status"></div>
+      <div class="exh-finder-results" id="exh-finder-results"></div>
+    </div>
     <div class="exh-sections" id="exh-grid"></div>
   </div>
 
@@ -1316,6 +1353,8 @@ body.portal-mode .kriti-portal-shell { display:block; }
         <div class="page-sub">Every person who bought from Serafina — captured, tracked, followed up</div>
       </div>
       <div style="display:flex;gap:8px;">
+        <button class="btn btn-ghost" onclick="pullCloudCustomers()">↺ Pull lead forms</button>
+        <button class="btn btn-ghost" onclick="copyLeadPortalLink()">🔗 Copy lead form</button>
         <button class="capture-btn" onclick="openModal('modal-customer')">📲 Capture at Show</button>
         <button class="btn btn-ghost" onclick="openModal('modal-customer')">+ Add Customer</button>
       </div>
@@ -1509,6 +1548,52 @@ body.portal-mode .kriti-portal-shell { display:block; }
   </div>
   <div class="kriti-portal-note">Upload final edits one by one. Add a short note only if Dolly needs context. If the edit can work for ads too, mark it before submitting.</div>
   <div id="kriti-portal-grid" class="kriti-portal-grid"></div>
+</div>
+
+<div id="lead-portal-shell" class="lead-portal-shell">
+  <div class="kriti-portal-top">
+    <div>
+      <div class="greeting">✦ exhibition lead form</div>
+      <div class="page-title">Capture Lead</div>
+      <div class="page-sub">A super-light form for your hostess. No dashboard, no extra thinking, just capture the lead and move on.</div>
+    </div>
+  </div>
+  <div class="lead-portal-status" id="lead-portal-status"></div>
+  <div class="lead-portal-card">
+    <div class="frow c2">
+      <div class="fgrp"><label>Name *</label><input id="lead-name" placeholder="Customer name" style="font-size:16px;padding:12px;" /></div>
+      <div class="fgrp"><label>WhatsApp / Phone *</label><input id="lead-phone" placeholder="9876543210" type="tel" style="font-size:16px;padding:12px;" /></div>
+    </div>
+    <div class="frow c2">
+      <div class="fgrp"><label>City</label><input id="lead-city" placeholder="Mumbai" /></div>
+      <div class="fgrp"><label>Show</label>
+        <select id="lead-show-id">
+          <option value="">Loading shows…</option>
+        </select>
+      </div>
+    </div>
+    <div class="frow c2">
+      <div class="fgrp"><label>What they liked</label><input id="lead-items" placeholder="Shirt / leggings / modal set" /></div>
+      <div class="fgrp"><label>Spend / intent (optional)</label><input id="lead-spend" type="number" placeholder="0" /></div>
+    </div>
+    <div class="frow c2">
+      <div class="fgrp"><label>Tag</label>
+        <select id="lead-tag">
+          <option value="new">🆕 New Buyer</option>
+          <option value="repeat">🔁 Repeat Buyer</option>
+          <option value="vip">👑 VIP</option>
+        </select>
+      </div>
+      <div class="fgrp"><label>Follow-up date</label><input id="lead-followup" type="date" /></div>
+    </div>
+    <div class="frow">
+      <div class="fgrp"><label>Notes / objection</label><textarea id="lead-notes" placeholder="What did they ask? What stopped them? What should you follow up with?"></textarea></div>
+    </div>
+    <div class="modal-btns" style="margin-top:6px;">
+      <button class="btn btn-teal" style="background:var(--teal);color:white;" onclick="submitLeadPortal()">Save lead</button>
+    </div>
+    <div class="lead-helper">This writes into the shared customer list for your workspace, so you can pull it into the main dashboard later.</div>
+  </div>
 </div>
 
 <!-- Brainstorm canvas (outside main, full screen) -->
@@ -3231,7 +3316,8 @@ function renderExhCard(e) {
       <div class="exh-op-meta">Helper: <strong>${helperName}</strong> · Hostess: <strong>${hostessName}</strong></div>
       ${e.notes ? `<div class="exh-note">💬 ${e.notes}</div>` : ''}
       <div class="exh-quick-actions">
-        <button class="btn btn-ghost btn-sm" onclick="captureExhLead('${e.id}')">Capture lead</button>
+        <button class="btn btn-ghost btn-sm" onclick="openExhLeadForm('${e.id}')">Open lead form</button>
+        <button class="btn btn-ghost btn-sm" onclick="copyExhLeadForm('${e.id}')">Copy lead form</button>
         <button class="btn btn-ghost btn-sm" onclick="addExhNote('${e.id}')">Add note</button>
         <button class="btn btn-ghost btn-sm" onclick="markExhStockIssue('${e.id}')">Mark stock issue</button>
         <button class="btn btn-ghost btn-sm" onclick="wrapExh('${e.id}')">Wrap up</button>
@@ -3424,25 +3510,18 @@ function updateExhField(id, field, value) {
   if (field === 'wrapNotes' && value) exh.checklist.postShowNotesDone = true;
   saveExhCollection(exhs);
 }
+async function copyLeadPortalLink() {
+  await copyTextValue(getLeadPortalLink(), 'Lead form link copied');
+}
+function openExhLeadForm(id) {
+  window.open(getLeadPortalLink(id), '_blank');
+}
+async function copyExhLeadForm(id) {
+  await copyTextValue(getLeadPortalLink(id), 'Show lead form copied');
+}
 async function copyExhSOP(id, kind, btn) {
   const exh = normalizeExhItem(load(K.exh).find(x=>x.id===id) || {});
   await copyTextValue(buildExhSOP(kind, exh), 'SOP copied');
-}
-function captureExhLead(id) {
-  const exh = normalizeExhItem(load(K.exh).find(x=>x.id===id) || {});
-  const extra = prompt('Optional note before opening WhatsApp:', '') || '';
-  const lines = [
-    `Exhibition lead`,
-    `${exh.name || 'Show'}${exh.city ? ` · ${exh.city}` : ''}`,
-    '',
-    'Name:',
-    'Phone:',
-    'What they liked:',
-    'Objection:',
-    'Follow-up priority:',
-    extra ? `Note: ${extra}` : 'Note:',
-  ];
-  window.open(`https://wa.me/?text=${encodeURIComponent(lines.join('\n'))}`, '_blank');
 }
 function addExhNote(id) {
   const note = prompt('What note do you want to save for this show?');
@@ -3470,6 +3549,65 @@ function wrapExh(id) {
   exh.status = 'completed';
   exh.checklist.postShowNotesDone = !!(exh.wrapNotes || exh.objections || exh.bestSeller);
   saveExhCollection(exhs);
+}
+function setExhibitionFinderStatus(message, tone='') {
+  const el = document.getElementById('exh-finder-status');
+  if (!el) return;
+  el.className = 'content-sync-status';
+  if (tone) el.classList.add(tone);
+  el.innerHTML = message || '';
+  el.style.display = message ? 'block' : 'none';
+}
+function finderTags(item) {
+  const text = `${item.title || ''} ${item.snippet || ''}`.toLowerCase();
+  return [
+    text.includes('d2c') || text.includes('brand') ? 'brand-led' : '',
+    text.includes('fashion') || text.includes('lifestyle') ? 'fashion / lifestyle' : '',
+    text.includes('retail') || text.includes('expo') ? 'retail / expo' : '',
+    text.includes('popup') || text.includes('pop-up') ? 'pop-up' : '',
+    text.includes('activation') ? 'activation' : ''
+  ].filter(Boolean).slice(0,3);
+}
+function fillShowFromFinder(index) {
+  const item = (window.__exhFinderResults || [])[index];
+  if (!item) return;
+  document.getElementById('e-id').value = '';
+  document.getElementById('e-name').value = item.title || '';
+  document.getElementById('e-city').value = item.city || '';
+  document.getElementById('e-venue').value = item.source || '';
+  document.getElementById('e-notes').value = [item.snippet, item.url ? `Source: ${item.url}` : ''].filter(Boolean).join('\n');
+  document.getElementById('e-status').value = 'upcoming';
+  openModal('modal-exh');
+}
+function renderExhibitionFinderResults(items) {
+  window.__exhFinderResults = items || [];
+  const root = document.getElementById('exh-finder-results');
+  if (!root) return;
+  root.innerHTML = (items || []).map((item, idx)=>`
+    <div class="finder-card">
+      <div class="finder-source">${item.source || 'Web result'}</div>
+      <div class="finder-title">${item.title || 'Untitled opportunity'}</div>
+      <div class="finder-snippet">${item.snippet || 'Open the result and check fit, audience, pricing, and city.'}</div>
+      <div class="finder-tags">${finderTags(item).map(tag=>`<span class="finder-tag">${tag}</span>`).join('')}</div>
+      <div class="finder-actions">
+        <a class="btn btn-ghost btn-sm" href="${item.url}" target="_blank" rel="noopener noreferrer">Open source</a>
+        <button class="btn btn-ghost btn-sm" onclick="fillShowFromFinder(${idx})">Add as show</button>
+      </div>
+    </div>
+  `).join('') || '<div class="exh-empty">No opportunities yet. Run the finder to search live event listings.</div>';
+}
+async function runExhibitionFinder() {
+  const market = (document.getElementById('exh-search-market')?.value || 'India').trim() || 'India';
+  setExhibitionFinderStatus(`Searching live opportunities for ${market}…`, '');
+  try {
+    const resp = await fetch(`/api/exhibitions/search?market=${encodeURIComponent(market)}`, { cache:'no-store' });
+    const data = await resp.json();
+    if (!resp.ok) throw new Error(data.error || 'Search failed');
+    renderExhibitionFinderResults(data.results || []);
+    setExhibitionFinderStatus(`Found ${data.results?.length || 0} current opportunities for ${market}.`, 'ok');
+  } catch (e) {
+    setExhibitionFinderStatus(`Finder failed: ${e.message}`, 'err');
+  }
 }
 function saveExh() {
   const id=document.getElementById('e-id').value;
@@ -4902,6 +5040,18 @@ function setCloudWorkspace(workspace) {
   if (input) input.value = workspace;
 }
 
+function getLeadPortalWorkspace() {
+  const params = new URLSearchParams(location.search);
+  return params.get('workspace') || getCloudWorkspace() || 'serafina-main';
+}
+
+function getLeadPortalLink(showId='') {
+  const workspace = getCloudWorkspace() || 'serafina-main';
+  const params = new URLSearchParams({ portal:'lead', workspace });
+  if (showId) params.set('show', showId);
+  return `${location.origin}${location.pathname}?${params.toString()}`;
+}
+
 function collectSnapshot() {
   const data = {};
   ALL_KEYS.forEach(k => {
@@ -4915,6 +5065,18 @@ function applySnapshot(data) {
   Object.entries(data || {}).forEach(([k,v]) => {
     if (ALL_KEYS.includes(k) && v != null) localStorage.setItem(k, v);
   });
+}
+
+async function fetchWorkspaceSnapshot(workspace) {
+  const resp = await fetch(`/api/cloud/pull?workspace=${encodeURIComponent(workspace)}`, { cache:'no-store' });
+  const data = await resp.json();
+  if (!resp.ok && resp.status !== 404) throw new Error(data.error || 'Pull failed');
+  return data.snapshot || {};
+}
+
+function snapshotList(snapshot, key) {
+  if (!snapshot || snapshot[key] == null) return [];
+  try { return JSON.parse(snapshot[key]); } catch (_) { return []; }
 }
 
 async function openCloudSync() {
@@ -4963,6 +5125,25 @@ async function cloudPull() {
     setTimeout(() => location.reload(), 800);
   } catch (e) {
     setCloudStatus('Pull failed: ' + e.message, 'var(--magenta)', 'var(--magenta-t)');
+  }
+}
+
+async function pullCloudCustomers() {
+  const cfg = await loadRuntimeConfig(true);
+  if (!cfg.features?.cloudSync) {
+    alert('Cloud sync is not configured for this deployment yet.');
+    return;
+  }
+  const workspace = getCloudWorkspace() || 'serafina-main';
+  setCloudWorkspace(workspace);
+  try {
+    const snapshot = await fetchWorkspaceSnapshot(workspace);
+    if (snapshot[K.customers]) localStorage.setItem(K.customers, snapshot[K.customers]);
+    if (snapshot[K.exh]) localStorage.setItem(K.exh, snapshot[K.exh]);
+    if (currentPage === 'customers') renderCustomers();
+    alert('Pulled latest leads into Customers.');
+  } catch (e) {
+    alert(`Could not pull lead forms: ${e.message}`);
   }
 }
 
@@ -5864,6 +6045,85 @@ function saveCustomer() {
   document.getElementById('cust-tag').value='new';
   document.getElementById('cust-show-id').value='';
   if (currentPage==='customers') renderCustomers();
+}
+
+function setLeadPortalStatus(message, tone='') {
+  const el = document.getElementById('lead-portal-status');
+  if (!el) return;
+  el.className = 'lead-portal-status';
+  if (tone) el.classList.add(tone);
+  el.textContent = message || '';
+}
+
+async function renderLeadPortal() {
+  const workspace = getLeadPortalWorkspace();
+  setLeadPortalStatus('Loading lead form…');
+  try {
+    const snapshot = await fetchWorkspaceSnapshot(workspace);
+    const exhs = snapshotList(snapshot, K.exh).map(normalizeExhItem).filter(e => ['upcoming','live'].includes(e.status));
+    const select = document.getElementById('lead-show-id');
+    const requestedShow = new URLSearchParams(location.search).get('show') || '';
+    select.innerHTML = '<option value="">— select show —</option>';
+    exhs.forEach(e => {
+      const opt = document.createElement('option');
+      opt.value = e.id;
+      opt.textContent = `${e.name} · ${e.city}`;
+      select.appendChild(opt);
+    });
+    if (requestedShow && exhs.some(e => e.id === requestedShow)) select.value = requestedShow;
+    setLeadPortalStatus(`Connected to workspace "${workspace}".`, 'ok');
+  } catch (e) {
+    setLeadPortalStatus(`Lead form could not load: ${e.message}`, 'err');
+  }
+}
+
+async function submitLeadPortal() {
+  const name = document.getElementById('lead-name').value.trim();
+  const phone = document.getElementById('lead-phone').value.trim();
+  if (!name || !phone) {
+    setLeadPortalStatus('Name and phone are required.', 'warn');
+    return;
+  }
+  const workspace = getLeadPortalWorkspace();
+  setLeadPortalStatus('Saving lead…');
+  try {
+    const snapshot = await fetchWorkspaceSnapshot(workspace);
+    const customers = snapshotList(snapshot, K.customers);
+    const exhs = snapshotList(snapshot, K.exh).map(normalizeExhItem);
+    const showId = document.getElementById('lead-show-id').value;
+    const show = exhs.find(e => e.id === showId);
+    const record = {
+      id: uid(),
+      name,
+      phone,
+      email: '',
+      city: document.getElementById('lead-city').value.trim(),
+      showId,
+      showName: show ? show.name : '',
+      items: document.getElementById('lead-items').value.trim(),
+      totalSpend: Number(document.getElementById('lead-spend').value) || 0,
+      tag: document.getElementById('lead-tag').value || 'new',
+      followUpDate: document.getElementById('lead-followup').value,
+      notes: document.getElementById('lead-notes').value.trim(),
+    };
+    customers.unshift(record);
+    const nextSnapshot = { ...snapshot, [K.customers]: JSON.stringify(customers) };
+    const pushResp = await fetch('/api/cloud/push', {
+      method:'POST',
+      headers:{ 'Content-Type':'application/json' },
+      body: JSON.stringify({ workspace, snapshot: nextSnapshot })
+    });
+    const pushData = await pushResp.json();
+    if (!pushResp.ok) throw new Error(pushData.error || 'Save failed');
+    setLeadPortalStatus(`Saved ${name}. This lead is now in the shared customer list.`, 'ok');
+    ['lead-name','lead-phone','lead-city','lead-items','lead-spend','lead-followup','lead-notes'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.value = '';
+    });
+    document.getElementById('lead-tag').value = 'new';
+  } catch (e) {
+    setLeadPortalStatus(`Could not save lead: ${e.message}`, 'err');
+  }
 }
 
 function editCustomer(id) {
@@ -8632,6 +8892,9 @@ seedStrategicContent();
 if (PORTAL_MODE === 'kriti') {
   document.body.classList.add('portal-mode');
   loadRuntimeConfig().then(() => renderKritiPortal());
+} else if (PORTAL_MODE === 'lead') {
+  document.body.classList.add('portal-mode-lead');
+  loadRuntimeConfig().then(() => renderLeadPortal());
 } else {
   initDate();
   loadRuntimeConfig();
